@@ -31,7 +31,7 @@
 
   display: inline-flex; align-items: center; gap: var(--space-8);
   width: 100%; padding: var(--space-6) var(--space-10);
-  border: none; background: transparent; border-radius: var(--radius-sm);
+  border: none; background: transparent; border-radius: var(--radius-md);
   color: var(--color-fg-muted); cursor: pointer; font-family: inherit; font-size: 14px; font-weight: 500;
 }
 .footer__action:hover { background: var(--hover-fill, var(--color-bg-subtle)); color: var(--color-fg-default); }

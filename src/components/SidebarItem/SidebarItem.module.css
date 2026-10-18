@@ -16,7 +16,7 @@
   padding: var(--space-6) var(--space-10);
   border: none;
   background: transparent;
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-md);   /* Figma: 8px (radius/md) */
   cursor: pointer;
   font-family: var(--font-sans);
   font-size: 14px;

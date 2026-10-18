@@ -1,4 +1,4 @@
-/* SidebarSubItem — radius-sm, padding 0/10 with height, label/sm, indented */
+/* SidebarSubItem — radius-md, padding 0/10 with height, label/sm, indented */
 .subItem {
   transition: background-color var(--transition-base), color var(--transition-base), border-color var(--transition-base), box-shadow var(--transition-base), opacity var(--transition-base);
 
@@ -10,7 +10,7 @@
   padding: 0 var(--space-10);
   border: none;
   background: transparent;
-  border-radius: 6px;            /* Figma: 6px */
+  border-radius: var(--radius-md);   /* Figma: 8px (radius/md) */
   cursor: pointer;
   font-family: var(--font-sans);
   font-size: 13px;

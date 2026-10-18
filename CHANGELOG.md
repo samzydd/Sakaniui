@@ -2,6 +2,14 @@
 
 All notable changes to `@sakaniui/react` are documented here.
 
+## 0.8.5
+
+- **Sidebar: 8px corners.** To match the Figma file (where the sidebar components now use
+  `radius/md`), `SidebarItem`, `SidebarSubItem`, `SidebarSearch` (field, command and collapsed),
+  `SidebarHeader` (workspace card and brand button) and the `SidebarFooter` action button go from
+  6px to 8px. Small icon buttons (the header toggle and footer menu) and the keyboard-shortcut
+  badge keep their size, as in Figma.
+
 ## 0.8.4
 
 - **Switch: new `stretch` variant.** `<Switch variant="stretch" />` adds a liquid motion: on every
