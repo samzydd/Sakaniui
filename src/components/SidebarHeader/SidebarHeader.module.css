@@ -14,7 +14,7 @@
 /* Workspace switcher (Figma Type=Workspace): filled, padded card. */
 .header--workspace {
   padding: var(--space-8);
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-md);
   background: var(--color-bg-subtle);
 }
 .header--workspace .header__subtitle { font-size: 10px; line-height: 14px; }
@@ -33,7 +33,7 @@ button.header__logoWrap {
   background: none;
   padding: 0;
   cursor: pointer;
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-md);
 }
 .header__logo {
   display: inline-flex;

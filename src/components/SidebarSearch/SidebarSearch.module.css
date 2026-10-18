@@ -1,4 +1,4 @@
-/* SidebarSearch — 36px, bg/subtle, border/subtle, radius-sm, padding 8/8/8/10 */
+/* SidebarSearch — 36px, bg/subtle, border/subtle, radius-md, padding 8/8/8/10 */
 .search {
   display: flex;
   align-items: center;
@@ -8,7 +8,7 @@
   padding: var(--space-8) var(--space-8) var(--space-8) var(--space-10);
   background: var(--surface-bg-subtle);
   border: var(--border-width-100) solid var(--surface-border);
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-md);
   font-family: var(--font-sans);
   cursor: text;
   box-sizing: border-box;
@@ -59,6 +59,6 @@
   box-sizing: border-box;
   background: var(--surface-bg-subtle);
   border: var(--border-width-100) solid var(--surface-border);
-  border-radius: var(--radius-sm); color: var(--color-fg-muted); cursor: pointer;
+  border-radius: var(--radius-md); color: var(--color-fg-muted); cursor: pointer;
 }
 .collapsed:hover { color: var(--color-fg-default); }
