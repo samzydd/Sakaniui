@@ -7,6 +7,17 @@ first, then open a component's docs page for its props.
 
 Full machine-readable index: https://www.sakaniui.com/llms.txt (and `/llms-full.txt`).
 
+**The contract:** `@sakaniui/react/manifest.json` (also https://www.sakaniui.com/manifest.json) lists
+every exported component and block with its import path, props, types, enum values, defaults, which
+props are *required*, and every design token. It is generated from the TypeScript source on each
+build, so it is always in step with the installed version. Prefer it over guessing a prop name:
+```ts
+import manifest from '@sakaniui/react/manifest.json';
+const button = manifest.components.find((c) => c.name === 'Button'); // props[], contract.requiredProps
+```
+If a prop, value or token is not in the manifest, it does not exist. If `contract.requiresAccessibleName`
+is true, the required `aria-label` / alt prop is the only thing that names the control. Do not drop it.
+
 ---
 
 ## 1. Setup you must get right
@@ -232,6 +243,7 @@ and **tell the user when you are composing** rather than implying a dedicated co
 - [ ] Both CSS files imported once; no hex/px literals where a token exists.
 - [ ] Exactly one `primary` Button per view; no hand-styled `<button>`.
 - [ ] Every icon-only control has an accessible name.
+- [ ] Every prop, value and token you used exists in `manifest.json`; every `contract.requiredProps` entry is set.
 - [ ] Looks right inside `className="dark"`.
 - [ ] If you used glass/liquid: acceptable in the frosted fallback; data surfaces stay `solid`.
 - [ ] You said so wherever you composed something the system doesn't provide.

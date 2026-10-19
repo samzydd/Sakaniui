@@ -2,6 +2,16 @@
 
 All notable changes to `@sakaniui/react` are documented here.
 
+## 0.8.7
+
+- **Machine-readable contract for AI agents and tooling.** The package now ships
+  `@sakaniui/react/manifest.json`: every exported component and block (123 + 42) with its import
+  path, summary, props, types, enum values, defaults, required props and a
+  `requiresAccessibleName` flag, plus all 182 design tokens. It is generated from the TypeScript
+  source on every `build:lib` (react-docgen-typescript), so it cannot drift from the code, and it only
+  lists names that are really exported. AGENTS.md now points agents at it first.
+- `IconButton`'s `icon` prop description no longer says "Lucide icon component" (it takes Tabler or Lucide).
+
 ## 0.8.6
 
 - **Social icons are now exported.** The glyphs the Figma ProfileCard and TeamCard use --

@@ -19,7 +19,7 @@ export type IconButtonVariant = 'primary' | 'secondary' | 'outline' | 'ghost' | 
 export type IconButtonSize = 'sm' | 'md' | 'lg';
 
 export interface IconButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  /** Lucide icon component. */
+  /** Icon component (Tabler or Lucide), passed as the component itself, e.g. icon={IconSettings}. */
   icon: IconComponent;
   variant?: IconButtonVariant;
   size?: IconButtonSize;
