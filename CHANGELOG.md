@@ -10,6 +10,10 @@ All notable changes to `@sakaniui/react` are documented here.
   `requiresAccessibleName` flag, plus all 182 design tokens. It is generated from the TypeScript
   source on every `build:lib` (react-docgen-typescript), so it cannot drift from the code, and it only
   lists names that are really exported. AGENTS.md now points agents at it first.
+- **MCP server.** `npx -y -p @sakaniui/react sakaniui-mcp` starts a local, dependency-free Model
+  Context Protocol server over stdio that answers from the shipped manifest and AGENTS.md. Tools:
+  `search_components`, `get_component`, `list_components`, `get_tokens`, `check_usage` (reports
+  missing required props, values outside an enum and props that do not exist) and `get_guide`.
 - `IconButton`'s `icon` prop description no longer says "Lucide icon component" (it takes Tabler or Lucide).
 
 ## 0.8.6

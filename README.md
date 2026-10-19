@@ -95,6 +95,30 @@ export const Dashboard = () => (
 </div>
 ```
 
+## Use it with AI (agents, Cursor, Claude Code)
+
+SakaniUI ships a machine-readable contract and an MCP server, so an AI assistant looks components
+up instead of guessing prop names.
+
+- `@sakaniui/react/manifest.json` -- every component and block with props, types, allowed values,
+  defaults, required props and all design tokens, generated from the source on every build.
+- `AGENTS.md` -- the "why" guide (principles, when nothing fits, glass, icons, checklist).
+- **MCP server** -- add it to your editor's MCP config (Claude Code, Cursor, Windsurf, ...):
+
+```json
+{
+  "mcpServers": {
+    "sakaniui": { "command": "npx", "args": ["-y", "-p", "@sakaniui/react", "sakaniui-mcp"] }
+  }
+}
+```
+
+Claude Code: `claude mcp add sakaniui -- npx -y -p @sakaniui/react sakaniui-mcp`
+
+Tools: `search_components`, `get_component`, `list_components`, `get_tokens`, `check_usage`
+(validates props against the contract) and `get_guide`. It runs locally, has no dependencies and
+answers from the installed version.
+
 ## Glass & liquid glass
 
 Glass is built into the theme system, not added component by component. Next to light/dark, SakaniUI has a second axis — **Surface** — with three modes: **Solid** (the default), **Glass** (frosted translucency) and **Liquid** (Apple-style liquid glass: the backdrop *bends* at the edges like a lens, with a faint color fringe, rim light and depth). Components read a small set of `--surface-*` tokens, so switching an area from Solid to Glass or Liquid re-themes everything inside it at once — in the Figma file (variable modes and effect styles) and in code. Solid stays pixel-identical to before.

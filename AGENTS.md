@@ -15,6 +15,9 @@ build, so it is always in step with the installed version. Prefer it over guessi
 import manifest from '@sakaniui/react/manifest.json';
 const button = manifest.components.find((c) => c.name === 'Button'); // props[], contract.requiredProps
 ```
+Editors can query the same data through the bundled MCP server
+(`npx -y -p @sakaniui/react sakaniui-mcp`): `get_component`, `check_usage`, `get_tokens`, `get_guide`.
+If it is connected, call `check_usage` on every component you write.
 If a prop, value or token is not in the manifest, it does not exist. If `contract.requiresAccessibleName`
 is true, the required `aria-label` / alt prop is the only thing that names the control. Do not drop it.
 
