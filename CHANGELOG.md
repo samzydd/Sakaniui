@@ -2,6 +2,13 @@
 
 All notable changes to `@sakaniui/react` are documented here.
 
+## 0.8.6
+
+- **Social icons are now exported.** The glyphs the Figma ProfileCard and TeamCard use --
+  `XIcon`, `GithubIcon` (ProfileCard) and `InstagramIcon`, `FacebookIcon`, `LinkedinIcon`
+  (TeamCard) -- can be imported from `@sakaniui/react`, so an app's `socialLinks` can use the exact
+  same icons as the design system instead of copying them. They draw in `currentColor`.
+
 ## 0.8.5
 
 - **Sidebar: 8px corners.** To match the Figma file (where the sidebar components now use
