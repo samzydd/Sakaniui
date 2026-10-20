@@ -2,6 +2,32 @@
 
 All notable changes to `@sakaniui/react` are documented here.
 
+## 0.8.8
+
+Audit of the agent contract and MCP server (accuracy, security, versioning).
+
+- **Manifest accuracy.** `FaqBlock.columns` is now `1 | 2` (numbers), not `"1" | "2"`; prop `values`
+  keep their real type. All 231 design tokens are listed (the 49 `glass-*`, `surface-*` and `liquid-*`
+  tokens were missing). `LiquidGlass`, `LiquidBackdrop` and `HoverGroup` are described, and hooks and
+  helpers are listed under `utilities`. Defaults that are code (`createIcon(...)`, arrow functions) are
+  no longer shown. The build now fails if a public component is exported but not described, so the
+  manifest cannot silently fall behind.
+- **Manifest content.** Design-tool (Figma) notes, source paths and a sample e-mail address are no longer
+  shipped in the manifest.
+- **Versioning.** Every component has `since`, the first release that contained it. `CHANGELOG.md` now
+  ships in the package. The MCP server finds the project's own installed `@sakaniui/react` (working
+  directory, or `--project <dir>`) and answers from that copy; when the project is older it flags
+  components it does not have yet. New tools `check_compatibility` and `get_changelog`.
+- **Summaries.** Component summaries were rewritten where the source notes were maintainer-only text
+  (garbled or empty summaries, design-tool node ids); blocks get a name-and-group summary.
+- **Verified on every build.** `npm run build:lib` now also runs `scripts/manifest/verify.mjs`, which fails
+  the build (and so `npm publish`) if an entry is not a real export, a prop is not in the type
+  definitions, a token disagrees with `tokens.css`, `since` is newer than the package, or anything that
+  looks like a private reference (design-file link or node id, e-mail address, local path, key) or any
+  write / network / exec code in the server appears.
+- **Server hardening.** Every tool argument is type- and length-checked, tools are marked read-only, and
+  the server reads only four fixed files from an install (package.json, manifest, AGENTS.md, CHANGELOG.md).
+
 ## 0.8.7
 
 - **Machine-readable contract for AI agents and tooling.** The package now ships

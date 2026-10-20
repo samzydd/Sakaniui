@@ -116,8 +116,17 @@ up instead of guessing prop names.
 Claude Code: `claude mcp add sakaniui -- npx -y -p @sakaniui/react sakaniui-mcp`
 
 Tools: `search_components`, `get_component`, `list_components`, `get_tokens`, `check_usage`
-(validates props against the contract) and `get_guide`. It runs locally, has no dependencies and
-answers from the installed version.
+(validates props against the contract), `get_guide`, `check_compatibility` and `get_changelog`.
+
+- **Read-only.** It reads four fixed files from a `@sakaniui/react` install (package.json, the
+  manifest, AGENTS.md, CHANGELOG.md). It writes nothing, runs nothing, opens no network connection and
+  takes no file paths. Every tool is marked read-only.
+- **Matches your version.** It finds the `@sakaniui/react` installed in your project (working directory,
+  or `--project <dir>`) and flags components your version does not have yet, with the release notes for
+  the versions in between (`get_changelog`).
+- **Accurate by construction.** `npm run build:lib` fails if the manifest disagrees with the real build:
+  an export that is not described, a prop that is not declared, a token that is not defined, or anything
+  that looks like a private reference.
 
 ## Glass & liquid glass
 
