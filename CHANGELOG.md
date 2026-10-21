@@ -2,6 +2,29 @@
 
 All notable changes to `@sakaniui/react` are documented here.
 
+## 0.8.9
+
+Stops assistants from inventing code. Found by testing the MCP server in Claude Code: it validated a
+snippet correctly, then wrote its own example as `icon={<TrashIcon />}` -- an icon that does not exist,
+passed as an element instead of a component.
+
+- **Examples.** Every component and block in `manifest.json` has `example`: the import lines and the
+  element with each required prop filled in with a value of the right shape (an array of `BreadcrumbItem`
+  gets one real item). Prop types are read from the shipped `.d.ts`, and every example is type-checked
+  against the built package; the build fails if one does not compile.
+- **Icon index.** `@sakaniui/react/icon-index.json` lists all 5,184 icons (and their 1,054 filled
+  variants) with Tabler's category and search tags. The build fails if it differs from the exports.
+- **MCP: `search_icons`.** Finds real icon names by meaning ("delete" -> `IconTrash`); common UI intents
+  rank the conventional icon first.
+- **MCP: `check_code`.** Checks a whole snippet as text (it is never run): imports must exist and come
+  from the right entry point, every SakaniUI element needs its required props, values must be allowed,
+  and icon props must be real icon components passed as `icon={IconTrash}`. Errors carry line numbers
+  and suggestions ("TrashIcon is not exported... Did you mean: IconTrash?").
+- **MCP: `check_usage`** now validates icon props too, and `get_component` points at the example and
+  at `search_icons`.
+- Fixed a type error in `KanbanBoardBlock` (drag attributes when dragging is disabled) that was printed
+  during every build.
+
 ## 0.8.8
 
 Audit of the agent contract and MCP server (accuracy, security, versioning).

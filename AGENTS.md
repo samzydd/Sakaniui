@@ -16,8 +16,14 @@ import manifest from '@sakaniui/react/manifest.json';
 const button = manifest.components.find((c) => c.name === 'Button'); // props[], contract.requiredProps
 ```
 Editors can query the same data through the bundled MCP server
-(`npx -y -p @sakaniui/react sakaniui-mcp`): `get_component`, `check_usage`, `get_tokens`, `get_guide`,
-`check_compatibility`, `get_changelog`. If it is connected, call `check_usage` on every component you write.
+(`npx -y -p @sakaniui/react sakaniui-mcp`): `search_components`, `get_component`, `search_icons`,
+`check_code`, `check_usage`, `get_tokens`, `get_guide`, `check_compatibility`, `get_changelog`.
+
+**Start from the example, check before you answer.** Every component has `example`: its imports and the
+element with each required prop filled in, type-checked against the release. Start from it instead of
+writing the element from memory. Never guess an icon name: find it with `search_icons` (icons are
+`IconTrash`, `IconSettings`, ... from `@sakaniui/react/icons`, passed as `icon={IconTrash}`, not
+`icon={<IconTrash />}`). If the server is connected, run `check_code` on every snippet you write.
 
 **Versions.** Every component has `since`, the first release that contained it. The project may have an
 older `@sakaniui/react` installed than the one the manifest describes: if an entry is marked

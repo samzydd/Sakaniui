@@ -12,6 +12,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
+import { typecheckExamples } from './examples.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const read = (p) => fs.readFileSync(path.join(root, p), 'utf8');
@@ -62,6 +63,29 @@ for (const c of manifest.components) {
 }
 if (unverifiable.length > 10) fail(`could not find the type definitions of ${unverifiable.length} components (${unverifiable.slice(0, 5).join(', ')}, ...)`);
 
+/* ---- examples: every shipped example must compile against this build ---- */
+const withExample = manifest.components.filter((c) => c.example);
+if (withExample.length < manifest.components.length) fail(`${manifest.components.length - withExample.length} components have no example`);
+const brokenExamples = typecheckExamples(root, withExample.map((c) => ({ name: c.name, example: c.example })));
+for (const n of brokenExamples) fail(`the example for ${n} does not type-check`);
+
+/* ---- icons: the index is exactly the set of exported icons ---- */
+const iconIndex = JSON.parse(read('dist/icon-index.json'));
+const iconMod = await import(pathToFileURL(path.join(root, 'dist/icons.mjs')).href);
+const exportedIcons = new Set(Object.keys(iconMod).filter((n) => /^Icon[A-Z0-9]/.test(n)));
+const indexed = new Set(iconIndex.icons.flatMap((i) => [i.name, i.filled].filter(Boolean)));
+for (const n of indexed) if (!exportedIcons.has(n)) fail(`icon ${n} is in icon-index.json but not exported`);
+for (const n of exportedIcons) if (!indexed.has(n)) fail(`icon ${n} is exported but missing from icon-index.json`);
+if (iconIndex.version !== pkg.version) fail(`icon-index.json version ${iconIndex.version} is not ${pkg.version}`);
+// icon names the server and the examples rely on
+const serverSrc = read('bin/sakaniui-mcp.mjs');
+const common = serverSrc.slice(serverSrc.indexOf('const COMMON'), serverSrc.indexOf('function searchIcons'));
+for (const n of new Set([...common.matchAll(/Icon[A-Z][A-Za-z0-9]*/g)].map((m) => m[0]))) if (!exportedIcons.has(n)) fail(`the server maps an intent to ${n}, which does not exist`);
+for (const c of withExample) {
+  const icons = /import \{([^}]*)\} from '@sakaniui\/react\/icons'/.exec(c.example);
+  for (const n of icons ? icons[1].split(',').map((x) => x.trim()).filter(Boolean) : []) if (!exportedIcons.has(n)) fail(`the example for ${c.name} uses ${n}, which does not exist`);
+}
+
 /* ---- tokens ---- */
 const css = read('dist/tokens.css').replace(/\/\*[\s\S]*?\*\//g, '');
 const defined = new Set([...css.matchAll(/(--[a-z0-9-]+)\s*:/gi)].map((m) => m[1]));
@@ -90,7 +114,7 @@ if (/\bFigma\b/i.test(shipped['dist/manifest.json'])) fail('dist/manifest.json m
 
 /* ---- the server must stay read-only ---- */
 const server = shipped['bin/sakaniui-mcp.mjs'];
-for (const re of [/\bwriteFile|appendFile|createWriteStream|unlink|rmSync|rmdir|mkdir|rename\(/, /child_process|\bspawn\(|\bexec\(|execSync/, /\bfetch\(|node:https?|node:net|node:dgram|XMLHttpRequest/, /\beval\(|new Function/]) {
+for (const re of [/\bwriteFile|appendFile|createWriteStream|unlink|rmSync|rmdir|mkdir|rename\(/, /child_process|(?<![.\w])spawn\(|(?<![.\w])exec\(|execSync|execFile/, /\bfetch\(|node:https?|node:net|node:dgram|XMLHttpRequest/, /\beval\(|new Function/]) {
   const m = re.exec(server);
   if (m) fail(`bin/sakaniui-mcp.mjs must be read-only but contains: ${m[0]}`);
 }
@@ -100,4 +124,4 @@ if (problems.length) {
   for (const p of problems.slice(0, 40)) console.error('  - ' + p);
   process.exit(1);
 }
-console.log(`manifest verified: ${manifest.components.length} entries exist at runtime, ${checkedProps} props match the type definitions, ${listed.size} tokens match tokens.css, no private references, server is read-only`);
+console.log(`manifest verified: ${manifest.components.length} entries exist at runtime, ${checkedProps} props match the type definitions, ${withExample.length} examples type-check, ${indexed.size} icons match the exports, ${listed.size} tokens match tokens.css, no private references, server is read-only`);

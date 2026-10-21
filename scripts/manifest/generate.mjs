@@ -25,6 +25,7 @@ import path from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { withCustomConfig } from 'react-docgen-typescript';
+import { buildExamples } from './examples.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const rel = (p) => path.relative(root, p).split(path.sep).join('/');
@@ -297,6 +298,11 @@ for (const d of parsed) {
 }
 components.sort((a, b) => (a.kind === b.kind ? a.name.localeCompare(b.name) : a.kind === 'component' ? -1 : 1));
 
+/* ---- ready-to-paste examples, type-checked against the built package ---- */
+const { examples, failed: noExample } = buildExamples(root, components);
+for (const c of components) if (examples.has(c.name)) c.example = examples.get(c.name);
+if (noExample.length) console.warn(`manifest: no example for ${noExample.join(', ')} (it did not type-check)`);
+
 /* ---- summary quality gate: a wrong or garbled summary is worse than none ---- */
 const looksBroken = (t) => !t || t.length < 10 || !/^[A-Z`<]/.test(t) || !/[.)`">!?]$/.test(t) || (t.match(/\(/g) || []).length !== (t.match(/\)/g) || []).length || /:$/.test(t);
 const needsSummary = components.filter((c) => looksBroken(c.summary));
@@ -332,12 +338,42 @@ for (const m of css.matchAll(/(--[a-z0-9-]+)\s*:\s*([^;{}]+);/gi)) {
 }
 const tokenCount = Object.values(tokens).reduce((a, g) => a + Object.keys(g).length, 0);
 
-/* ---- icons ---- */
+/* ---- icons: every exported icon name, with Tabler's category and search tags ---- */
 const count = (d) => fs.readdirSync(path.join(root, 'src/icons', d)).filter((f) => f.endsWith('.ts')).length;
+function iconExports(dir) {
+  const out = new Map();
+  for (const f of fs.readdirSync(path.join(root, 'src/icons', dir))) {
+    if (!f.endsWith('.ts')) continue;
+    const m = /export const (Icon[A-Za-z0-9]+)\b/.exec(fs.readFileSync(path.join(root, 'src/icons', dir, f), 'utf8'));
+    if (m) out.set(f.replace(/\.ts$/, ''), m[1]);
+  }
+  return out;
+}
+const outline = iconExports('outline');
+const filled = iconExports('filled');
+let tabler = {};
+try { tabler = JSON.parse(fs.readFileSync(path.join(root, 'node_modules/@tabler/icons/icons.json'), 'utf8')); } catch { /* names only */ }
+const iconIndex = {
+  name: pkg.name,
+  version: pkg.version,
+  import: '@sakaniui/react/icons',
+  note: 'Pass an icon to a component prop as the component itself: icon={IconTrash}, not icon={<IconTrash />}. Filled variants end in "Filled".',
+  icons: [...outline.entries()].sort(([a], [b]) => a.localeCompare(b)).map(([slug, name]) => {
+    const meta = tabler[slug] || {};
+    const entry = { name };
+    if (filled.has(slug)) entry.filled = filled.get(slug);
+    if (meta.category) entry.category = meta.category;
+    const tags = (meta.tags || []).map(String).filter((t) => t && t !== slug).slice(0, 12);
+    if (tags.length) entry.tags = tags;
+    return entry;
+  }),
+};
+for (const [slug, name] of filled) if (!outline.has(slug)) iconIndex.icons.push({ name, category: (tabler[slug] || {}).category });
+fs.writeFileSync(path.join(root, 'dist/icon-index.json'), JSON.stringify(iconIndex) + '\n');
 
 const manifest = {
   $schema: 'https://www.sakaniui.com/manifest.schema.json',
-  schemaVersion: 2,
+  schemaVersion: 3,
   name: pkg.name,
   version: pkg.version,
   description: 'Machine-readable contract of the SakaniUI React library, generated from its TypeScript source.',
@@ -359,7 +395,8 @@ const manifest = {
     acceptsNativeProps: 'Components forward native HTML attributes (className, style, aria-*, event handlers) to their root element unless a prop says otherwise; only the props that are specific to SakaniUI are listed here.',
     accessibleName: 'When `contract.requiresAccessibleName` is true, a required prop (aria-label, aria-labelledby or an alt text) is the only thing that names the control or image. Do not omit it.',
     tokens: 'Use only the token names listed under `tokens`. Colour tokens follow the theme (the `.dark` class flips them); do not hard-code colours.',
-    icons: 'Icon props take the component itself (IconSettings), not an element (<IconSettings />).',
+    icons: 'Icon props take the component itself (IconSettings), not an element (<IconSettings />). Only names in icon-index.json exist; search them (MCP: search_icons) instead of guessing.',
+    examples: 'Each component has `example`: its imports and the element with every required prop filled in, type-checked against this build. Start from it.',
     literals: 'Prop `values` keep their real type: a number is a number (columns: 2), a string is a string ("md").',
   },
   tokens: { count: tokenCount, groups: tokens },

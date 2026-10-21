@@ -249,7 +249,7 @@ const renderTask = (
   task: Task,
   key: React.Key,
   state?: 'default' | 'dragging',
-  wrapperProps?: React.HTMLAttributes<HTMLDivElement> & Record<`data-${string}`, string>,
+  wrapperProps?: React.HTMLAttributes<HTMLDivElement> & Partial<Record<`data-${string}`, string>>,
 ) => (
   <div key={key} className={wrapperProps ? styles.draggable : undefined} {...(wrapperProps ?? {})}>
   <BoardCard
