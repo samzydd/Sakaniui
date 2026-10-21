@@ -23,8 +23,11 @@ export default defineConfig({
         'src/components/**/*.ts', 'src/components/**/*.tsx', 'src/index.ts',
         'src/blocks/**/*.ts', 'src/blocks/**/*.tsx',
         'src/icons/**/*.ts', 'src/icons/**/*.tsx',
+        // index.ts re-exports from ./lib (LiquidGlass, HoverGroup, helpers): without these their types are `any`
+        'src/lib/**/*.ts', 'src/lib/**/*.tsx',
       ],
       exclude: [
+        'src/lib/**/*.stories.tsx', 'src/lib/**/*.test.tsx', 'src/lib/**/*.test.ts',
         'src/components/**/*.stories.tsx', 'src/components/**/*.test.tsx', 'src/components/**/*.test.ts',
         'src/blocks/**/*.stories.tsx', 'src/blocks/**/*.test.tsx', 'src/blocks/**/*.test.ts',
         // Experimental/broken alternate file, not part of the real

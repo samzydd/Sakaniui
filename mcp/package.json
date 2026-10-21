@@ -1,0 +1,45 @@
+{
+  "name": "@sakaniui/mcp",
+  "version": "0.8.10",
+  "description": "SakaniUI MCP server: lets AI editors look up components, props, tokens and icons, and check code, instead of guessing. Read-only, zero dependencies.",
+  "type": "module",
+  "bin": {
+    "sakaniui-mcp": "./bin/sakaniui-mcp.mjs"
+  },
+  "files": [
+    "bin",
+    "data",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "sync": "node scripts/sync.mjs",
+    "prepack": "node scripts/sync.mjs"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "sakaniui",
+    "design-system",
+    "ai",
+    "claude",
+    "cursor",
+    "react"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/samzydd/Sakaniui.git",
+    "directory": "mcp"
+  },
+  "homepage": "https://www.sakaniui.com/docs/ai",
+  "bugs": {
+    "url": "https://github.com/samzydd/Sakaniui/issues"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

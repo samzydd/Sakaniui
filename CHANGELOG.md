@@ -2,6 +2,27 @@
 
 All notable changes to `@sakaniui/react` are documented here.
 
+## 0.8.10
+
+Readiness fixes found by checking the MCP server against real projects.
+
+- **Fixed: missing type definitions.** `dist/lib/` was left out of the generated `.d.ts` files, so
+  `LiquidGlass`, `LiquidBackdrop`, `HoverGroup`, `useHoverHighlight`, `useLiquidGlass`, `getContrastColor`
+  and `iconStrokeWidth` had no types for TypeScript users: `<LiquidBackdrop />` compiled without its
+  required `src`. They are typed now. The build also fails if any relative import in a shipped `.d.ts`
+  does not resolve, so this cannot happen again.
+- **New package `@sakaniui/mcp`.** `npx -y @sakaniui/mcp` starts the MCP server from a ~190 kB package with no
+  dependencies (2 s cold start). Starting it through `@sakaniui/react` pulled in React, Recharts and Next.js (about 500 MB
+  and ~30 s on a cold start, long enough for an editor to give up). The server in `@sakaniui/react`
+  still works.
+- **MCP `check_code`: no more false positives.** It checked 704 real elements across three apps and
+  reported 0 errors on working code (it had reported 77). Aliased imports (`IconSettings as Settings`),
+  default imports, code shown inside template strings, native attributes (`href`, `name`,
+  `placeholder`...) and the non-icon exports of `@sakaniui/react/icons` are handled. It still catches
+  every deliberate mistake in the test set.
+- **Fixed: unresolvable `$schema` link** removed from `manifest.json`.
+- The build also checks that `check_code` accepts every shipped example and rejects known-bad code.
+
 ## 0.8.9
 
 Stops assistants from inventing code. Found by testing the MCP server in Claude Code: it validated a

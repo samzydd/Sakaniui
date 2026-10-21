@@ -12,6 +12,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
+import { spawnSync } from 'node:child_process';
 import { typecheckExamples } from './examples.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
@@ -38,6 +39,27 @@ for (const c of manifest.components) {
 for (const u of manifest.utilities) if (!(u.name in main)) fail(`utility ${u.name} is listed but not exported`);
 const described = new Set([...manifest.components.map((c) => c.name), ...manifest.utilities.map((u) => u.name)]);
 for (const n of [...Object.keys(main), ...Object.keys(blocks)]) if (!described.has(n)) fail(`${n} is exported but missing from the manifest`);
+
+/* ---- type definitions are complete: every relative import in a shipped .d.ts must resolve ---- */
+{
+  const missing = new Map();
+  (function walk(d) {
+    for (const e of fs.readdirSync(d, { withFileTypes: true })) {
+      const p = path.join(d, e.name);
+      if (e.isDirectory()) { walk(p); continue; }
+      if (!e.name.endsWith('.d.ts')) continue;
+      const text = fs.readFileSync(p, 'utf8');
+      for (const m of text.matchAll(/(?:from|import\()\s*['"](\.{1,2}\/[^'"]+)['"]/g)) {
+        const spec = m[1].replace(/\.(?:js|mjs|cjs)$/, '');
+        const base = path.resolve(path.dirname(p), spec);
+        if (/\.(css|svg|png|jpe?g|webp|avif)(\?.*)?$/.test(m[1])) continue; // assets are declared globally
+        if (!fs.existsSync(base + '.d.ts') && !fs.existsSync(path.join(base, 'index.d.ts')) && !fs.existsSync(base)) missing.set(`${path.relative(root, p)} -> ${m[1]}`, true);
+      }
+    }
+  })(path.join(root, 'dist'));
+  for (const k of [...missing.keys()].slice(0, 15)) fail(`type definitions are incomplete: ${k} does not exist`);
+  if (missing.size > 15) fail(`...and ${missing.size - 15} more unresolved imports in the type definitions`);
+}
 
 /* ---- accuracy: props and values against the shipped .d.ts ---- */
 const dtsFiles = [];
@@ -68,6 +90,22 @@ const withExample = manifest.components.filter((c) => c.example);
 if (withExample.length < manifest.components.length) fail(`${manifest.components.length - withExample.length} components have no example`);
 const brokenExamples = typecheckExamples(root, withExample.map((c) => ({ name: c.name, example: c.example })));
 for (const n of brokenExamples) fail(`the example for ${n} does not type-check`);
+
+/* ---- check_code: it must accept every shipped example and reject known-bad code ---- */
+{
+  const bad = [
+    ['an element passed as an icon', "<IconButton icon={<TrashIcon />} aria-label=\"x\" />"],
+    ['an invented import', "import { Buton } from '@sakaniui/react';"],
+    ['a disallowed value', "import { Button } from '@sakaniui/react';\n<Button variant=\"danger\">x</Button>"],
+    ['a missing required prop', "import { IconButton } from '@sakaniui/react';\n<IconButton />"],
+  ];
+  const calls = [...withExample.map((c) => c.example), ...bad.map(([, code]) => code)];
+  const input = calls.map((code, i) => JSON.stringify({ jsonrpc: '2.0', id: i + 1, method: 'tools/call', params: { name: 'check_code', arguments: { code } } })).join('\n') + '\n';
+  const run = spawnSync('node', [path.join(root, 'bin/sakaniui-mcp.mjs')], { input, cwd: root, encoding: 'utf8', timeout: 60000 });
+  const answers = new Map(run.stdout.trim().split('\n').filter(Boolean).map((l) => { const m = JSON.parse(l); return [m.id, JSON.parse(m.result.content[0].text)]; }));
+  withExample.forEach((c, i) => { const r = answers.get(i + 1); if (!r || !r.ok) fail(`check_code rejects the shipped example for ${c.name}: ${JSON.stringify(r && r.errors).slice(0, 160)}`); });
+  bad.forEach(([what], i) => { const r = answers.get(withExample.length + i + 1); if (!r || r.ok) fail(`check_code accepted bad code (${what})`); });
+}
 
 /* ---- icons: the index is exactly the set of exported icons ---- */
 const iconIndex = JSON.parse(read('dist/icon-index.json'));
@@ -124,4 +162,4 @@ if (problems.length) {
   for (const p of problems.slice(0, 40)) console.error('  - ' + p);
   process.exit(1);
 }
-console.log(`manifest verified: ${manifest.components.length} entries exist at runtime, ${checkedProps} props match the type definitions, ${withExample.length} examples type-check, ${indexed.size} icons match the exports, ${listed.size} tokens match tokens.css, no private references, server is read-only`);
+console.log(`manifest verified: ${manifest.components.length} entries exist at runtime, ${checkedProps} props match the type definitions, ${withExample.length} examples type-check and pass check_code, ${indexed.size} icons match the exports, ${listed.size} tokens match tokens.css, no private references, server is read-only`);

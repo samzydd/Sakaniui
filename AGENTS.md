@@ -16,7 +16,7 @@ import manifest from '@sakaniui/react/manifest.json';
 const button = manifest.components.find((c) => c.name === 'Button'); // props[], contract.requiredProps
 ```
 Editors can query the same data through the bundled MCP server
-(`npx -y -p @sakaniui/react sakaniui-mcp`): `search_components`, `get_component`, `search_icons`,
+(`npx -y @sakaniui/mcp`): `search_components`, `get_component`, `search_icons`,
 `check_code`, `check_usage`, `get_tokens`, `get_guide`, `check_compatibility`, `get_changelog`.
 
 **Start from the example, check before you answer.** Every component has `example`: its imports and the

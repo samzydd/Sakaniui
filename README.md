@@ -108,12 +108,14 @@ up instead of guessing prop names.
 ```json
 {
   "mcpServers": {
-    "sakaniui": { "command": "npx", "args": ["-y", "-p", "@sakaniui/react", "sakaniui-mcp"] }
+    "sakaniui": { "command": "npx", "args": ["-y", "@sakaniui/mcp"] }
   }
 }
 ```
 
-Claude Code: `claude mcp add sakaniui -- npx -y -p @sakaniui/react sakaniui-mcp`
+Claude Code: `claude mcp add sakaniui -- npx -y @sakaniui/mcp`
+
+The server is its own tiny package, [`@sakaniui/mcp`](https://www.npmjs.com/package/@sakaniui/mcp) (about 1 MB, starts in a couple of seconds; it does not install the component library). The copy bundled in `@sakaniui/react` (`npx -y -p @sakaniui/react sakaniui-mcp`) still works but downloads far more.
 
 Tools: `search_components`, `get_component` (with a type-checked `example`), `search_icons`,
 `check_code` (checks a whole snippet: imports, required props, values, icon names), `check_usage`,

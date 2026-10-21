@@ -2,7 +2,7 @@
 /**
  * SakaniUI MCP server -- lets an AI editor/agent look up the design system instead of guessing.
  *
- *   npx -y -p @sakaniui/react sakaniui-mcp [--project <dir>]
+ *   npx -y @sakaniui/mcp [--project <dir>]     (or: npx -y -p @sakaniui/react sakaniui-mcp)
  *
  * Zero dependencies: speaks newline-delimited JSON-RPC (MCP stdio transport).
  *
@@ -47,7 +47,8 @@ function findProjectInstall() {
   return null;
 }
 
-const bundled = loadInstall(ownRoot);
+// inside @sakaniui/react the data sits next to bin/; inside @sakaniui/mcp it is copied into data/
+const bundled = loadInstall(fs.existsSync(path.join(ownRoot, 'dist', 'manifest.json')) ? ownRoot : path.join(ownRoot, 'data'));
 if (!bundled || !bundled.manifest) {
   process.stderr.write('sakaniui-mcp: dist/manifest.json not found. Run `npm run build:lib` (or install a published version).\n');
   process.exit(1);
@@ -157,6 +158,7 @@ function closest(name) {
 /* ---------- icons ---------- */
 const iconNames = new Set();
 for (const i of iconIndex) { iconNames.add(i.name); if (i.filled) iconNames.add(i.filled); }
+const iconOtherExports = new Set(((active.icons && active.icons.other) || (bundled.icons && bundled.icons.other)) || []);
 const iconWords = (name) => name.replace(/^Icon/, '').replace(/Filled$/, '').replace(/([a-z0-9])([A-Z])/g, '$1 $2').replace(/([A-Za-z])(\d)/g, '$1 $2').toLowerCase();
 
 // The conventional icon for common UI intents, ranked first (tags alone rank e.g. IconHttpDelete above IconTrash for "delete").
@@ -207,7 +209,7 @@ function searchIcons(query, limit = 12) {
 }
 
 /** Checks a value given for an icon prop. Returns an error string, or null. */
-function iconProblem(propName, raw, importedElsewhere = new Set()) {
+function iconProblem(propName, raw, importedElsewhere = new Set(), localNames = new Set()) {
   const v = String(raw).trim().replace(/^\{|\}$/g, '').trim();
   if (/^</.test(v)) {
     const tag = (/^<\s*([A-Za-z][\w.]*)/.exec(v) || [])[1] || 'Icon';
@@ -216,12 +218,15 @@ function iconProblem(propName, raw, importedElsewhere = new Set()) {
     return `"${propName}" takes the icon component itself, not an element: write ${propName}={${real || 'IconName'}}, not ${propName}={<${tag} />}.${unknown}${!real ? ' Use search_icons to find the real name.' : ''}`;
   }
   if (!/^[A-Za-z_$][\w$]*$/.test(v)) return null; // an expression we cannot judge
-  if (iconNames.has(v) || importedElsewhere.has(v)) return null;
+  if (iconNames.has(v) || importedElsewhere.has(v) || localNames.has(v)) return null;
+  // a local name (alias, parameter, constant): the import line was already checked, and we cannot see the rest
+  if (!/^Icon[A-Z0-9]/.test(v)) return null;
   const hint = searchIcons(v, 3).map((i) => i.name);
   return `"${v}" is not a SakaniUI icon.${hint.length ? ` Did you mean: ${hint.join(', ')}?` : ''} Use search_icons to find the real name.`;
 }
 
-const NATIVE = /^(className|style|id|ref|key|children|role|tabIndex|title|hidden|lang|dir|slot|on[A-Z].*|aria-.*|data-.*)$/;
+// Attributes every component forwards to its root element. A prop outside this list and the contract is worth a warning.
+const NATIVE = /^(className|style|id|ref|key|children|role|tabIndex|title|hidden|lang|dir|slot|on[A-Z].*|aria-.*|data-.*|href|target|rel|download|name|type|value|defaultValue|checked|defaultChecked|disabled|required|readOnly|placeholder|htmlFor|form|autoFocus|autoComplete|autoCapitalize|spellCheck|inputMode|pattern|min|max|step|minLength|maxLength|rows|cols|multiple|accept|src|srcSet|alt|width|height|loading|draggable|tabindex|ariaLabel)$/;
 
 /** Release notes: [{version, body}] newest first, from the CHANGELOG that matches the answering install. */
 function releases() {
@@ -333,14 +338,38 @@ function classify(expr) {
 
 const TYPE_LIKE = /(Props|Type|Variant|Size|Item|Option|Datum|Column|Link|Plan|Post|Action|Step|Image|Author|Change|Data|Tab|Color|Category|Job|Member|Testimonial|Transaction)$/;
 
-function checkCode(code) {
+/** Replaces the contents of template literals with spaces (newlines kept): code shown inside a string is not code. */
+function blankTemplates(code) {
+  let out = '';
+  for (let i = 0; i < code.length; i++) {
+    const ch = code[i];
+    if (ch === '`') {
+      let j = i + 1, depth = 0;
+      for (; j < code.length; j++) {
+        if (code[j] === '\\') { j++; continue; }
+        if (code[j] === '$' && code[j + 1] === '{') { depth++; j++; continue; }
+        if (code[j] === '}' && depth > 0) { depth--; continue; }
+        if (code[j] === '`' && depth === 0) break;
+      }
+      out += '`' + code.slice(i + 1, j).replace(/[^\n]/g, ' ') + '`';
+      i = j;
+    } else out += ch;
+  }
+  return out;
+}
+
+function checkCode(source) {
+  const code = blankTemplates(source);
   lineAt = ((idx) => (_c, pos) => idx(pos))(lineIndex(code));
   const errors = [];
   const warnings = [];
   const imports = parseImports(code);
   const importedFrom = new Map(); // local name -> module
-  for (const imp of imports) for (const n of imp.names) importedFrom.set(n.local, imp.from);
+  for (const imp of imports) { for (const n of imp.names) importedFrom.set(n.local, imp.from); if (imp.def) importedFrom.set(imp.def, imp.from); }
   const importedElsewhere = new Set([...importedFrom].filter(([, from]) => !from.startsWith('@sakaniui/react')).map(([n]) => n));
+  // anything the snippet declares itself (const Icon = ..., function X, class Y) or aliases: not ours to judge
+  const localNames = new Set([...code.matchAll(/\b(?:const|let|var|function|class)\s+([A-Za-z_$][\w$]*)/g)].map((m) => m[1]));
+  for (const imp of imports) for (const n of imp.names) if (n.local !== n.imported) localNames.add(n.local);
 
   for (const imp of imports) {
     if (!imp.from.startsWith('@sakaniui/react')) continue;
@@ -355,7 +384,7 @@ function checkCode(code) {
       const c = byName.get(n.imported.toLowerCase());
       const isUtility = manifest.utilities?.some((u) => u.name === n.imported);
       if (entry === '@sakaniui/react/icons') {
-        if (!iconNames.has(n.imported)) {
+        if (!iconNames.has(n.imported) && !iconOtherExports.has(n.imported)) {
           const hint = searchIcons(n.imported, 3).map((i) => i.name);
           errors.push({ line: imp.line, message: `${n.imported} is not exported by @sakaniui/react/icons.${hint.length ? ` Did you mean: ${hint.join(', ')}?` : ''}` });
         }
@@ -401,9 +430,9 @@ function checkCode(code) {
       if (p.type === 'IconComponent') {
         if (a.kind === 'string') errors.push(at(`"${a.name}" takes an icon component, not a string: ${a.name}={IconName}.`));
         else if (a.kind === 'element' || a.kind === 'identifier') {
-          const e = iconProblem(a.name, a.raw, importedElsewhere);
+          const e = iconProblem(a.name, a.raw, importedElsewhere, localNames);
           if (e) errors.push(at(e));
-          else if (a.kind === 'identifier' && iconNames.has(a.value) && importedFrom.get(a.value) !== '@sakaniui/react/icons') warnings.push(at(`${a.value} is not imported. Add: import { ${a.value} } from '@sakaniui/react/icons';`));
+          else if (a.kind === 'identifier' && iconNames.has(a.value) && !importedFrom.has(a.value) && !localNames.has(a.value)) warnings.push(at(`${a.value} is not imported. Add: import { ${a.value} } from '@sakaniui/react/icons';`));
         }
       }
     }

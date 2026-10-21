@@ -369,10 +369,12 @@ const iconIndex = {
   }),
 };
 for (const [slug, name] of filled) if (!outline.has(slug)) iconIndex.icons.push({ name, category: (tabler[slug] || {}).category });
+// the icons entry also exports a few non-icon names (iconNames, createIcon, ...): real, so imports of them are valid
+const iconsEntryNames = exportedNames('icons.mjs');
+iconIndex.other = [...iconsEntryNames].filter((n) => !/^Icon[A-Z0-9]/.test(n)).sort();
 fs.writeFileSync(path.join(root, 'dist/icon-index.json'), JSON.stringify(iconIndex) + '\n');
 
 const manifest = {
-  $schema: 'https://www.sakaniui.com/manifest.schema.json',
   schemaVersion: 3,
   name: pkg.name,
   version: pkg.version,
