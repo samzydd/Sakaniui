@@ -152,6 +152,12 @@ CSS of a component into your own file.
 
 Format: **Use for** · **Why it is built this way** · **Not for / instead**.
 
+**Looking for a component by another name?** SakaniUI uses its own names. A *dialog* or *alert dialog* is
+`Modal`; a *snackbar* is `Toast`; a *dropdown menu* is `Menu`; a *navbar* or *app bar* is `TopBar`; a
+*date picker* is `Calendar`; a *loader* is `Spinner`; a *toggle* is `Switch`; a *banner* is `Announcement`;
+*autocomplete* is `Combobox`. There is no `Dialog`, `AlertDialog`, `Snackbar` or `Navbar`. Each component
+lists its other names under `aliases` in `manifest.json`, and `search_components` understands them.
+
 ### Actions
 - **Button** — Use for any action that does something. *Why:* 5 variants × 3 sizes mirror Figma 1:1;
   `loading` disables interaction so double-submits can't happen. *Not for* navigation → `Link`; icon-only →

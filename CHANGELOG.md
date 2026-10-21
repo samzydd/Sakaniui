@@ -2,6 +2,22 @@
 
 All notable changes to `@sakaniui/react` are documented here.
 
+## 0.8.12
+
+Found while testing 0.8.11 in Claude Code: after writing correct code, the agent offered to wrap the
+delete button in "SakaniUI's Dialog/AlertDialog". Neither exists; the component is `Modal`. It named it
+from memory without looking it up.
+
+- **`aliases` in `manifest.json`**: the other names people use for a component, 250+ across 61 components
+  (dialog, alert dialog -> `Modal`; snackbar -> `Toast`; navbar, app bar -> `TopBar`; date picker ->
+  `Calendar`; loader -> `Spinner`; toggle -> `Switch`; autocomplete -> `Combobox`; dropzone ->
+  `FileUpload`; pricing table -> `PricingTableBlock`; ...). Hand-written; the build checks every one
+  points at a real component and never shadows a real name.
+- **MCP:** `search_components` ranks by alias ("dialog" finds `Modal` first; a plain exact name such as
+  "button" always wins). `get_component`, `check_usage` and `check_code` now say what the name is here:
+  *"Dialog is not exported by @sakaniui/react. In SakaniUI that is `Modal` (Confirmation dialog)."*
+- `AGENTS.md` lists the most common renamings.
+
 ## 0.8.11
 
 Found by asking Claude Code, with the published 0.8.10 MCP server, to add a delete button to a table row:

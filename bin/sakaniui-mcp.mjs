@@ -121,6 +121,22 @@ function propTooNew(c, p, value, installed = projectVersion) {
 
 /* ---------- helpers ---------- */
 const byName = new Map(manifest.components.map((c) => [c.name.toLowerCase(), c]));
+// Common names for components ("Dialog" -> Modal). Only used when a name is not found, and to rank search results.
+const norm = (x) => String(x).toLowerCase().replace(/[^a-z0-9]/g, '');
+const aliasIndex = new Map(); // normalized alias -> components
+for (const c of manifest.components) for (const a of c.aliases || []) { const k = norm(a); if (!aliasIndex.has(k)) aliasIndex.set(k, []); aliasIndex.get(k).push(c); }
+/** The real component(s) for a name that does not exist: "Dialog" -> [Modal]. */
+function byAlias(name) {
+  const k = norm(name);
+  const exact = aliasIndex.get(k) || aliasIndex.get(k.replace(/s$/, '')) || [];
+  return [...new Set(exact)].slice(0, 4);
+}
+const aliasHint = (name) => {
+  const hits = byAlias(name);
+  if (!hits.length) return '';
+  return ` ${hits.length === 1 ? `In SakaniUI that is \`${hits[0].name}\` (${hits[0].summary.replace(/\.$/, '')})` : `In SakaniUI that could be ${hits.map((h) => `\`${h.name}\``).join(' or ')}`}.`;
+};
+
 const brief = (c) => {
   const out = { name: c.name, kind: c.kind, category: c.category, import: c.import, since: c.since, summary: c.summary, requiredProps: c.contract.requiredProps };
   if (inInstalled(c) === false) out.availableInInstalled = false;
@@ -150,9 +166,19 @@ const verArg = (args, key) => {
 };
 const firstError = (...rs) => rs.find((r) => r.err);
 
-function score(c, terms) {
+function score(c, terms, phrase = '') {
   const hay = `${c.name} ${c.category ?? ''} ${c.summary} ${c.props.map((p) => p.name).join(' ')}`.toLowerCase();
   let s = 0;
+  // an alias is the name people use for this component: "dialog" finds Modal, "snackbar" finds Toast
+  const p = norm(phrase);
+  let aliasWords = 0;
+  for (const a of c.aliases || []) {
+    const na = norm(a);
+    if (na === p || na + 's' === p || na === p + 's') s += 60;
+    else if (na.length >= 4 && p.includes(na)) s += 25;
+    else if (!aliasWords && terms.length && a.toLowerCase().split(/[^a-z0-9]+/).some((w) => w.length >= 3 && terms.includes(w))) { s += 6; aliasWords = 1; } // loosely related: counts once
+  }
+  if (p && norm(c.name) === p) s += 100; // the real name always wins
   for (const t of terms) {
     if (c.name.toLowerCase() === t) s += 20;
     else if (c.name.toLowerCase().includes(t)) s += 8;
@@ -434,7 +460,7 @@ function checkCode(source) {
       if (!c && !isUtility) {
         if (TYPE_LIKE.test(n.imported)) continue; // most likely a type export
         const near = closest(n.imported);
-        errors.push({ line: imp.line, message: `${n.imported} is not exported by @sakaniui/react.${near.length ? ` Did you mean: ${near.join(', ')}?` : ''} Use search_components.` });
+        errors.push({ line: imp.line, message: `${n.imported} is not exported by @sakaniui/react.${aliasHint(n.imported)}${near.length ? ` Did you mean: ${near.join(', ')}?` : ''} Use search_components.` });
       }
       if (c && inInstalled(c) === false) errors.push({ line: imp.line, message: `${c.name} was added in ${c.since}; the project has ${projectVersion}.` });
     }
@@ -578,7 +604,7 @@ const tools = {
       const terms = q.value.toLowerCase().split(/\s+/).filter(Boolean);
       const hits = manifest.components
         .filter((c) => !k.value || c.kind === k.value)
-        .map((c) => [score(c, terms), c])
+        .map((c) => [score(c, terms, q.value), c])
         .filter(([s]) => s > 0)
         .sort((a, b) => b[0] - a[0])
         .slice(0, limit)
@@ -594,7 +620,7 @@ const tools = {
     run(args) {
       const n = strArg(args, 'name', { required: true }); if (n.err) return fail(n.err);
       const c = byName.get(n.value.toLowerCase());
-      if (!c) return fail(`No component named "${n.value}". Did you mean: ${closest(n.value).join(', ') || '(none close)'}? Use search_components.`);
+      if (!c) return fail(`No component named "${n.value}".${aliasHint(n.value)} ${closest(n.value).length ? `Did you mean: ${closest(n.value).join(', ')}? ` : ''}Use search_components.`.replace(/\s+/g, ' '));
       const out = { ...c, note: 'Native HTML attributes (className, style, aria-*, event handlers) are also accepted on the root element.' };
       if (c.props.some((p) => p.shape)) out.shapeNote = 'A prop with a `shape` takes an object (or an array of objects) with exactly those fields; `required` fields must be present. In a generic shape, `keyof T & string` means the value must be a field of your own data type.';
       if (c.recipes && c.recipes.length) out.recipeNote = 'See `recipes`: patterns the types alone do not teach, compiled against this release.';
@@ -660,7 +686,7 @@ const tools = {
       if (typeof props !== 'object' || Array.isArray(props)) return fail('"props" must be an object of prop name -> value.');
       if (Object.keys(props).length > 200) return fail('"props" has too many entries (max 200).');
       const c = byName.get(n.value.toLowerCase());
-      if (!c) return fail(`No component named "${n.value}". Did you mean: ${closest(n.value).join(', ') || '(none close)'}?`);
+      if (!c) return fail(`No component named "${n.value}".${aliasHint(n.value)} ${closest(n.value).length ? `Did you mean: ${closest(n.value).join(', ')}?` : ''}`.replace(/\s+/g, ' ').trim());
       const known = new Map(c.props.map((p) => [p.name, p]));
       const errors = [];
       const warnings = [];
@@ -784,7 +810,7 @@ function handle(msg) {
           protocolVersion: asked && PROTOCOL_VERSIONS.includes(asked) ? asked : PROTOCOL_VERSIONS[0],
           capabilities: { tools: { listChanged: false } },
           serverInfo: { name: 'sakaniui', title: 'SakaniUI', version: refVersion },
-          instructions: `SakaniUI ${refVersion}${projectVersion ? ` (project has ${projectVersion})` : ''}. Read-only reference. Look components up with search_components / get_component and start from their \`example\`; find icon names with search_icons (never guess them); run check_code on every snippet before you answer; style anything beyond props with the design tokens from get_tokens (CSS variables), not hard-coded colours or utility classes the project may not have; read get_guide when nothing fits.${note ? ` ${note}` : ''}`,
+          instructions: `SakaniUI ${refVersion}${projectVersion ? ` (project has ${projectVersion})` : ''}. Read-only reference. Look components up with search_components / get_component and start from their \`example\`; find icon names with search_icons (never guess them); search by the name you would normally use (dialog, snackbar, navbar, date picker) and it maps to the real component; run check_code on every snippet before you answer; style anything beyond props with the design tokens from get_tokens (CSS variables), not hard-coded colours or utility classes the project may not have; read get_guide when nothing fits.${note ? ` ${note}` : ''}`,
         } });
       }
       case 'ping':

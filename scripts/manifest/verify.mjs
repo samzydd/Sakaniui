@@ -145,6 +145,21 @@ export const Example = () => <Table columns={columns} rows={[]} />;` }]);
   if (!wrong.has('table-key-not-on-row')) fail('a Table column key that is not on the row type compiled, so the Table recipe describes a rule that no longer holds');
 }
 
+/* ---- aliases ---- */
+{
+  const norm = (x) => x.toLowerCase().replace(/[^a-z0-9]/g, '');
+  const real = new Set(manifest.components.map((c) => norm(c.name)).concat(manifest.utilities.map((u) => norm(u.name))));
+  let count = 0;
+  for (const c of manifest.components) for (const a of c.aliases || []) {
+    count++;
+    if (!a.trim() || a !== a.toLowerCase()) fail(`alias "${a}" of ${c.name} must be non-empty lower case`);
+    if (real.has(norm(a))) fail(`alias "${a}" of ${c.name} is the name of a real component`);
+  }
+  const need = { Dialog: 'Modal', 'alert dialog': 'Modal', Snackbar: 'Toast', Navbar: 'TopBar', 'date picker': 'Calendar', Loader: 'Spinner', Toggle: 'Switch' };
+  for (const [a, target] of Object.entries(need)) if (!manifest.components.find((c) => c.name === target)?.aliases?.some((x) => norm(x) === norm(a))) fail(`"${a}" must be an alias of ${target}`);
+  if (count < 100) fail(`only ${count} aliases (expected 150+): they have gone missing`);
+}
+
 /* ---- check_code: it must accept every shipped example and reject known-bad code ---- */
 {
   const bad = [

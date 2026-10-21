@@ -420,6 +420,76 @@ for (const d of parsed) {
 }
 components.sort((a, b) => (a.kind === b.kind ? a.name.localeCompare(b.name) : a.kind === 'component' ? -1 : 1));
 
+/* ---- aliases: the names people (and models) use for a component, mapped to the real one ----
+ * "Dialog" is not a SakaniUI component, `Modal` is. Hand-written; the build checks every target exists
+ * and that no alias shadows a real component name. Used by search_components and by the "did you mean"
+ * of get_component, check_usage and check_code. */
+const ALIASES = {
+  Modal: ['dialog', 'alert dialog', 'alertdialog', 'confirm dialog', 'confirmation dialog', 'confirmation', 'modal window', 'popup dialog', 'lightbox'],
+  Popover: ['popup', 'flyout', 'floating panel', 'popup panel'],
+  Menu: ['dropdown', 'dropdown menu', 'context menu', 'actions menu', 'kebab menu'],
+  Toast: ['snackbar', 'toaster', 'toast notification', 'flash message', 'transient notification'],
+  Alert: ['callout', 'notice', 'inline message', 'inline alert', 'status message', 'message box'],
+  Announcement: ['banner', 'announcement bar', 'top banner', 'promo bar'],
+  Tooltip: ['hovercard', 'hover card', 'hint on hover'],
+  Spinner: ['loader', 'loading', 'loading spinner', 'activity indicator', 'busy indicator'],
+  Skeleton: ['shimmer', 'loading skeleton', 'content placeholder', 'skeleton loader'],
+  Progress: ['progress bar', 'progressbar', 'meter', 'loading bar'],
+  Tabs: ['tab bar', 'tabbar', 'tab navigation', 'tabbed'],
+  Select: ['select box', 'selectbox', 'dropdown select', 'picker', 'dropdown list'],
+  Combobox: ['autocomplete', 'typeahead', 'searchable select', 'multi select', 'multiselect', 'tag input'],
+  Switch: ['toggle', 'toggle switch', 'on off switch'],
+  Radio: ['radio button', 'radio group', 'radio input'],
+  Checkbox: ['tickbox'],
+  Input: ['text field', 'textfield', 'text input', 'input field', 'form field'],
+  Textarea: ['multiline input', 'multi line input', 'comment box'],
+  Slider: ['range', 'range slider', 'range input'],
+  Table: ['datagrid', 'data grid', 'data table', 'grid', 'list view'],
+  Badge: ['pill', 'status pill', 'status badge', 'lozenge'],
+  Tags: ['tag list', 'chips', 'chip list', 'labels list'],
+  Avatar: ['profile picture', 'user avatar', 'profile image'],
+  Breadcrumb: ['breadcrumbs', 'bread crumbs', 'path trail'],
+  Pagination: ['pager', 'paginator', 'page numbers'],
+  Stepper: ['wizard', 'step indicator', 'steps', 'multi step'],
+  Calendar: ['date picker', 'datepicker', 'date selector', 'calendar picker'],
+  FileUpload: ['file picker', 'dropzone', 'drop zone', 'file input', 'uploader', 'upload area'],
+  Accordion: ['collapse', 'collapsible', 'expandable', 'disclosure', 'expand collapse'],
+  Divider: ['separator', 'horizontal rule', 'hr', 'rule'],
+  Link: ['anchor', 'hyperlink', 'text link'],
+  Kbd: ['keyboard shortcut', 'key cap', 'keycap', 'shortcut key'],
+  Sidebar: ['side nav', 'sidenav', 'side navigation', 'left nav', 'navigation sidebar'],
+  TopBar: ['navbar', 'nav bar', 'app bar', 'appbar', 'top navigation', 'top nav', 'header bar'],
+  MobileNavigationMenu: ['mobile nav', 'mobile menu', 'hamburger menu', 'burger menu'],
+  EmptyState: ['no data', 'blank state', 'zero state', 'empty view', 'no results'],
+  StatCard: ['metric card', 'kpi', 'kpi card', 'stat tile', 'stats card'],
+  IconButton: ['icon only button', 'icon-only button', 'icon btn', 'round button'],
+  StarRating: ['rating', 'stars', 'review stars', 'star reviews'],
+  ChatComposer: ['message input', 'chat input', 'message box', 'composer'],
+  MessageBubble: ['chat bubble', 'chat message', 'message'],
+  CodeSnippet: ['code block', 'code sample', 'code viewer'],
+  PricingTableBlock: ['pricing', 'pricing table', 'pricing section', 'pricing plans', 'plans'],
+  HeroBlock: ['hero', 'hero section', 'landing hero', 'header section'],
+  FaqBlock: ['faq', 'faqs', 'questions and answers', 'frequently asked questions'],
+  LoginBlock: ['login', 'login form', 'sign in', 'signin', 'sign in form'],
+  SignUpBlock: ['signup', 'sign up', 'register', 'registration', 'create account'],
+  TestimonialBlock: ['testimonial', 'testimonials', 'customer quotes'],
+  CtaBannerBlock: ['cta', 'cta banner', 'call to action', 'call to action banner'],
+  FeatureGridBlock: ['features', 'feature grid', 'features section'],
+  TeamSectionBlock: ['team', 'team section', 'meet the team'],
+  LogoCloudBlock: ['logo cloud', 'logo wall', 'customer logos', 'trusted by'],
+  DataTableBlock: ['data table section', 'table section', 'records table'],
+  KanbanBoardBlock: ['kanban', 'kanban board', 'task board', 'board view'],
+  ShoppingCartBlock: ['cart', 'shopping cart', 'basket'],
+  CheckoutFlowBlock: ['checkout', 'checkout flow', 'checkout page'],
+  ForgotPasswordBlock: ['forgot password', 'password reset request', 'lost password'],
+  ResetPasswordBlock: ['reset password', 'new password', 'change password'],
+  TwoFactorAuthBlock: ['2fa', 'two factor', 'two factor authentication', 'otp', 'mfa', 'verification code'],
+  EmailVerificationBlock: ['verify email', 'email verification', 'confirm email'],
+  ProfileSettingsBlock: ['profile settings', 'account settings', 'settings page'],
+};
+const listed0 = new Set(components.map((c) => c.name));
+for (const name of Object.keys(ALIASES)) if (!listed0.has(name)) { console.error(`manifest: ALIASES names ${name}, which is not a component. Fix the spelling in scripts/manifest/generate.mjs.`); process.exit(1); }
+
 /* ---- recipes: patterns the types alone do not teach, written by hand and compiled on every build ---- */
 const RECIPES = {
   Table: [{
@@ -454,6 +524,7 @@ export const Example = () => <Table columns={columns} rows={rows} />;`,
 const { examples, failed: noExample } = buildExamples(root, components);
 for (const c of components) if (examples.has(c.name)) c.example = examples.get(c.name);
 for (const c of components) if (RECIPES[c.name]) c.recipes = RECIPES[c.name];
+for (const c of components) if (ALIASES[c.name]) c.aliases = ALIASES[c.name];
 
 /* ---- the shape of every prop that takes this package's own object types ---- */
 const shapes = describePropShapes(root, components);
@@ -547,7 +618,7 @@ iconIndex.other = [...iconsEntryNames].filter((n) => !/^Icon[A-Z0-9]/.test(n)).s
 fs.writeFileSync(path.join(root, 'dist/icon-index.json'), JSON.stringify(iconIndex) + '\n');
 
 const manifest = {
-  schemaVersion: 5,
+  schemaVersion: 6,
   name: pkg.name,
   version: pkg.version,
   description: 'Machine-readable contract of the SakaniUI React library, generated from its TypeScript source.',
