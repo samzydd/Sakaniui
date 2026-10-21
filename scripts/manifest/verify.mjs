@@ -13,7 +13,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { spawnSync } from 'node:child_process';
-import { typecheckExamples } from './examples.mjs';
+import { typecheckExamples, typecheckFiles } from './examples.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const read = (p) => fs.readFileSync(path.join(root, p), 'utf8');
@@ -48,6 +48,17 @@ for (const [kind, key, want] of ANCHORS) {
   if (got !== want) fail(`release history anchor: ${key} should be since ${want}, manifest says ${got}`);
 }
 if (!/^## /m.test(read('CHANGELOG.md')) || !new RegExp(`^## ${pkg.version.replace(/\./g, '\\.')}\\b`, 'm').test(read('CHANGELOG.md'))) fail(`CHANGELOG.md has no entry for ${pkg.version}`);
+
+/* ---- package.json bin paths in npm's normalized form (npm otherwise rewrites them at publish and prints a
+   misleading "was invalid and removed" warning), pointing at files that exist ---- */
+for (const file of ['package.json', 'mcp/package.json']) {
+  const p = JSON.parse(read(file));
+  for (const [name, target] of Object.entries(p.bin || {})) {
+    if (target.startsWith('./') || target.startsWith('/') || target.includes('..')) fail(`${file}: bin["${name}"] should be written "${target.replace(/^\.\//, '')}"`);
+    if (file === 'package.json' && !fs.existsSync(path.join(root, target))) fail(`${file}: bin["${name}"] points at ${target}, which does not exist`);
+  }
+  if (file === 'mcp/package.json' && p.bin?.['sakaniui-mcp'] !== 'bin/sakaniui-mcp.mjs') fail('mcp/package.json must expose bin "sakaniui-mcp" -> bin/sakaniui-mcp.mjs');
+}
 
 /* ---- accuracy: runtime exports ---- */
 const main = await import(pathToFileURL(path.join(root, 'dist/index.mjs')).href);
@@ -111,6 +122,28 @@ const withExample = manifest.components.filter((c) => c.example);
 if (withExample.length < manifest.components.length) fail(`${manifest.components.length - withExample.length} components have no example`);
 const brokenExamples = typecheckExamples(root, withExample.map((c) => ({ name: c.name, example: c.example })));
 for (const n of brokenExamples) fail(`the example for ${n} does not type-check`);
+
+/* ---- shapes and recipes ---- */
+{
+  let shapes = 0;
+  for (const c of manifest.components) for (const p of c.props) if (p.shape) {
+    shapes++;
+    if (!p.shape.fields.length) fail(`${c.name}.${p.name} has an empty shape`);
+    if (!['array', 'object'].includes(p.shape.collection)) fail(`${c.name}.${p.name} shape has an unknown collection`);
+  }
+  if (shapes < 40) fail(`only ${shapes} prop shapes were extracted (expected 60+): the extraction has silently broken`);
+  const col = manifest.components.find((c) => c.name === 'Table')?.props.find((p) => p.name === 'columns')?.shape;
+  if (!col || !col.fields.some((f) => f.name === 'key' && /keyof T/.test(f.type))) fail('Table.columns must expose key: keyof T & string');
+  const recipes = manifest.components.flatMap((c) => (c.recipes || []).map((r, i) => ({ name: `${c.name}-${i}`, code: r.code })));
+  if (!recipes.length) fail('the Table recipe is missing');
+  for (const [name, err] of typecheckFiles(root, recipes)) fail(`recipe ${name} does not compile: ${err}`);
+  // the rule the recipe states must be real: a key that is not on the row type must NOT compile
+  const wrong = typecheckFiles(root, [{ name: 'table-key-not-on-row', code: `import { Table, type TableColumn } from '@sakaniui/react';
+type Row = { id: number; name: string };
+const columns: TableColumn<Row>[] = [{ key: 'name', header: 'Customer' }, { key: 'actions', header: '' }];
+export const Example = () => <Table columns={columns} rows={[]} />;` }]);
+  if (!wrong.has('table-key-not-on-row')) fail('a Table column key that is not on the row type compiled, so the Table recipe describes a rule that no longer holds');
+}
 
 /* ---- check_code: it must accept every shipped example and reject known-bad code ---- */
 {

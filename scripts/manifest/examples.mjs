@@ -226,3 +226,90 @@ export function htmlAttributes(root) {
   ts.forEachChild(program.getSourceFile(f), (n) => { if (ts.isTypeAliasDeclaration(n)) names = checker.getPropertiesOfType(checker.getTypeAtLocation(n.name)).map((x) => x.getName()); });
   return names.filter((n) => !/^on[A-Z]/.test(n) && !/^aria-/.test(n)).sort();
 }
+
+/**
+ * The field-by-field shape of every prop whose type is one of this package's own object types
+ * (TableColumn<T>, BreadcrumbItem, PricingPlan, ...), one level deep, read from the shipped .d.ts.
+ * Without it an agent sees only `TableColumn<T>[]` and has to guess that `key` must be a field of
+ * the row type. Returns Map<"Component.prop", shape>.
+ */
+export function describePropShapes(root, components) {
+  const options = compilerOptions(root);
+  const tmp = path.join(root, 'node_modules/.cache/sakaniui-manifest');
+  fs.mkdirSync(tmp, { recursive: true });
+  const file = path.join(tmp, 'shapes.ts');
+  const lines = ["import type { ComponentProps } from 'react';", "import * as M from '@sakaniui/react';", "import * as B from '@sakaniui/react/blocks';"];
+  components.forEach((c, i) => lines.push(`export type P${i} = ComponentProps<typeof ${c.kind === 'block' ? 'B' : 'M'}.${c.name}>;`));
+  fs.writeFileSync(file, lines.join('\n') + '\n');
+  const program = ts.createProgram([file], options);
+  const checker = program.getTypeChecker();
+  const sf = program.getSourceFile(file);
+  const aliases = new Map();
+  ts.forEachChild(sf, (n) => { if (ts.isTypeAliasDeclaration(n)) aliases.set(n.name.text, checker.getTypeAtLocation(n.name)); });
+
+  const flags = ts.TypeFormatFlags.NoTruncation | ts.TypeFormatFlags.UseAliasDefinedOutsideCurrentScope | ts.TypeFormatFlags.WriteArrowStyleSignature;
+  const text = (t) => checker.typeToString(t, undefined, flags).replace(/\s+/g, ' ');
+  const own = (type) => {
+    // an object type declared in this package (not React, the DOM or the standard library)
+    const decl = (type.aliasSymbol || type.getSymbol())?.declarations?.[0];
+    if (!decl) return false;
+    const f = decl.getSourceFile().fileName;
+    return !/node_modules/.test(f) && !/lib\.[\w.]*\.d\.ts$/.test(f) && /\/dist\//.test(f.replace(/\\/g, '/'));
+  };
+  const nonNull = (t) => (t.isUnion() ? t.types.filter((x) => !(x.flags & (ts.TypeFlags.Undefined | ts.TypeFlags.Null))) : [t]);
+
+  const shapes = new Map();
+  components.forEach((c, i) => {
+    const props = aliases.get(`P${i}`);
+    if (!props) return;
+    for (const prop of checker.getPropertiesOfType(props)) {
+      if (['ref', 'key', 'children'].includes(prop.getName())) continue;
+      let t = checker.getTypeOfSymbol(prop);
+      const parts = nonNull(t);
+      if (parts.length !== 1) continue;
+      t = parts[0];
+      let collection = 'object';
+      if (checker.isArrayType(t)) { collection = 'array'; t = checker.getTypeArguments(t)[0]; }
+      if (!t || !(t.flags & ts.TypeFlags.Object) || t.getCallSignatures().length || !own(t)) continue;
+      // a generic type (TableColumn<T>) is described as declared, with T left as T, not as TableColumn<unknown>
+      const sym = t.aliasSymbol || t.getSymbol();
+      const declared = sym ? checker.getDeclaredTypeOfSymbol(sym) : null;
+      const typeParameters = declared && declared.typeParameters ? declared.typeParameters.map((x) => x.symbol.getName()) : [];
+      const described = typeParameters.length ? declared : t;
+      const fields = checker.getPropertiesOfType(described).map((f) => {
+        const optional = !!(f.flags & ts.SymbolFlags.Optional);
+        const ft = checker.getTypeOfSymbol(f);
+        const entry = { name: f.getName(), type: text(ft).replace(/ \| undefined$/, ''), required: !optional };
+        const doc = ts.displayPartsToString(f.getDocumentationComment(checker)).replace(/\s+/g, ' ').trim();
+        if (doc) entry.description = doc;
+        return entry;
+      });
+      if (!fields.length) continue;
+      const shape = { type: text(described), collection, fields };
+      if (typeParameters.length) shape.typeParameters = typeParameters;
+      shapes.set(`${c.name}.${prop.getName()}`, shape);
+    }
+  });
+  return shapes;
+}
+
+/** Type-checks whole files as written (imports, declarations, an exported component), against the built package. */
+export function typecheckFiles(root, entries) {
+  const options = compilerOptions(root);
+  const tmp = path.join(root, 'node_modules/.cache/sakaniui-manifest/files');
+  fs.rmSync(tmp, { recursive: true, force: true });
+  fs.mkdirSync(tmp, { recursive: true });
+  const files = entries.map(({ name, code }) => {
+    const file = path.join(tmp, `${name.replace(/[^\w-]/g, '_')}.tsx`);
+    fs.writeFileSync(file, code.endsWith('\n') ? code : code + '\n');
+    return [name, file];
+  });
+  const program = ts.createProgram(files.map(([, f]) => f), options);
+  const problems = new Map();
+  for (const diag of ts.getPreEmitDiagnostics(program)) {
+    if (!diag.file) continue;
+    const hit = files.find(([, f]) => path.resolve(f) === path.resolve(diag.file.fileName));
+    if (hit) problems.set(hit[0], ts.flattenDiagnosticMessageText(diag.messageText, ' ').slice(0, 200));
+  }
+  return problems; // Map<name, first error>
+}

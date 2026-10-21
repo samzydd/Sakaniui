@@ -142,7 +142,7 @@ or `claude mcp add sakaniui -- cmd /c npx -y @sakaniui/mcp`). Needs Node.js 18 o
 The server is its own tiny package, [`@sakaniui/mcp`](https://www.npmjs.com/package/@sakaniui/mcp) (about 1 MB, starts in a couple of seconds; it does not install the component library). The copy bundled in `@sakaniui/react` (`npx -y -p @sakaniui/react sakaniui-mcp`) still works but downloads far more.
 
 Tools: `search_components`, `get_component` (with a type-checked `example`), `search_icons`,
-`check_code` (checks a whole snippet: imports, required props, values, icon names), `check_usage`,
+`check_code` (checks a whole snippet: imports, required props, values, icon names, and the field names of object props such as table columns), `check_usage`,
 `list_components`, `get_tokens`, `get_guide`, `check_compatibility` and `get_changelog`.
 
 - **Read-only.** It reads five fixed files from a `@sakaniui/react` install (package.json, the

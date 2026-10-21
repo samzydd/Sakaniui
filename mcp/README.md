@@ -44,7 +44,7 @@ show 10 tools.
 | `get_component` | full contract for one: props, types, allowed values, required props, and a type-checked `example` |
 | `list_components` | browse everything, by kind or category |
 | `search_icons` | find real icon names by meaning ("delete" gives `IconTrash`) |
-| `check_code` | check a whole snippet: imports, required props, allowed values, icon names (the code is read, never run) |
+| `check_code` | check a whole snippet: imports, required props, allowed values, icon names, and the field names of object props like table columns (the code is read, never run) |
 | `check_usage` | check one component's props |
 | `get_tokens` | the design tokens that exist |
 | `get_guide` | sections of the AGENTS.md guide |

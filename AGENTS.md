@@ -19,6 +19,11 @@ Editors can query the same data through the bundled MCP server
 (`npx -y @sakaniui/mcp`): `search_components`, `get_component`, `search_icons`,
 `check_code`, `check_usage`, `get_tokens`, `get_guide`, `check_compatibility`, `get_changelog`.
 
+**Object props have a shape.** A prop such as `columns`, `items`, `options`, `plans` or `data` takes an array
+of objects with exactly the fields listed under the prop's `shape` (required ones must be present, and
+`keyof T` means "a field of your own data type"). `check_code` verifies the field names of inline literals.
+Components with a pattern the types do not teach carry `recipes`: code that compiles.
+
 **Start from the example, check before you answer.** Every component has `example`: its imports and the
 element with each required prop filled in, type-checked against the release. Start from it instead of
 writing the element from memory. Never guess an icon name: find it with `search_icons` (icons are
@@ -206,7 +211,11 @@ Format: **Use for** · **Why it is built this way** · **Not for / instead**.
 ### Content and data
 - **Card** — a container surface for a unit of content, optionally with actions. Not a layout wrapper for
   everything.
-- **Table** — dense, comparable records. **StatCard** — one headline metric with trend. **ListItem** — a
+- **Table** — dense, comparable records. `Table<T>` is generic: every column's `key` must be a field of
+  your row type `T` (`keyof T & string`), so a column that is not data (a delete button, a menu) still
+  needs a key: give the row type an optional `never` field (`actions?: never`) and render the control in
+  `render`. Inventing a key that is not on the row type does not compile (see `recipes` in
+  `get_component("Table")` for code that does). **StatCard** — one headline metric with trend. **ListItem** — a
   row in a list. **Charts** — pick by question: trend over time → Line/Area; compare categories → Bar;
   part of whole → Pie/Donut (few slices only); progress to a target → Radial; compare several measures →
   Radar; drop-off → Funnel; intensity across two dimensions → Heatmap.

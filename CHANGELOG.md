@@ -2,6 +2,25 @@
 
 All notable changes to `@sakaniui/react` are documented here.
 
+## 0.8.11
+
+Found by asking Claude Code, with the published 0.8.10 MCP server, to add a delete button to a table row:
+every tool call was correct and `IconButton` was used properly, but it put the button in a new `Table`
+column with `key: 'actions'`, which does not compile (`key` must be a field of the row type). The
+contract only said `columns: TableColumn<T>[]`.
+
+- **Object props now have a `shape`** in `manifest.json`: the fields of `TableColumn<T>`, `BreadcrumbItem`,
+  `PricingPlan`, `SelectOption`, chart data and 58 more (63 props), read from the shipped type
+  definitions, generics kept as declared (`key: keyof T & string`).
+- **`recipes`**: code for patterns the types do not teach, compiled on every build. First one: a `Table`
+  column that is not data (a delete button, a menu). The build also checks the opposite, that a column
+  key which is not on the row type really does not compile.
+- **MCP `check_code` checks inline object literals** against the shape: an unknown field (`title` for
+  `label`, `pct` for `percent`, with a suggestion), a missing required field (with the item index), and,
+  for a `Table`, a column `key` that is not a field of the `rows` written next to it. Spreads, identifiers
+  and anything it cannot read are left alone (0 errors on 685 real elements in three apps).
+- `AGENTS.md` explains the generic `Table` rule and the new `shape` and `recipes`.
+
 ## 0.8.10
 
 Readiness release: everything below was found by testing the package the way a new user, an editor

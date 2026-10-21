@@ -81,7 +81,7 @@ function unknownProp(c, name) {
   }
   // close spellings, plus the usual synonyms (leftIcon -> leadingIcon, onChange vs onValueChange is left to the list)
   const canon = (x) => x.toLowerCase().replace(/left|start|before|prefix/g, 'leading').replace(/right|end|after|suffix/g, 'trailing').replace(/colou?r|tone|kind|type/g, 'variant');
-  const near = c.props.map((p) => p.name).filter((p) => distance(p.toLowerCase(), name.toLowerCase()) <= 2 || canon(p) === canon(name));
+  const near = c.props.map((p) => p.name).filter((p) => similar(p, name) || canon(p) === canon(name));
   return { level: 'error', message: `"${name}" is not a ${c.name} prop${near.length ? ` (did you mean ${near.map((x) => `"${x}"`).join(', ')}?)` : ''}. ${c.name} accepts: ${c.props.map((p) => p.name).join(', ') || 'no props of its own'}.` };
 }
 
@@ -169,6 +169,16 @@ function distance(a, b) {
   for (let i = 1; i <= a.length; i++) for (let j = 1; j <= b.length; j++) d[i][j] = Math.min(d[i - 1][j] + 1, d[i][j - 1] + 1, d[i - 1][j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
   return d[a.length][b.length];
 }
+
+/** `pct` for `percent`, `desc` for `description`: same first letter, every letter in order. */
+function isAbbreviation(short, full) {
+  const a = short.toLowerCase(), b = full.toLowerCase();
+  if (a.length < 2 || a.length >= b.length || a[0] !== b[0]) return false;
+  let i = 0;
+  for (const ch of b) if (ch === a[i]) i++;
+  return i === a.length;
+}
+const similar = (a, b) => distance(a.toLowerCase(), b.toLowerCase()) <= 2 || isAbbreviation(a, b) || isAbbreviation(b, a);
 
 function closest(name) {
   const n = name.toLowerCase();
@@ -454,6 +464,7 @@ function checkCode(source) {
         errors.push(at(`${a.name}=${JSON.stringify(a.value)} is not allowed. Use one of: ${p.values.map((x) => JSON.stringify(x)).join(', ')}.`));
       }
       { const tooNew = propTooNew(c, p, a.kind === 'string' ? a.value : undefined); if (tooNew) errors.push(at(tooNew)); }
+      for (const m of checkShape(c, p, a, new Map(el.attrs.map((x) => [x.name, x])))) errors.push(at(m));
       if (p.type === 'IconComponent') {
         if (a.kind === 'string') errors.push(at(`"${a.name}" takes an icon component, not a string: ${a.name}={IconName}.`));
         else if (a.kind === 'element' || a.kind === 'identifier') {
@@ -467,6 +478,89 @@ function checkCode(source) {
   if (!elements.length && !imports.some((i) => i.from.startsWith('@sakaniui/react'))) warnings.push({ line: 1, message: 'No SakaniUI imports or elements found in this code.' });
   const out = { ok: errors.length === 0, checkedElements: elements.length, errors, warnings };
   const note = versionNote(); if (note) out.versionNote = note;
+  return out;
+}
+
+/* ---------- literal shapes: field names inside inline object literals ---------- */
+/** Splits `text` at top-level commas (ignores commas inside brackets, braces, parentheses and strings). */
+function splitTopLevel(text) {
+  const parts = [];
+  let depth = 0, start = 0, quote = null;
+  for (let i = 0; i < text.length && parts.length < 2000; i++) {
+    const ch = text[i];
+    if (quote) { if (ch === '\\') i++; else if (ch === quote) quote = null; continue; }
+    if (ch === '"' || ch === "'" || ch === '`') { quote = ch; continue; }
+    if (ch === '{' || ch === '[' || ch === '(') depth++;
+    else if (ch === '}' || ch === ']' || ch === ')') depth--;
+    else if (ch === ',' && depth === 0) { parts.push(text.slice(start, i)); start = i + 1; }
+  }
+  parts.push(text.slice(start));
+  return parts.map((x) => x.trim()).filter(Boolean);
+}
+
+/** The keys written in an object literal `{ a: 1, 'b': 2, c, ...d }`. spread: it also contains `...x`. */
+function objectKeys(literal) {
+  const inner = literal.trim().slice(1, -1);
+  const keys = []; let spread = false;
+  for (const entry of splitTopLevel(inner)) {
+    if (entry.startsWith('...')) { spread = true; continue; }
+    const m = /^(?:'([^']+)'|"([^"]+)"|([A-Za-z_$][\w$]*))\s*(?::|\(|$)/.exec(entry);
+    if (m) keys.push(m[1] || m[2] || m[3]);
+    else spread = true; // computed key or something we cannot read: do not judge this object
+  }
+  return { keys, spread };
+}
+
+/** The object literals in an inline `[ {...}, {...} ]` (or a single `{...}`). Null when it is not an inline literal. */
+function inlineObjects(raw, collection) {
+  const t = raw.trim();
+  if (collection === 'array') {
+    if (!(t.startsWith('[') && t.endsWith(']'))) return null;
+    const items = splitTopLevel(t.slice(1, -1));
+    if (items.some((x) => !x.startsWith('{') || !x.endsWith('}'))) return items.filter((x) => x.startsWith('{') && x.endsWith('}')).length ? items.filter((x) => x.startsWith('{') && x.endsWith('}')) : null;
+    return items;
+  }
+  return t.startsWith('{') && t.endsWith('}') ? [t] : null;
+}
+
+/** Checks inline object literals against the prop's `shape`. Returns messages. */
+function checkShape(c, prop, attr, siblings) {
+  const sh = prop.shape;
+  if (!sh || attr.kind !== 'expression' || !attr.raw) return [];
+  const objs = inlineObjects(attr.raw, sh.collection);
+  if (!objs || !objs.length) return [];
+  const out = [];
+  const known = new Map(sh.fields.map((f) => [f.name, f]));
+  const list = sh.fields.map((f) => f.name + (f.required ? '' : '?')).join(', ');
+  objs.forEach((lit, idx) => {
+    const { keys, spread } = objectKeys(lit);
+    const where = sh.collection === 'array' ? `${prop.name}[${idx}]` : prop.name;
+    for (const k of keys) {
+      if (!known.has(k)) {
+        const near = sh.fields.map((f) => f.name).filter((f) => similar(f, k));
+        out.push(`${where}: "${k}" is not a field of ${sh.type}${near.length ? ` (did you mean "${near[0]}"?)` : ''}. Fields: ${list}.`);
+      }
+    }
+    if (!spread) for (const f of sh.fields) if (f.required && !keys.includes(f.name)) out.push(`${where}: missing required field "${f.name}" of ${sh.type}. Fields: ${list}.`);
+  });
+  // `key: keyof T`: the key must be a field of the rows given next to it (T[] sibling), when both are written inline
+  const keyField = sh.fields.find((f) => /^keyof T\b/.test(f.type));
+  if (keyField && sh.typeParameters && sh.typeParameters[0] === 'T') {
+    const rowsProp = c.props.find((p) => p.type === 'T[]');
+    const rowsAttr = rowsProp && siblings.get(rowsProp.name);
+    const rowObjs = rowsAttr && rowsAttr.kind === 'expression' ? inlineObjects(rowsAttr.raw || '', 'array') : null;
+    if (rowObjs && rowObjs.length) {
+      const rowKeys = new Set();
+      let rowsOpen = false;
+      for (const r of rowObjs) { const o = objectKeys(r); o.keys.forEach((k) => rowKeys.add(k)); if (o.spread) rowsOpen = true; }
+      if (!rowsOpen) {
+        for (const lit of objs) {
+          const kv = new RegExp(`(?:^|[{,\\s])${keyField.name}\\s*:\\s*['"]([^'"]+)['"]`).exec(lit);
+          if (kv && !rowKeys.has(kv[1])) out.push(`${prop.name}: ${keyField.name} "${kv[1]}" is not a field of the ${rowsProp.name} (${[...rowKeys].join(', ')}). It must be a key of the row type; for a column that is not data, add an optional field to the row type (see the recipe in get_component ${c.name}).`);
+        }
+      }
+    }
+  }
   return out;
 }
 
@@ -502,6 +596,8 @@ const tools = {
       const c = byName.get(n.value.toLowerCase());
       if (!c) return fail(`No component named "${n.value}". Did you mean: ${closest(n.value).join(', ') || '(none close)'}? Use search_components.`);
       const out = { ...c, note: 'Native HTML attributes (className, style, aria-*, event handlers) are also accepted on the root element.' };
+      if (c.props.some((p) => p.shape)) out.shapeNote = 'A prop with a `shape` takes an object (or an array of objects) with exactly those fields; `required` fields must be present. In a generic shape, `keyof T & string` means the value must be a field of your own data type.';
+      if (c.recipes && c.recipes.length) out.recipeNote = 'See `recipes`: patterns the types alone do not teach, compiled against this release.';
       if (c.example) out.exampleNote = 'Start from `example`: it is type-checked against this release. Replace the placeholder text and values; keep the prop names and shapes.';
       if (c.props.some((p) => p.type === 'IconComponent')) out.iconNote = 'Icon props take the component itself (icon={IconTrash}), not an element. The example uses IconStar as a placeholder: find the real icon with search_icons.';
       if (inInstalled(c) === false) out.availableInInstalled = false;

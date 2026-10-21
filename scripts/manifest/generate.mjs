@@ -25,7 +25,7 @@ import path from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { withCustomConfig } from 'react-docgen-typescript';
-import { buildExamples, htmlAttributes } from './examples.mjs';
+import { buildExamples, describePropShapes, htmlAttributes, typecheckFiles } from './examples.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const rel = (p) => path.relative(root, p).split(path.sep).join('/');
@@ -420,9 +420,50 @@ for (const d of parsed) {
 }
 components.sort((a, b) => (a.kind === b.kind ? a.name.localeCompare(b.name) : a.kind === 'component' ? -1 : 1));
 
+/* ---- recipes: patterns the types alone do not teach, written by hand and compiled on every build ---- */
+const RECIPES = {
+  Table: [{
+    title: 'A column that is not data (a delete button, a menu)',
+    description: 'Every column `key` must be a field of the row type (`keyof T & string`), so a button column needs a key too. Give the row type an optional `never` field for it and render the control; do not invent a key that is not on the row type, it will not compile.',
+    code: `import { Table, IconButton, type TableColumn } from '@sakaniui/react';
+import { IconTrash } from '@sakaniui/react/icons';
+
+type Row = { id: number; name: string; actions?: never };
+
+const rows: Row[] = [{ id: 1, name: 'Olivia Carter' }];
+
+const columns: TableColumn<Row>[] = [
+  { key: 'name', header: 'Customer' },
+  {
+    key: 'actions',
+    header: '',
+    align: 'right',
+    render: (row) => <IconButton icon={IconTrash} variant="destructive" size="sm" aria-label={\`Delete \${row.name}\`} />,
+  },
+];
+
+export const Example = () => <Table columns={columns} rows={rows} />;`,
+  }],
+};
+{
+  const bad = typecheckFiles(root, Object.entries(RECIPES).flatMap(([name, list]) => list.map((r, i) => ({ name: `${name}-${i}`, code: r.code }))));
+  if (bad.size) { console.error(`manifest: a recipe does not compile: ${[...bad].map(([n, e]) => `${n}: ${e}`).join('; ')}`); process.exit(1); }
+}
+
 /* ---- ready-to-paste examples, type-checked against the built package ---- */
 const { examples, failed: noExample } = buildExamples(root, components);
 for (const c of components) if (examples.has(c.name)) c.example = examples.get(c.name);
+for (const c of components) if (RECIPES[c.name]) c.recipes = RECIPES[c.name];
+
+/* ---- the shape of every prop that takes this package's own object types ---- */
+const shapes = describePropShapes(root, components);
+for (const c of components) {
+  for (const p of c.props) {
+    const sh = shapes.get(`${c.name}.${p.name}`);
+    if (!sh) continue;
+    p.shape = { ...sh, fields: sh.fields.map((f) => { const d = f.description ? publicText(f.description) : ''; const { description, ...rest } = f; return d ? { ...rest, description: d } : rest; }) };
+  }
+}
 if (noExample.length) console.warn(`manifest: no example for ${noExample.join(', ')} (it did not type-check)`);
 
 fs.writeFileSync(sinceCachePath, JSON.stringify(Object.fromEntries(Object.entries(sinceCache).sort()), null, 2) + '\n');
@@ -506,7 +547,7 @@ iconIndex.other = [...iconsEntryNames].filter((n) => !/^Icon[A-Z0-9]/.test(n)).s
 fs.writeFileSync(path.join(root, 'dist/icon-index.json'), JSON.stringify(iconIndex) + '\n');
 
 const manifest = {
-  schemaVersion: 4,
+  schemaVersion: 5,
   name: pkg.name,
   version: pkg.version,
   description: 'Machine-readable contract of the SakaniUI React library, generated from its TypeScript source.',
@@ -530,6 +571,7 @@ const manifest = {
     tokens: 'Use only the token names listed under `tokens`. Colour tokens follow the theme (the `.dark` class flips them); do not hard-code colours.',
     icons: 'Icon props take the component itself (IconSettings), not an element (<IconSettings />). Only names in icon-index.json exist; search them (MCP: search_icons) instead of guessing.',
     examples: 'Each component has `example`: its imports and the element with every required prop filled in, type-checked against this build. Start from it.',
+    shapes: 'A prop with a `shape` takes an object (collection "object") or an array of objects (collection "array") with exactly those fields; `required` fields must be present. In a generic shape (`typeParameters: ["T"]`) T is the type of your own data: `key: keyof T & string` means the key must be a field of your row type. `recipes` hold patterns the types alone do not teach.',
     literals: 'Prop `values` keep their real type: a number is a number (columns: 2), a string is a string ("md").',
   },
   // what a component's root element accepts besides its own props (plus aria-*, data-* and on* handlers)
