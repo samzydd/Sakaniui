@@ -4,24 +4,44 @@ All notable changes to `@sakaniui/react` are documented here.
 
 ## 0.8.10
 
-Readiness fixes found by checking the MCP server against real projects.
+Readiness release: everything below was found by testing the package the way a new user, an editor
+and an AI agent would, and every fix is now covered by a check that fails the build.
 
+**Installing the library**
+- **Fixed: installing `@sakaniui/react` installed Next.js.** The `geist` and `@fontsource-variable/geist`
+  font packages were runtime dependencies, though the library never loads them, and `geist` requires
+  Next.js as a peer, so every app (Vite included) got Next.js 16. Both are now dev-only; the only runtime
+  dependency is `recharts`. Load Geist yourself if you want it (`@fontsource-variable/geist`); otherwise
+  the system font is used, as before.
 - **Fixed: missing type definitions.** `dist/lib/` was left out of the generated `.d.ts` files, so
   `LiquidGlass`, `LiquidBackdrop`, `HoverGroup`, `useHoverHighlight`, `useLiquidGlass`, `getContrastColor`
-  and `iconStrokeWidth` had no types for TypeScript users: `<LiquidBackdrop />` compiled without its
-  required `src`. They are typed now. The build also fails if any relative import in a shipped `.d.ts`
-  does not resolve, so this cannot happen again.
-- **New package `@sakaniui/mcp`.** `npx -y @sakaniui/mcp` starts the MCP server from a ~190 kB package with no
-  dependencies (2 s cold start). Starting it through `@sakaniui/react` pulled in React, Recharts and Next.js (about 500 MB
-  and ~30 s on a cold start, long enough for an editor to give up). The server in `@sakaniui/react`
-  still works.
-- **MCP `check_code`: no more false positives.** It checked 704 real elements across three apps and
-  reported 0 errors on working code (it had reported 77). Aliased imports (`IconSettings as Settings`),
-  default imports, code shown inside template strings, native attributes (`href`, `name`,
-  `placeholder`...) and the non-icon exports of `@sakaniui/react/icons` are handled. It still catches
-  every deliberate mistake in the test set.
-- **Fixed: unresolvable `$schema` link** removed from `manifest.json`.
-- The build also checks that `check_code` accepts every shipped example and rejects known-bad code.
+  and `iconStrokeWidth` had no types: `<LiquidBackdrop />` compiled without its required `src`. The build
+  now fails if any relative import in a shipped `.d.ts` does not resolve.
+- **Fixed docs: `style.css` is required.** The README and the website's Installation page only imported
+  `tokens.css`, which leaves components unstyled. Both now import both stylesheets.
+
+**The MCP server**
+- **New package `@sakaniui/mcp`** (about 190 kB, no dependencies): `npx -y @sakaniui/mcp` starts in
+  about 2 s on a first run. Through `@sakaniui/react` it took ~30 s and ~675 MB, long enough for an editor
+  to give up. The copy in `@sakaniui/react` still works.
+- **`check_code`: no false positives** on 685 real elements across three apps (it reported 77). Aliased
+  and default imports, code inside template strings, native attributes and the non-icon exports of
+  `@sakaniui/react/icons` are handled; it still catches every deliberate mistake in the test set.
+- **Versions per prop and per value.** Each prop added after its component has its own `since` (for
+  example `Switch.variant`, 0.8.4), and values added later are listed in `valuesSince`. `since` now means
+  "first release you could import it", taken from the package's public exports at every release (the
+  social icons are 0.8.6, not 0.3.0). `check_code`, `check_usage` and `get_component` flag props and
+  values the project's installed version does not have.
+- **Invented props are errors.** A prop that is neither the component's own nor an HTML attribute (React's
+  own attribute list now ships in `manifest.json` as `nativeAttributes`) fails `check_code` and
+  `check_usage`, with the real prop list and a suggestion (`leftIcon` -> "did you mean leadingIcon?").
+  Real HTML attributes (`placeholder`, `href`, `name`...) pass silently; `color` gets a note that it does
+  not style the component.
+- **Protocol:** negotiates a supported protocol version, answers `resources/list`, `prompts/list` and
+  batches, exits when the editor disconnects (flushing replies first), and survives a closed pipe.
+  `get_guide` accepts `query`. Tested on Node 18, 20, 22 and 26, with the official MCP SDK client and the
+  MCP Inspector, and documented for Windows (`cmd /c npx ...`).
+- Removed an unresolvable `$schema` link from `manifest.json`.
 
 ## 0.8.9
 

@@ -69,6 +69,22 @@ const changelog = active.changelog || bundled.changelog || '';
 const iconIndex = (active.icons && active.icons.icons) || (bundled.icons && bundled.icons.icons) || [];
 const projectVersion = project ? project.version : null;
 
+// The HTML attributes React accepts (shipped in the manifest since 0.8.10; older manifests use the fallback list).
+const nativeAttrs = new Set(manifest.nativeAttributes || []);
+const NATIVE = { test: (n) => /^(aria-|data-)/.test(n) || /^on[A-Z]/.test(n) || n === 'key' || n === 'ref' || n === 'children' || (nativeAttrs.size ? nativeAttrs.has(n) : NATIVE_FALLBACK.test(n)) };
+/** What to say about a prop the component does not declare: an error when nothing accepts it, else a note. */
+function unknownProp(c, name) {
+  if (NATIVE.test(name)) {
+    // a real HTML attribute (placeholder, href, name, defaultChecked...): passed to the element, and fine.
+    // `color` is the one people mistake for a styling prop: it does not colour the component.
+    return name === 'color' ? { level: 'warning', message: `"color" is not a ${c.name} prop: it is the old HTML colour attribute and does not change the component's colours. Use the component's own props, or design tokens (get_tokens).` } : null;
+  }
+  // close spellings, plus the usual synonyms (leftIcon -> leadingIcon, onChange vs onValueChange is left to the list)
+  const canon = (x) => x.toLowerCase().replace(/left|start|before|prefix/g, 'leading').replace(/right|end|after|suffix/g, 'trailing').replace(/colou?r|tone|kind|type/g, 'variant');
+  const near = c.props.map((p) => p.name).filter((p) => distance(p.toLowerCase(), name.toLowerCase()) <= 2 || canon(p) === canon(name));
+  return { level: 'error', message: `"${name}" is not a ${c.name} prop${near.length ? ` (did you mean ${near.map((x) => `"${x}"`).join(', ')}?)` : ''}. ${c.name} accepts: ${c.props.map((p) => p.name).join(', ') || 'no props of its own'}.` };
+}
+
 /* ---------- versions ---------- */
 const SEMVER = /^\d+\.\d+\.\d+/;
 const parse = (v) => String(v).split('-')[0].split('.').map(Number);
@@ -92,6 +108,15 @@ function versionNote(installed = projectVersion) {
 function inInstalled(c, installed = projectVersion) {
   if (!installed || !c.since) return null;
   return cmp(c.since, installed) <= 0;
+}
+
+/** Is this prop (or this value of it) in the project's install? Returns a message when it is not. */
+function propTooNew(c, p, value, installed = projectVersion) {
+  if (!installed) return null;
+  if (p.since && cmp(p.since, installed) > 0) return `"${p.name}" was added to ${c.name} in ${p.since}; the project has ${installed}, where it does not exist. Upgrade (npm install @sakaniui/react@latest) or leave it out.`;
+  const vs = p.valuesSince && typeof value === 'string' ? p.valuesSince[value] : null;
+  if (vs && cmp(vs, installed) > 0) return `${p.name}=${JSON.stringify(value)} was added in ${vs}; the project has ${installed}, where it does not exist.`;
+  return null;
 }
 
 /* ---------- helpers ---------- */
@@ -226,7 +251,7 @@ function iconProblem(propName, raw, importedElsewhere = new Set(), localNames = 
 }
 
 // Attributes every component forwards to its root element. A prop outside this list and the contract is worth a warning.
-const NATIVE = /^(className|style|id|ref|key|children|role|tabIndex|title|hidden|lang|dir|slot|on[A-Z].*|aria-.*|data-.*|href|target|rel|download|name|type|value|defaultValue|checked|defaultChecked|disabled|required|readOnly|placeholder|htmlFor|form|autoFocus|autoComplete|autoCapitalize|spellCheck|inputMode|pattern|min|max|step|minLength|maxLength|rows|cols|multiple|accept|src|srcSet|alt|width|height|loading|draggable|tabindex|ariaLabel)$/;
+const NATIVE_FALLBACK = /^(className|style|id|ref|key|children|role|tabIndex|title|hidden|lang|dir|slot|on[A-Z].*|aria-.*|data-.*|href|target|rel|download|name|type|value|defaultValue|checked|defaultChecked|disabled|required|readOnly|placeholder|htmlFor|form|autoFocus|autoComplete|autoCapitalize|spellCheck|inputMode|pattern|min|max|step|minLength|maxLength|rows|cols|multiple|accept|src|srcSet|alt|width|height|loading|draggable|tabindex|ariaLabel)$/;
 
 /** Release notes: [{version, body}] newest first, from the CHANGELOG that matches the answering install. */
 function releases() {
@@ -412,6 +437,7 @@ function checkCode(source) {
     const c = byName.get(el.tag.toLowerCase());
     if (!c) continue;
     const at = (message) => ({ line: el.line, message: `<${el.tag}>: ${message}` });
+    if (inInstalled(c) === false && !importedFrom.has(el.tag)) errors.push(at(`${c.name} was added in ${c.since}; the project has ${projectVersion}, where it does not exist.`));
     if (!importedFrom.has(el.tag)) warnings.push(at(`not imported. Add: import { ${c.name} } from '${c.import}';`));
     const given = new Map(el.attrs.map((a) => [a.name, a]));
     if (!el.selfClosing) given.set('children', { kind: 'expression' });
@@ -423,10 +449,11 @@ function checkCode(source) {
     const known = new Map(c.props.map((p) => [p.name, p]));
     for (const a of el.attrs) {
       const p = known.get(a.name);
-      if (!p) { if (!NATIVE.test(a.name) && a.name !== 'key' && a.name !== 'ref') warnings.push(at(`"${a.name}" is not a ${c.name} prop (it only works if it is a native attribute).`)); continue; }
+      if (!p) { const u = unknownProp(c, a.name); if (u) (u.level === 'error' ? errors : warnings).push(at(u.message)); continue; }
       if (p.values && ['string', 'number', 'boolean'].includes(a.kind) && !p.values.includes(a.value)) {
         errors.push(at(`${a.name}=${JSON.stringify(a.value)} is not allowed. Use one of: ${p.values.map((x) => JSON.stringify(x)).join(', ')}.`));
       }
+      { const tooNew = propTooNew(c, p, a.kind === 'string' ? a.value : undefined); if (tooNew) errors.push(at(tooNew)); }
       if (p.type === 'IconComponent') {
         if (a.kind === 'string') errors.push(at(`"${a.name}" takes an icon component, not a string: ${a.name}={IconName}.`));
         else if (a.kind === 'element' || a.kind === 'identifier') {
@@ -478,6 +505,17 @@ const tools = {
       if (c.example) out.exampleNote = 'Start from `example`: it is type-checked against this release. Replace the placeholder text and values; keep the prop names and shapes.';
       if (c.props.some((p) => p.type === 'IconComponent')) out.iconNote = 'Icon props take the component itself (icon={IconTrash}), not an element. The example uses IconStar as a placeholder: find the real icon with search_icons.';
       if (inInstalled(c) === false) out.availableInInstalled = false;
+      if (projectVersion) {
+        out.props = c.props.map((p) => {
+          const tooNew = propTooNew(c, p);
+          const newerValues = p.valuesSince ? Object.entries(p.valuesSince).filter(([, v]) => cmp(v, projectVersion) > 0).map(([k]) => k) : [];
+          if (!tooNew && !newerValues.length) return p;
+          const q = { ...p };
+          if (tooNew) q.availableInInstalled = false;
+          if (newerValues.length) q.valuesNotInInstalled = newerValues;
+          return q;
+        });
+      }
       const note = versionNote();
       if (note) out.versionNote = note;
       if (inInstalled(c) === false) out.warning = `${c.name} was added in ${c.since} but the project has ${projectVersion}. Do not use it without upgrading (npm install @sakaniui/react@latest).`;
@@ -534,11 +572,12 @@ const tools = {
       for (const r of c.contract.requiredProps) if (!Object.hasOwn(props, r)) errors.push(`Missing required prop "${r}".`);
       for (const [k, v] of Object.entries(props)) {
         const p = known.get(k);
-        if (!p) { if (!NATIVE.test(k)) warnings.push(`"${k}" is not a ${c.name} prop in the manifest (it would only work if it is a native attribute).`); continue; }
+        if (!p) { const u = unknownProp(c, k); if (u) (u.level === 'error' ? errors : warnings).push(u.message); continue; }
         if (p.values && (typeof v === 'string' || typeof v === 'number' || typeof v === 'boolean') && !p.values.includes(v)) {
           errors.push(`"${k}" = ${JSON.stringify(v)} is not allowed. Use one of: ${p.values.map((x) => JSON.stringify(x)).join(', ')}.`);
         }
         if (p.type === 'IconComponent' && typeof v === 'string') { const e = iconProblem(k, v); if (e) errors.push(e); }
+        const tooNew = propTooNew(c, p, v); if (tooNew) errors.push(tooNew);
       }
       if (c.contract.requiresAccessibleName && !errors.length) warnings.push('This control has no visible text of its own: keep its accessible-name prop set.');
       const out = { component: c.name, ok: errors.length === 0, errors, warnings };
@@ -609,9 +648,10 @@ const tools = {
   },
   get_guide: {
     description: 'The AGENTS.md guide (principles, token rules, when nothing fits, glass, icons, per-component "why / when not to use", checklist). Pass a section number or heading text to get just that section; omit for the section list.',
-    inputSchema: { type: 'object', properties: { section: { type: 'string' } } },
+    inputSchema: { type: 'object', properties: { section: { type: 'string', description: 'A section number ("3") or words from its heading ("icons").' } } },
     run(args) {
-      const s0 = strArg(args, 'section'); if (s0.err) return fail(s0.err);
+      // agents sometimes call it with `query`; treat that as the section
+      const s0 = strArg(args.section === undefined && args.query !== undefined ? { section: args.query } : args, 'section'); if (s0.err) return fail(s0.err);
       if (!guide) return fail('AGENTS.md is not available in this install.');
       const parts = guide.split(/^(?=## )/m).filter((p) => p.startsWith('## '));
       const heads = parts.map((p) => p.split('\n')[0].replace(/^## /, ''));
@@ -624,45 +664,71 @@ const tools = {
 };
 
 /* ---------- JSON-RPC over stdio ---------- */
-const send = (msg) => process.stdout.write(JSON.stringify({ jsonrpc: '2.0', ...msg }) + '\n');
+// Protocol versions this server implements; the client's is used when it is one of them.
+const PROTOCOL_VERSIONS = ['2025-11-25', '2025-06-18', '2025-03-26', '2024-11-05'];
 
+let stdoutClosed = false;
+process.stdout.on('error', () => { stdoutClosed = true; process.exit(0); }); // the client went away (EPIPE)
+const write = (payload) => { if (!stdoutClosed) process.stdout.write(JSON.stringify(payload) + '\n'); };
+const reply = (id, body) => ({ jsonrpc: '2.0', id, ...body });
+
+/** Handles one message. Returns the response, or null for notifications. */
 function handle(msg) {
-  if (!msg || typeof msg !== 'object' || Array.isArray(msg)) return send({ id: null, error: { code: -32600, message: 'Invalid request' } });
+  if (!msg || typeof msg !== 'object' || Array.isArray(msg)) return reply(null, { error: { code: -32600, message: 'Invalid request' } });
   const { id, method, params } = msg;
   const isRequest = id !== undefined && id !== null;
+  if (typeof method !== 'string') return isRequest ? reply(id, { error: { code: -32600, message: 'Invalid request: method must be a string' } }) : null;
+  if (!isRequest) return null; // notifications (initialized, cancelled, ...) need no answer
   try {
     switch (method) {
       case 'initialize': {
         const note = versionNote();
-        return send({ id, result: {
-          protocolVersion: params?.protocolVersion || '2025-06-18',
-          capabilities: { tools: {} },
-          serverInfo: { name: 'sakaniui', version: refVersion },
-          instructions: `SakaniUI ${refVersion}${projectVersion ? ` (project has ${projectVersion})` : ''}. Read-only reference. Look components up with search_components / get_component before writing JSX, validate with check_usage, use only tokens from get_tokens, and read get_guide when nothing fits.${note ? ` ${note}` : ''}`,
+        const asked = params && typeof params.protocolVersion === 'string' ? params.protocolVersion : null;
+        return reply(id, { result: {
+          protocolVersion: asked && PROTOCOL_VERSIONS.includes(asked) ? asked : PROTOCOL_VERSIONS[0],
+          capabilities: { tools: { listChanged: false } },
+          serverInfo: { name: 'sakaniui', title: 'SakaniUI', version: refVersion },
+          instructions: `SakaniUI ${refVersion}${projectVersion ? ` (project has ${projectVersion})` : ''}. Read-only reference. Look components up with search_components / get_component and start from their \`example\`; find icon names with search_icons (never guess them); run check_code on every snippet before you answer; style anything beyond props with the design tokens from get_tokens (CSS variables), not hard-coded colours or utility classes the project may not have; read get_guide when nothing fits.${note ? ` ${note}` : ''}`,
         } });
       }
       case 'ping':
-        return send({ id, result: {} });
+        return reply(id, { result: {} });
       case 'tools/list':
-        return send({ id, result: { tools: Object.entries(tools).map(([name, t]) => ({ name, description: t.description, inputSchema: t.inputSchema, annotations: READ_ONLY })) } });
+        return reply(id, { result: { tools: Object.entries(tools).map(([name, t]) => ({ name, description: t.description, inputSchema: t.inputSchema, annotations: READ_ONLY })) } });
       case 'tools/call': {
         const t = typeof params?.name === 'string' && Object.hasOwn(tools, params.name) ? tools[params.name] : null;
-        if (!t) return send({ id, error: { code: -32602, message: `Unknown tool: ${String(params?.name).slice(0, 60)}` } });
+        if (!t) return reply(id, { error: { code: -32602, message: `Unknown tool: ${String(params?.name).slice(0, 60)}` } });
         const args = params.arguments;
-        if (args !== undefined && args !== null && (typeof args !== 'object' || Array.isArray(args))) return send({ id, result: fail('Tool arguments must be an object.') });
-        return send({ id, result: t.run(args || {}) });
+        if (args !== undefined && args !== null && (typeof args !== 'object' || Array.isArray(args))) return reply(id, { result: fail('Tool arguments must be an object.') });
+        return reply(id, { result: t.run(args || {}) });
       }
+      // Some clients ask for these even when only tools are offered; an empty list is the polite answer.
+      case 'resources/list': return reply(id, { result: { resources: [] } });
+      case 'resources/templates/list': return reply(id, { result: { resourceTemplates: [] } });
+      case 'prompts/list': return reply(id, { result: { prompts: [] } });
+      case 'logging/setLevel': return reply(id, { result: {} });
       default:
-        if (isRequest) send({ id, error: { code: -32601, message: `Method not found: ${String(method).slice(0, 60)}` } });
+        return reply(id, { error: { code: -32601, message: `Method not found: ${method.slice(0, 60)}` } });
     }
   } catch (e) {
-    if (isRequest) send({ id, error: { code: -32603, message: String(e?.message || e) } });
+    return reply(id, { error: { code: -32603, message: String(e?.message || e) } });
   }
 }
 
-readline.createInterface({ input: process.stdin }).on('line', (line) => {
+const rl = readline.createInterface({ input: process.stdin, crlfDelay: Infinity });
+rl.on('line', (line) => {
   if (!line.trim()) return;
   let msg;
-  try { msg = JSON.parse(line); } catch { return send({ id: null, error: { code: -32700, message: 'Parse error' } }); }
-  handle(msg);
+  try { msg = JSON.parse(line); } catch { return write(reply(null, { error: { code: -32700, message: 'Parse error' } })); }
+  if (Array.isArray(msg)) { // a batch (older protocol versions): answer with one array
+    if (!msg.length) return write(reply(null, { error: { code: -32600, message: 'Invalid request: empty batch' } }));
+    const out = msg.map(handle).filter(Boolean);
+    if (out.length) write(out);
+    return;
+  }
+  const r = handle(msg);
+  if (r) write(r);
 });
+// the editor closed the connection: exit instead of lingering as an orphan process
+// (flush first: on macOS and Windows, writes to a pipe are asynchronous)
+rl.on('close', () => { if (stdoutClosed) process.exit(0); else process.stdout.write('', () => process.exit(0)); });

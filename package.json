@@ -83,12 +83,11 @@
     "react-dom": "^19.0.0"
   },
   "dependencies": {
-    "@fontsource-variable/geist": "^5.2.9",
-    "geist": "^1.7.2",
     "recharts": "^3.9.2"
   },
   "devDependencies": {
     "@chromatic-com/storybook": "^5.2.1",
+    "@fontsource-variable/geist": "^5.2.9",
     "@storybook/addon-a11y": "^10.5.2",
     "@storybook/addon-docs": "^10.5.2",
     "@storybook/addon-mcp": "^0.7.0",
@@ -102,6 +101,7 @@
     "@vitest/browser-playwright": "^4.1.10",
     "@vitest/coverage-v8": "^4.1.10",
     "chromatic": "^18.0.1",
+    "geist": "^1.7.2",
     "oxlint": "^1.71.0",
     "playwright": "^1.61.1",
     "react": "^19.2.7",

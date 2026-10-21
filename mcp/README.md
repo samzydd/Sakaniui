@@ -25,6 +25,17 @@ Any MCP client (Cursor, Windsurf, Claude Desktop, ...), or a `.mcp.json` in your
 }
 ```
 
+**Windows:** `npx` is a `.cmd` script there, so launch it through `cmd /c`:
+
+```json
+{ "mcpServers": { "sakaniui": { "command": "cmd", "args": ["/c", "npx", "-y", "@sakaniui/mcp"] } } }
+```
+
+and in Claude Code: `claude mcp add sakaniui -- cmd /c npx -y @sakaniui/mcp`.
+
+Needs Node.js 18 or later. Check it is connected in your editor's MCP list (in Claude Code: `/mcp`): `sakaniui` should
+show 10 tools.
+
 ## Tools
 
 | Tool | What it does |

@@ -213,3 +213,16 @@ export function typecheckExamples(root, entries) {
   for (const diag of ts.getPreEmitDiagnostics(program)) if (diag.file) bad.add(path.resolve(diag.file.fileName));
   return files.filter(([, f]) => bad.has(path.resolve(f))).map(([n]) => n);
 }
+
+/** Every attribute React accepts on an HTML element (AllHTMLAttributes), from the installed @types/react. */
+export function htmlAttributes(root) {
+  const tmp = path.join(root, 'node_modules/.cache/sakaniui-manifest');
+  fs.mkdirSync(tmp, { recursive: true });
+  const f = path.join(tmp, 'attrs.ts');
+  fs.writeFileSync(f, "import type { AllHTMLAttributes } from 'react';\nexport type A = AllHTMLAttributes<HTMLElement>;\n");
+  const program = ts.createProgram([f], { ...compilerOptions(root), jsx: ts.JsxEmit.ReactJSX });
+  const checker = program.getTypeChecker();
+  let names = [];
+  ts.forEachChild(program.getSourceFile(f), (n) => { if (ts.isTypeAliasDeclaration(n)) names = checker.getPropertiesOfType(checker.getTypeAtLocation(n.name)).map((x) => x.getName()); });
+  return names.filter((n) => !/^on[A-Z]/.test(n) && !/^aria-/.test(n)).sort();
+}

@@ -43,11 +43,32 @@ accepts Lucide or Tabler React icons. See `THIRD_PARTY_NOTICES.md` for the MIT l
 npm install @sakaniui/react
 ```
 
-Then import the tokens once at your app's entry point, and any component from the package root:
+Then import the two stylesheets once, at your app's entry point (both are required: `tokens.css` defines
+the design tokens, `style.css` styles the components), and use any component from the package root:
 
 ```tsx
 import '@sakaniui/react/tokens.css';
+import '@sakaniui/react/style.css';
+
+import { Button } from '@sakaniui/react';
+
+export function Example() {
+  return <Button variant="primary">Get started</Button>;
+}
 ```
+
+Requires React 19. Typography is set in **Geist**; load the font yourself if you want it (otherwise the
+system font is used):
+
+```bash
+npm install @fontsource-variable/geist
+```
+
+```tsx
+import '@fontsource-variable/geist';
+```
+
+Charts (`AreaChart`, `BarChart`, ...) use `recharts`, which is installed with the package.
 
 > **Building with AI?** `AGENTS.md` (shipped in this package) explains *why* components behave as they do and what to do when nothing fits. Index for agents: https://www.sakaniui.com/llms.txt
 
@@ -114,6 +135,9 @@ up instead of guessing prop names.
 ```
 
 Claude Code: `claude mcp add sakaniui -- npx -y @sakaniui/mcp`
+
+On Windows, launch `npx` through `cmd /c` (`"command": "cmd", "args": ["/c", "npx", "-y", "@sakaniui/mcp"]`,
+or `claude mcp add sakaniui -- cmd /c npx -y @sakaniui/mcp`). Needs Node.js 18 or later.
 
 The server is its own tiny package, [`@sakaniui/mcp`](https://www.npmjs.com/package/@sakaniui/mcp) (about 1 MB, starts in a couple of seconds; it does not install the component library). The copy bundled in `@sakaniui/react` (`npx -y -p @sakaniui/react sakaniui-mcp`) still works but downloads far more.
 

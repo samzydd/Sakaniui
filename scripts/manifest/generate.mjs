@@ -25,7 +25,7 @@ import path from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { withCustomConfig } from 'react-docgen-typescript';
-import { buildExamples } from './examples.mjs';
+import { buildExamples, htmlAttributes } from './examples.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const rel = (p) => path.relative(root, p).split(path.sep).join('/');
@@ -216,13 +216,13 @@ function defaultOf(v) {
 }
 
 /* ---- release history ---- */
-const git = (...args) => execFileSync('git', args, { cwd: root, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim();
+const git = (...args) => execFileSync('git', args, { cwd: root, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'], maxBuffer: 1 << 28 }).trim();
 const sinceCachePath = path.join(root, 'scripts/manifest/since.json');
 let sinceCache = {};
 try { sinceCache = JSON.parse(fs.readFileSync(sinceCachePath, 'utf8')); } catch { /* none yet */ }
 
+let releases = null;
 function computeSince(sourceFiles) {
-  let releases;
   try {
     // the commit that introduced each version number in package.json, oldest first
     const hashes = git('log', '--reverse', '--format=%H', '-G"version"', '--', 'package.json').split('\n').filter(Boolean);
@@ -254,6 +254,124 @@ const fresh = computeSince(sourceFiles);
 if (fresh) {
   sinceCache = { ...sinceCache, ...fresh };
   fs.writeFileSync(sinceCachePath, JSON.stringify(Object.fromEntries(Object.entries(sinceCache).sort()), null, 2) + '\n');
+}
+
+/* ---- per-prop (and per-value) release history ---- */
+/**
+ * The library's source tree at every release: one `git ls-tree` per release and one
+ * `git cat-file --batch` for all distinct file versions (icons excluded). The working tree is the
+ * current, unreleased version. Returns [{ v, files: Map<path, text> }] oldest first, or null.
+ */
+function releaseTrees() {
+  if (!releases || !releases.length) return null;
+  try {
+    const isSource = (f) => /\.(ts|tsx)$/.test(f) && !/\.(stories|test)\.tsx?$/.test(f);
+    const perRelease = releases.map((r) => {
+      const map = new Map();
+      for (const line of git('ls-tree', '-r', r.h, '--', 'src/index.ts', 'src/components', 'src/blocks', 'src/lib').split('\n')) {
+        const m = /^\d+ blob ([0-9a-f]+)\t(.+)$/.exec(line);
+        if (m && isSource(m[2])) map.set(m[2], m[1]);
+      }
+      return { v: r.v, map };
+    });
+    const blobs = [...new Set(perRelease.flatMap((r) => [...r.map.values()]))];
+    const text = new Map();
+    if (blobs.length) {
+      const out = execFileSync('git', ['cat-file', '--batch'], { cwd: root, input: blobs.join('\n') + '\n', maxBuffer: 1 << 30 });
+      let i = 0;
+      while (i < out.length) {
+        const nl = out.indexOf(10, i);
+        const [sha, , size] = out.subarray(i, nl).toString().split(' ');
+        const start = nl + 1;
+        text.set(sha, out.subarray(start, start + Number(size)).toString('utf8'));
+        i = start + Number(size) + 1;
+      }
+    }
+    const trees = perRelease.map((r) => ({ v: r.v, files: new Map([...r.map].map(([f, sha]) => [f, text.get(sha)])) }));
+    if (releases[releases.length - 1].v !== pkg.version) {
+      const files = new Map();
+      for (const dir of ['src/components', 'src/blocks', 'src/lib']) for (const f of walk(path.join(root, dir))) { const r = rel(f); if (isSource(r)) files.set(r, fs.readFileSync(f, 'utf8')); }
+      files.set('src/index.ts', fs.readFileSync(path.join(root, 'src/index.ts'), 'utf8'));
+      trees.push({ v: pkg.version, files });
+    }
+    return trees;
+  } catch (e) { console.warn(`manifest: release history unavailable (${e.message.split('\n')[0]}); since is taken from the cache`); return null; }
+}
+
+/** Every name a module exports, following `export ... from` and `export *` chains. */
+function exportsOf(files, file, memo = new Map()) {
+  if (memo.has(file)) return memo.get(file);
+  const names = new Set();
+  memo.set(file, names); // set before recursing: cycles end here
+  const text = files.get(file);
+  if (!text) return names;
+  const resolve = (spec) => {
+    if (!spec.startsWith('.')) return null;
+    const base = path.posix.normalize(path.posix.join(path.posix.dirname(file), spec)).replace(/\.(js|jsx)$/, '');
+    for (const c of [base, `${base}.ts`, `${base}.tsx`, `${base}/index.ts`, `${base}/index.tsx`]) if (files.has(c)) return c;
+    return null;
+  };
+  const code = text.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');
+  for (const m of code.matchAll(/export\s+(type\s+)?\{([^}]*)\}\s*(?:from\s*['"]([^'"]+)['"])?/g)) {
+    if (m[1]) continue; // type-only
+    for (const part of m[2].split(',')) {
+      const x = part.trim();
+      if (!x || /^type\s/.test(x)) continue;
+      const name = x.split(/\s+as\s+/).pop().trim();
+      if (name && name !== 'default') names.add(name);
+    }
+  }
+  for (const m of code.matchAll(/export\s+\*\s+as\s+([A-Za-z_$][\w$]*)\s+from/g)) names.add(m[1]);
+  for (const m of code.matchAll(/export\s+\*\s+from\s*['"]([^'"]+)['"]/g)) { const t = resolve(m[1]); if (t) for (const n of exportsOf(files, t, memo)) names.add(n); }
+  for (const m of code.matchAll(/export\s+(?:declare\s+)?(?:const|let|var|function|class|enum)\s+([A-Za-z_$][\w$]*)/g)) names.add(m[1]);
+  return names;
+}
+
+const trees = releaseTrees();
+// public exports of each entry point at each release
+const publicAt = trees && trees.map((t) => ({ v: t.v, main: exportsOf(t.files, 'src/index.ts'), blocks: exportsOf(t.files, 'src/blocks/index.ts') }));
+/** The first release in which users could import `name` from its entry point. */
+const importableSince = (name, isBlock) => {
+  if (!publicAt) return null;
+  const hit = publicAt.find((r) => (isBlock ? r.blocks : r.main).has(name));
+  return hit ? hit.v : null;
+};
+// per-file history, for props
+const snapshotsFor = (file) => trees && trees.map((t) => ({ v: t.v, text: t.files.get(file) ?? null }));
+
+const escapeRe = (x) => x.replace(/[.*+?^${}()|[\]\\-]/g, '\\$&');
+const semverCmp = (a, b) => { const x = a.split('.').map(Number), y = b.split('.').map(Number); for (let i = 0; i < 3; i++) if (x[i] !== y[i]) return x[i] - y[i]; return 0; };
+
+/**
+ * The first release (at or after the component's) whose source declares the prop, and likewise for
+ * each literal value. When the file was not at this path when the component first shipped (it was
+ * moved), the history is incomplete and nothing is recorded: a wrong "not available" would be
+ * worse than none.
+ */
+function propHistory(snaps, componentSince, props) {
+  if (!snaps || !componentSince) return {};
+  const fromIdx = snaps.findIndex((s) => s.v === componentSince);
+  if (fromIdx < 0 || !snaps[fromIdx].text) return {};
+  const out = {};
+  for (const p of props) {
+    const decl = new RegExp(`(?:^|[\\s{;,(])['"]?${escapeRe(p.name)}['"]?\\??\\s*:`, 'm');
+    const first = snaps.slice(fromIdx).find((s) => s.text && decl.test(s.text));
+    if (!first) continue; // declared in another file (an extended interface): unknown, say nothing
+    const entry = {};
+    if (semverCmp(first.v, componentSince) > 0) entry.since = first.v;
+    if (p.values) {
+      const vs = {};
+      for (const val of p.values) {
+        if (typeof val !== 'string') continue;
+        const lit = new RegExp(`['"]${escapeRe(val)}['"]`);
+        const seenAt = snaps.slice(fromIdx).find((s) => s.text && lit.test(s.text));
+        if (seenAt && semverCmp(seenAt.v, entry.since || componentSince) > 0) vs[val] = seenAt.v;
+      }
+      if (Object.keys(vs).length) entry.valuesSince = vs;
+    }
+    if (Object.keys(entry).length) out[p.name] = entry;
+  }
+  return out;
 }
 
 /* ---- components and blocks ---- */
@@ -293,7 +411,11 @@ for (const d of parsed) {
       requiresAccessibleName: props.some((p) => p.required && accessibleNameProp(p.name)),
     },
   };
-  if (sinceCache[source]) entry.since = sinceCache[source];
+  // when users could first import it (falls back to the cached value when there is no git history)
+  const since = importableSince(name, isBlock) || sinceCache[`export:${exportedFrom}:${name}`] || sinceCache[source];
+  if (since) { entry.since = since; sinceCache[`export:${exportedFrom}:${name}`] = since; }
+  const history = propHistory(snapshotsFor(source), entry.since, props);
+  for (const p of props) if (history[p.name]) Object.assign(p, history[p.name]);
   components.push(entry);
 }
 components.sort((a, b) => (a.kind === b.kind ? a.name.localeCompare(b.name) : a.kind === 'component' ? -1 : 1));
@@ -302,6 +424,8 @@ components.sort((a, b) => (a.kind === b.kind ? a.name.localeCompare(b.name) : a.
 const { examples, failed: noExample } = buildExamples(root, components);
 for (const c of components) if (examples.has(c.name)) c.example = examples.get(c.name);
 if (noExample.length) console.warn(`manifest: no example for ${noExample.join(', ')} (it did not type-check)`);
+
+fs.writeFileSync(sinceCachePath, JSON.stringify(Object.fromEntries(Object.entries(sinceCache).sort()), null, 2) + '\n');
 
 /* ---- summary quality gate: a wrong or garbled summary is worse than none ---- */
 const looksBroken = (t) => !t || t.length < 10 || !/^[A-Z`<]/.test(t) || !/[.)`">!?]$/.test(t) || (t.match(/\(/g) || []).length !== (t.match(/\)/g) || []).length || /:$/.test(t);
@@ -316,8 +440,15 @@ if (needsSummary.length) {
 const listed = new Set(components.map((c) => c.name));
 const utilities = [...mainExports]
   .filter((n) => !listed.has(n) && !/^[A-Z][a-z]/.test(n)) // PascalCase names are components and must be described above
-  .map((n) => ({ name: n, kind: /^use[A-Z]/.test(n) ? 'hook' : /^[A-Z][A-Z0-9_]+$/.test(n) ? 'constant' : 'helper', import: '@sakaniui/react' }))
+  .map((n) => {
+    const u = { name: n, kind: /^use[A-Z]/.test(n) ? 'hook' : /^[A-Z][A-Z0-9_]+$/.test(n) ? 'constant' : 'helper', import: '@sakaniui/react' };
+    const since = importableSince(n, false) || sinceCache[`export:@sakaniui/react:${n}`];
+    if (since) { u.since = since; sinceCache[`export:@sakaniui/react:${n}`] = since; }
+    return u;
+  })
   .sort((a, b) => a.name.localeCompare(b.name));
+
+fs.writeFileSync(sinceCachePath, JSON.stringify(Object.fromEntries(Object.entries(sinceCache).sort()), null, 2) + '\n');
 
 /* ---- completeness: a public component that is exported but not described is a bug here ---- */
 const known = new Set([...listed, ...utilities.map((u) => u.name)]);
@@ -375,7 +506,7 @@ iconIndex.other = [...iconsEntryNames].filter((n) => !/^Icon[A-Z0-9]/.test(n)).s
 fs.writeFileSync(path.join(root, 'dist/icon-index.json'), JSON.stringify(iconIndex) + '\n');
 
 const manifest = {
-  schemaVersion: 3,
+  schemaVersion: 4,
   name: pkg.name,
   version: pkg.version,
   description: 'Machine-readable contract of the SakaniUI React library, generated from its TypeScript source.',
@@ -393,7 +524,7 @@ const manifest = {
     '@sakaniui/react/icons': `Tabler icons: IconName and IconNameFilled, one module each (${count('outline')} outline, ${count('filled')} filled).`,
   },
   conventions: {
-    version: `This manifest describes ${pkg.name}@${pkg.version}. Each component has \`since\`, the first release that contained it: if the project has an older version installed, a component or prop that is newer than that does not exist there.`,
+    version: `This manifest describes ${pkg.name}@${pkg.version}. Each component has \`since\`, the first release that contained it; a prop added later has its own \`since\`, and a value added later is listed in the prop's \`valuesSince\`. If the project has an older version installed, anything newer than that does not exist there.`,
     acceptsNativeProps: 'Components forward native HTML attributes (className, style, aria-*, event handlers) to their root element unless a prop says otherwise; only the props that are specific to SakaniUI are listed here.',
     accessibleName: 'When `contract.requiresAccessibleName` is true, a required prop (aria-label, aria-labelledby or an alt text) is the only thing that names the control or image. Do not omit it.',
     tokens: 'Use only the token names listed under `tokens`. Colour tokens follow the theme (the `.dark` class flips them); do not hard-code colours.',
@@ -401,6 +532,8 @@ const manifest = {
     examples: 'Each component has `example`: its imports and the element with every required prop filled in, type-checked against this build. Start from it.',
     literals: 'Prop `values` keep their real type: a number is a number (columns: 2), a string is a string ("md").',
   },
+  // what a component's root element accepts besides its own props (plus aria-*, data-* and on* handlers)
+  nativeAttributes: htmlAttributes(root),
   tokens: { count: tokenCount, groups: tokens },
   counts: { components: components.filter((c) => c.kind === 'component').length, blocks: components.filter((c) => c.kind === 'block').length, utilities: utilities.length },
   components,

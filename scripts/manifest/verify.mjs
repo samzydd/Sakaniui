@@ -26,6 +26,27 @@ const fail = (msg) => problems.push(msg);
 if (manifest.version !== pkg.version) fail(`manifest version ${manifest.version} is not the package version ${pkg.version}`);
 const cmp = (a, b) => { const x = a.split('.').map(Number), y = b.split('.').map(Number); for (let i = 0; i < 3; i++) if (x[i] !== y[i]) return x[i] - y[i]; return 0; };
 for (const c of manifest.components) if (c.since && cmp(c.since, pkg.version) > 0) fail(`${c.name}.since ${c.since} is newer than the package ${pkg.version}`);
+for (const c of manifest.components) {
+  if (!c.since) fail(`${c.name} has no since`);
+  for (const p of c.props) {
+    if (p.since && (cmp(p.since, c.since) <= 0 || cmp(p.since, pkg.version) > 0)) fail(`${c.name}.${p.name}.since ${p.since} is outside ${c.since}..${pkg.version}`);
+    for (const [val, v] of Object.entries(p.valuesSince || {})) {
+      if (!(p.values || []).includes(val)) fail(`${c.name}.${p.name}.valuesSince names "${val}", which is not an allowed value`);
+      if (cmp(v, pkg.version) > 0) fail(`${c.name}.${p.name}.valuesSince["${val}"] ${v} is newer than the package`);
+    }
+  }
+}
+// Anchors: facts from the release notes. If the history logic regresses, these break the build.
+const ANCHORS = [
+  ['component', 'XIcon', '0.8.6'], ['component', 'InstagramIcon', '0.8.6'], ['component', 'LiquidBackdrop', '0.4.3'],
+  ['component', 'LiquidGlass', '0.4.0'], ['prop', 'Switch.variant', '0.8.4'],
+];
+for (const [kind, key, want] of ANCHORS) {
+  const [name, prop] = key.split('.');
+  const c = manifest.components.find((x) => x.name === name);
+  const got = kind === 'prop' ? c?.props.find((p) => p.name === prop)?.since : c?.since;
+  if (got !== want) fail(`release history anchor: ${key} should be since ${want}, manifest says ${got}`);
+}
 if (!/^## /m.test(read('CHANGELOG.md')) || !new RegExp(`^## ${pkg.version.replace(/\./g, '\\.')}\\b`, 'm').test(read('CHANGELOG.md'))) fail(`CHANGELOG.md has no entry for ${pkg.version}`);
 
 /* ---- accuracy: runtime exports ---- */
