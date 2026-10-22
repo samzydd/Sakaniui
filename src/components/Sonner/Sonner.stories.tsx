@@ -109,29 +109,30 @@ export const Positions: Story = {
 
 export const Expanded: Story = { ...Stack, args: { expand: true, duration: Infinity } };
 
-/** Dark mode: the .dark class flips the semantic tokens; nothing in the component changes. */
+/** Dark mode: the .dark class flips the semantic tokens; nothing in the component changes. The Expanded button spreads the stack out (and adds a few toasts if there are none). */
 export const DarkMode: Story = {
-  ...Types,
-  decorators: [(S) => <div className="dark"><S /></div>],
-};
-
-/** Dark mode with the stack spread out (the Expanded state). The button adds three toasts to an expanded Toaster. */
-export const DarkExpanded: Story = {
-  name: 'Dark mode, expanded',
-  args: { expand: true, duration: Infinity },
   decorators: [(S) => <div className="dark"><S /></div>],
   render: (args: ToasterProps) => {
-    const show = () => {
-      toast.dismiss();
-      ['Event has been created', 'Your changes have been saved', 'Invitation sent'].forEach((title, i) => {
-        window.setTimeout(() => toast(title, { ...event, id: `dark-expanded-${i}` }), 80 + i * 150);
-      });
+    const [expanded, setExpanded] = React.useState(false);
+    const toggleExpanded = () => {
+      if (!expanded && document.querySelectorAll('ol[data-y-position] > li').length < 2) {
+        ['Event has been created', 'Your changes have been saved', 'Invitation sent'].forEach((title, i) => {
+          window.setTimeout(() => toast(title, { ...event, id: `dark-expanded-${i}` }), 80 + i * 150);
+        });
+      }
+      setExpanded((v) => !v);
     };
     return (
       <Stage>
-        <Button variant="secondary" onClick={show}>Show expanded stack</Button>
+        <Button variant="secondary" onClick={() => toast('Event has been created', event)}>Default</Button>
+        <Button variant="secondary" onClick={() => toast.success('Event has been created', event)}>Success</Button>
+        <Button variant="secondary" onClick={() => toast.info('Be at the area 10 minutes before the event time')}>Info</Button>
+        <Button variant="secondary" onClick={() => toast.warning('Event start time cannot be earlier than 8am')}>Warning</Button>
+        <Button variant="secondary" onClick={() => toast.error('Event has not been created')}>Error</Button>
+        <Button variant="secondary" onClick={() => toast.loading('Uploading file…', { description: 'report-q3.pdf' })}>Loading</Button>
+        <Button variant={expanded ? 'primary' : 'secondary'} onClick={toggleExpanded}>Expanded</Button>
         <Button variant="ghost" onClick={() => toast.dismiss()}>Clear</Button>
-        <Toaster {...args} />
+        <Toaster {...args} expand={expanded} duration={expanded ? Infinity : args.duration} />
       </Stage>
     );
   },
