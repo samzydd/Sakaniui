@@ -428,7 +428,8 @@ const ALIASES = {
   Modal: ['dialog', 'alert dialog', 'alertdialog', 'confirm dialog', 'confirmation dialog', 'confirmation', 'modal window', 'popup dialog', 'lightbox'],
   Popover: ['popup', 'flyout', 'floating panel', 'popup panel'],
   Menu: ['dropdown', 'dropdown menu', 'context menu', 'actions menu', 'kebab menu'],
-  Toast: ['snackbar', 'toaster', 'toast notification', 'flash message', 'transient notification'],
+  Toast: ['snackbar', 'toast notification', 'flash message', 'transient notification'],
+  Toaster: ['sonner', 'toast stack', 'toast provider', 'toast container', 'toast queue', 'notification stack', 'stacked toasts', 'toast manager'],
   Alert: ['callout', 'notice', 'inline message', 'inline alert', 'status message', 'message box'],
   Announcement: ['banner', 'announcement bar', 'top banner', 'promo bar'],
   Tooltip: ['hovercard', 'hover card', 'hint on hover'],
@@ -513,6 +514,44 @@ const columns: TableColumn<Row>[] = [
 ];
 
 export const Example = () => <Table columns={columns} rows={rows} />;`,
+  }],
+  Toaster: [{
+    title: 'Show a toast from anywhere',
+    description: 'Mount one `<Toaster />` near the root of the app, then call `toast()` (or `toast.success`, `.info`, `.warning`, `.error`, `.loading`) from any handler or module. Do not render `<Toast>` yourself for this: `Toast` is the static, presentational card.',
+    code: `import { Button, Toaster, toast } from '@sakaniui/react';
+
+export const App = () => (
+  <>
+    <Button
+      onClick={() =>
+        toast.success('Event has been created', {
+          description: 'Monday, January 3rd at 6:00pm',
+          action: { label: 'Undo', onClick: () => toast('Undone') },
+        })
+      }
+    >
+      Create event
+    </Button>
+    <Toaster position="bottom-right" richColors />
+  </>
+);`,
+  }, {
+    title: 'One toast for an async task',
+    description: '`toast.promise` shows a loading toast and turns the same toast into success or error when the promise settles. To update any toast by hand, pass the id that `toast()` returned as `id`.',
+    code: `import { toast } from '@sakaniui/react';
+
+declare function saveInvoice(): Promise<{ number: string }>;
+
+export function onSave() {
+  toast.promise(saveInvoice(), {
+    loading: 'Saving invoice…',
+    success: (invoice) => \`Invoice \${invoice.number} saved\`,
+    error: 'Could not save the invoice',
+  });
+
+  const id = toast.loading('Uploading…');
+  setTimeout(() => toast.success('Uploaded', { id }), 1000);
+}`,
   }],
 };
 {

@@ -117,6 +117,7 @@ export * from './components/SidebarSearch';
 export * from './components/SidebarSubItem';
 export * from './components/Skeleton';
 export * from './components/Slider';
+export * from './components/Sonner';
 export * from './components/Spinner';
 export * from './components/StatCard';
 export * from './components/Stepper';

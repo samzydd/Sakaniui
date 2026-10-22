@@ -78,7 +78,7 @@ import { Button, Card } from '@sakaniui/react';
    (`aria-label`, or `label` on `socialLinks`). Status changes use live regions (`Alert`, `Toast`,
    `Spinner`, `EmptyState` are `role="status"`/`alert`). Never remove focus rings.
 7. **Don't fake what the system doesn't do.** `Toast` is presentational — you own queueing and
-   positioning. `Menu` is a surface — you own anchoring (pair it with `Popover`). Dragging is a
+   positioning (for a ready-made stack, use `Toaster` and `toast()`). `Menu` is a surface — you own anchoring (pair it with `Popover`). Dragging is a
    look, not a behaviour. Check "Behaviour you must supply" in the table below before assuming.
 8. **Compose in slots, don't fork.** Components expose slots (`leading`, `trailing`, `meta`,
    `assignees`, `icon`, `actions`). Fill a slot with other system components rather than copying a
@@ -153,7 +153,7 @@ CSS of a component into your own file.
 Format: **Use for** · **Why it is built this way** · **Not for / instead**.
 
 **Looking for a component by another name?** SakaniUI uses its own names. A *dialog* or *alert dialog* is
-`Modal`; a *snackbar* is `Toast`; a *dropdown menu* is `Menu`; a *navbar* or *app bar* is `TopBar`; a
+`Modal`; a *snackbar* is `Toast` (or `Toaster` + `toast()` for a managed stack); a *dropdown menu* is `Menu`; a *navbar* or *app bar* is `TopBar`; a
 *date picker* is `Calendar`; a *loader* is `Spinner`; a *toggle* is `Switch`; a *banner* is `Announcement`;
 *autocomplete* is `Combobox`. There is no `Dialog`, `AlertDialog`, `Snackbar` or `Navbar`. Each component
 lists its other names under `aliases` in `manifest.json`, and `search_components` understands them.
@@ -174,6 +174,11 @@ lists its other names under `aliases` in `manifest.json`, and `search_components
 - **Toast** — Use for short-lived confirmation or error after an action. *Why:* presentational only;
   queueing and positioning are the app's job, so it fits any notification system. *Not for* anything the user
   must act on — a toast disappears.
+- **Toaster + toast()** — Use for notifications you trigger from code: mount one `<Toaster />`, call
+  `toast.success('Saved')` from anywhere. *Why:* it owns queueing, position (6), the 4s timer, the pile that
+  spreads on hover and swipe-to-dismiss, so the app does not. `toast.promise` turns one toast from loading
+  into success or error. *Not for* anything the user must act on — a toast disappears; a plain static card
+  → `Toast`. Needs `Toaster` mounted once, and `toast()` is a function, not a component.
 - **Badge** — Use for a short status, category or count. *Why:* 6 colours × subtle/solid, no sizes, no
   borders — it is a label, not a control. *Not for* clickable filters → `FilterChip`.
 - **Tooltip** — Use for brief supplementary text on hover/focus. *Why:* pure CSS, so it works with
@@ -261,7 +266,8 @@ and **tell the user when you are composing** rather than implying a dedicated co
 
 | Component | You own |
 |---|---|
-| Toast | queueing, positioning, auto-dismiss timing |
+| Toast | queueing, positioning, auto-dismiss timing (or use `Toaster`) |
+| Toaster | mounting it once; it handles the rest |
 | Menu | anchoring/positioning (pair with Popover) |
 | BoardCard `dragging` | drag-and-drop logic and drop targets |
 | BoardColumn `loading` | the skeleton cards inside it |

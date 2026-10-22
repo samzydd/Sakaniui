@@ -2,6 +2,25 @@
 
 All notable changes to `@sakaniui/react` are documented here.
 
+## 0.9.0
+
+- **New: `Toaster` and `toast()`**, a managed toast stack (Sonner-style) built from the new *↳ Sonner* page in Figma.
+  Mount one `<Toaster />`, then call `toast()`, `toast.success()`, `.info()`, `.warning()`, `.error()`,
+  `.loading()`, `.promise()` and `.dismiss()` from anywhere.
+  - New toasts rise in from the edge; older ones pile up behind the newest (lifted 14px, shrunk 5% per level,
+    content hidden, three visible). Hover or focus spreads the pile into a list and pauses the 4s timers;
+    leaving folds it back. Swipe a toast towards its edge to dismiss it (past 45px, or a quick flick, it flies
+    out in 200ms; otherwise it springs back in 400ms). Motion is 400ms `ease`.
+  - Options per toast: `description`, `icon`, `action`, `cancel`, `closeButton`, `duration`, `dismissible`,
+    `richColors`, `id` (update in place), `onDismiss`, `onAutoClose`. On `Toaster`: `position` (six),
+    `richColors`, `closeButton`, `expand`, `visibleToasts`, `duration`, `gap`, `offset`, `mobileOffset`,
+    `hotkey` (alt+T focuses the stack; Escape folds it).
+  - Light, dark and glass surfaces through the existing tokens; reduced motion keeps the fades only; errors
+    are announced assertively.
+  - The existing `Toast` is unchanged: it stays the static, presentational card.
+- Agent contract: `Toaster` is in the manifest with recipes (show a toast, a promise toast) and the aliases
+  *sonner*, *toast stack*, *toast provider*. (`toaster` now means this component, not `Toast`.)
+
 ## 0.8.13
 
 A user reported the MCP server "didn't work". Reproduced: on a Node older than 16.9 the server connected
