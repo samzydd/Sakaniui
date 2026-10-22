@@ -1,8 +1,8 @@
 /**
  * Toaster
  *
- * Renders the stack of toasts that `toast()` creates. Mount one near the root of the app, then call
- * `toast()`, `toast.success()`, `toast.promise()` and friends from anywhere.
+ * Renders the toasts that toast() creates, as a stack on one edge of the screen. Mount one near the root
+ * of the app, then call toast() from any handler or module.
  *
  * Matches Figma "Sonner", "Sonner Stack" and "Sonner Position" (the ↳ Sonner page):
  *   Type (Default|Success|Info|Warning|Error|Loading) → toast.<type>()

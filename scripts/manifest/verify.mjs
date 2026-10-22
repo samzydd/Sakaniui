@@ -168,12 +168,15 @@ export const Example = () => <Table columns={columns} rows={[]} />;` }]);
     ['a disallowed value', "import { Button } from '@sakaniui/react';\n<Button variant=\"danger\">x</Button>"],
     ['a missing required prop', "import { IconButton } from '@sakaniui/react';\n<IconButton />"],
   ];
-  const calls = [...withExample.map((c) => c.example), ...bad.map(([, code]) => code)];
+  // every recipe is real code an agent will copy, so check_code must accept it too (a helper such as `toast` must not be mistaken for the component `Toast`)
+  const recipes = manifest.components.flatMap((c) => (c.recipes || []).map((r) => ({ name: c.name, code: r.code })));
+  const calls = [...withExample.map((c) => c.example), ...bad.map(([, code]) => code), ...recipes.map((r) => r.code)];
   const input = calls.map((code, i) => JSON.stringify({ jsonrpc: '2.0', id: i + 1, method: 'tools/call', params: { name: 'check_code', arguments: { code } } })).join('\n') + '\n';
   const run = spawnSync('node', [path.join(root, 'bin/sakaniui-mcp.mjs')], { input, cwd: root, encoding: 'utf8', timeout: 60000 });
   const answers = new Map(run.stdout.trim().split('\n').filter(Boolean).map((l) => { const m = JSON.parse(l); return [m.id, JSON.parse(m.result.content[0].text)]; }));
   withExample.forEach((c, i) => { const r = answers.get(i + 1); if (!r || !r.ok) fail(`check_code rejects the shipped example for ${c.name}: ${JSON.stringify(r && r.errors).slice(0, 160)}`); });
   bad.forEach(([what], i) => { const r = answers.get(withExample.length + i + 1); if (!r || r.ok) fail(`check_code accepted bad code (${what})`); });
+  recipes.forEach((rc, i) => { const r = answers.get(withExample.length + bad.length + i + 1); if (!r || !r.ok) fail(`check_code rejects a recipe for ${rc.name}: ${JSON.stringify(r && r.errors).slice(0, 160)}`); });
 }
 
 /* ---- icons: the index is exactly the set of exported icons ---- */
