@@ -155,6 +155,27 @@ Tools: `search_components`, `get_component` (with a type-checked `example`), `se
   an export that is not described, a prop that is not declared, an example that does not type-check, an
   icon name that does not exist, a token that is not defined, or anything that looks like a private reference.
 
+### Troubleshooting the MCP server
+
+Run this in a terminal first. It checks Node, the data, the tools and your project, and prints a report you can
+paste when asking for help:
+
+```bash
+npx -y @sakaniui/mcp --doctor
+```
+
+| Symptom | Fix |
+|---|---|
+| `spawn npx ENOENT`, or the editor cannot start it | Desktop editors often start with a smaller `PATH` than your terminal (common with nvm and Homebrew). Use the full path: run `which npx` (macOS/Linux) or `where npx` (Windows) and put that in `"command"`, e.g. `"/opt/homebrew/bin/npx"`. |
+| Windows | `npx` is a `.cmd` script: use `"command": "cmd"` with `"args": ["/c", "npx", "-y", "@sakaniui/mcp"]`. |
+| Connects, but tool calls fail (before 0.8.13) | Node older than 16.9. Update Node (18 or later is supported), or use `@sakaniui/mcp@latest`. |
+| "Node.js ... is too old" | Install Node 18 or later: https://nodejs.org (check with `node --version`). |
+| Times out on the first start | The first run downloads about 200 kB. Run `npx -y @sakaniui/mcp --version` once in a terminal to warm the cache, then restart the editor. |
+| Behind a company proxy or private npm registry | The machine must reach `registry.npmjs.org` (check `npm config get registry`) and `@sakaniui/*` packages must be allowed. |
+| Odd `npx` errors, or an old version keeps running | Delete the `_npx` folder inside your npm cache (find it with `npm config get cache`), then restart the editor. |
+| Added it but no tools appear | Restart the editor. In Claude Code run `/mcp` and look for `sakaniui` with 10 tools. |
+| `Failed to connect` after typing the command by hand | Check the package name for a full-width `＠` or stray characters; copy the command from here instead. |
+
 ## Glass & liquid glass
 
 Glass is built into the theme system, not added component by component. Next to light/dark, SakaniUI has a second axis — **Surface** — with three modes: **Solid** (the default), **Glass** (frosted translucency) and **Liquid** (Apple-style liquid glass: the backdrop *bends* at the edges like a lens, with a faint color fringe, rim light and depth). Components read a small set of `--surface-*` tokens, so switching an area from Solid to Glass or Liquid re-themes everything inside it at once — in the Figma file (variable modes and effect styles) and in code. Solid stays pixel-identical to before.

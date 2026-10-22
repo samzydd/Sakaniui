@@ -17,10 +17,21 @@
  * manifest era, answers come from this copy but every component is checked against its `since`
  * release and flagged when the project does not have it yet.
  */
-import fs from 'node:fs';
-import path from 'node:path';
-import readline from 'node:readline';
-import { fileURLToPath } from 'node:url';
+import fs from 'fs';
+import path from 'path';
+import readline from 'readline';
+import { fileURLToPath } from 'url';
+
+/* ---------- Node version guard ---------- */
+// Tested on Node 16, 18, 20, 22 and 26; 18+ is the supported range. Say so plainly instead of failing later in a way
+// that looks like the server is broken (before 0.8.13 a Node older than 16.9 connected, listed its tools, then failed every call).
+const NODE_MAJOR = Number(process.versions.node.split('.')[0]);
+if (NODE_MAJOR < 16) {
+  process.stderr.write(`sakaniui-mcp: Node.js ${process.versions.node} is too old. SakaniUI's MCP server needs Node.js 18 or later (https://nodejs.org). Run \`node --version\` to check.\n`);
+  process.exit(1);
+}
+// `Object.hasOwn` is Node 16.9+; this works everywhere
+const has = (obj, key) => Object.prototype.hasOwnProperty.call(obj, key);
 
 const ownRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -48,6 +59,21 @@ function findProjectInstall() {
 }
 
 // inside @sakaniui/react the data sits next to bin/; inside @sakaniui/mcp it is copied into data/
+/* ---------- command line: --version, --help, --doctor ---------- */
+const argvFlag = (...names) => process.argv.slice(2).some((a) => names.includes(a));
+if (argvFlag('--help', '-h')) {
+  process.stdout.write(`sakaniui-mcp: the SakaniUI MCP server (read-only). Your editor starts it; there is nothing to type.
+
+  npx -y @sakaniui/mcp                 start the server (waits silently for an editor)
+  npx -y @sakaniui/mcp --doctor        check this machine and print a report (paste it when asking for help)
+  npx -y @sakaniui/mcp --version       print the version
+  npx -y @sakaniui/mcp --project <dir> answer for the @sakaniui/react installed in <dir>
+
+Docs: https://www.sakaniui.com/docs/ai
+`);
+  process.exit(0);
+}
+
 const bundled = loadInstall(fs.existsSync(path.join(ownRoot, 'dist', 'manifest.json')) ? ownRoot : path.join(ownRoot, 'data'));
 if (!bundled || !bundled.manifest) {
   process.stderr.write('sakaniui-mcp: dist/manifest.json not found. Run `npm run build:lib` (or install a published version).\n');
@@ -666,7 +692,7 @@ const tools = {
       const g = strArg(args, 'group'); const q = strArg(args, 'query');
       const e = firstError(g, q); if (e) return fail(e.err);
       const groups = manifest.tokens.groups;
-      if (g.value && !Object.hasOwn(groups, g.value)) return fail(`Unknown token group "${g.value}". Groups: ${Object.keys(groups).join(', ')}`);
+      if (g.value && !has(groups, g.value)) return fail(`Unknown token group "${g.value}". Groups: ${Object.keys(groups).join(', ')}`);
       const needle = q.value?.toLowerCase();
       const out = {};
       for (const [name, toks] of Object.entries(groups)) {
@@ -691,7 +717,7 @@ const tools = {
       const errors = [];
       const warnings = [];
       if (inInstalled(c) === false) errors.push(`${c.name} was added in ${c.since}; the project has ${projectVersion}. It does not exist there.`);
-      for (const r of c.contract.requiredProps) if (!Object.hasOwn(props, r)) errors.push(`Missing required prop "${r}".`);
+      for (const r of c.contract.requiredProps) if (!has(props, r)) errors.push(`Missing required prop "${r}".`);
       for (const [k, v] of Object.entries(props)) {
         const p = known.get(k);
         if (!p) { const u = unknownProp(c, k); if (u) (u.level === 'error' ? errors : warnings).push(u.message); continue; }
@@ -809,7 +835,7 @@ function handle(msg) {
         return reply(id, { result: {
           protocolVersion: asked && PROTOCOL_VERSIONS.includes(asked) ? asked : PROTOCOL_VERSIONS[0],
           capabilities: { tools: { listChanged: false } },
-          serverInfo: { name: 'sakaniui', title: 'SakaniUI', version: refVersion },
+          serverInfo: { name: 'sakaniui', title: 'SakaniUI', version: bundled.version }, // the server's own version, not the data's
           instructions: `SakaniUI ${refVersion}${projectVersion ? ` (project has ${projectVersion})` : ''}. Read-only reference. Look components up with search_components / get_component and start from their \`example\`; find icon names with search_icons (never guess them); search by the name you would normally use (dialog, snackbar, navbar, date picker) and it maps to the real component; run check_code on every snippet before you answer; style anything beyond props with the design tokens from get_tokens (CSS variables), not hard-coded colours or utility classes the project may not have; read get_guide when nothing fits.${note ? ` ${note}` : ''}`,
         } });
       }
@@ -818,7 +844,7 @@ function handle(msg) {
       case 'tools/list':
         return reply(id, { result: { tools: Object.entries(tools).map(([name, t]) => ({ name, description: t.description, inputSchema: t.inputSchema, annotations: READ_ONLY })) } });
       case 'tools/call': {
-        const t = typeof params?.name === 'string' && Object.hasOwn(tools, params.name) ? tools[params.name] : null;
+        const t = typeof params?.name === 'string' && has(tools, params.name) ? tools[params.name] : null;
         if (!t) return reply(id, { error: { code: -32602, message: `Unknown tool: ${String(params?.name).slice(0, 60)}` } });
         const args = params.arguments;
         if (args !== undefined && args !== null && (typeof args !== 'object' || Array.isArray(args))) return reply(id, { result: fail('Tool arguments must be an object.') });
@@ -835,6 +861,32 @@ function handle(msg) {
   } catch (e) {
     return reply(id, { error: { code: -32603, message: String(e?.message || e) } });
   }
+}
+
+/* ---------- --version and --doctor (no protocol traffic; print and exit) ---------- */
+if (argvFlag('--version', '-v')) { process.stdout.write(`${bundled.version}\n`); process.exit(0); }
+if (argvFlag('--doctor')) {
+  const lines = [];
+  const row = (label, value, ok) => lines.push(`  ${ok === false ? '✘' : ok === 'warn' ? '!' : ok === true ? '✔' : ' '} ${label.padEnd(20)}${value}`);
+  row('server version', bundled.version, true);
+  row('Node.js', NODE_MAJOR >= 18 ? `${process.version}` : `${process.version} (18+ is supported; 16 works but is end-of-life, please update)`, NODE_MAJOR >= 18 ? true : 'warn');
+  row('platform', `${process.platform} ${process.arch}`);
+  row('working folder', process.cwd());
+  row('reference data', `${manifest.components.length} components and blocks, ${Object.values(manifest.tokens.groups).reduce((a, g) => a + Object.keys(g).length, 0)} tokens, ${iconIndex.length} icons, describing @sakaniui/react ${refVersion} (${answeringFromProject ? "taken from your project's install" : 'bundled with this package'})`, manifest.components.length > 100 && iconIndex.length > 1000);
+  row('your project', project ? `@sakaniui/react ${project.version} at ${project.root}` : 'no @sakaniui/react found from this folder (fine for a quick check; run it from your project folder, or pass --project <dir>, to answer for your version)');
+  const exe = process.platform === 'win32' ? ['npx.cmd', 'npx.exe', 'npx'] : ['npx'];
+  const onPath = (process.env.PATH || '').split(path.delimiter).find((d) => d && exe.some((e) => fs.existsSync(path.join(d, e))));
+  row('npx on PATH', onPath ? onPath : 'not found on this PATH', !!onPath);
+  // exercise the real tools, the same code paths an editor calls
+  const probe = (name, args) => { try { const r = tools[name].run(args); return r.isError ? { ok: false, text: r.content[0].text } : { ok: true, text: r.content[0].text }; } catch (e) { return { ok: false, text: String(e && e.message || e) }; } };
+  const s1 = probe('search_components', { query: 'dialog' });
+  row('tool: search', s1.ok && /Modal/.test(s1.text) ? 'search_components("dialog") finds Modal' : `FAILED: ${s1.text.slice(0, 120)}`, s1.ok && /Modal/.test(s1.text));
+  const s2 = probe('check_code', { code: "import { Button } from '@sakaniui/react';\n<Button variant=\"danger\">x</Button>" });
+  row('tool: check_code', s2.ok && /not allowed/.test(s2.text) ? 'catches a wrong prop value' : `FAILED: ${s2.text.slice(0, 120)}`, s2.ok && /not allowed/.test(s2.text));
+  const s3 = probe('get_tokens', { group: 'radius' });
+  row('tool: get_tokens', s3.ok ? 'ok' : `FAILED: ${s3.text.slice(0, 120)}`, s3.ok);
+  process.stdout.write(`SakaniUI MCP doctor\n${lines.join('\n')}\n\nIf your editor still cannot start it: the editor may use a different PATH than this terminal\n(common with nvm and with desktop apps; on Windows use "cmd" with args ["/c","npx","-y","@sakaniui/mcp"]).\nPaste this report when asking for help: https://github.com/samzydd/Sakaniui/issues\n`);
+  process.exit(lines.some((l) => l.includes('✘')) ? 1 : 0);
 }
 
 const rl = readline.createInterface({ input: process.stdin, crlfDelay: Infinity });

@@ -51,6 +51,27 @@ show 10 tools.
 | `check_compatibility` | compare the reference with the version installed in your project |
 | `get_changelog` | release notes for a version, or everything since yours |
 
+## Troubleshooting
+
+Run this in a terminal first. It checks Node, the data, the tools and your project, and prints a report you can
+paste when asking for help:
+
+```bash
+npx -y @sakaniui/mcp --doctor
+```
+
+| Symptom | Fix |
+|---|---|
+| `spawn npx ENOENT`, or the editor cannot start it | Desktop editors often start with a smaller `PATH` than your terminal (common with nvm and Homebrew). Use the full path: run `which npx` (macOS/Linux) or `where npx` (Windows) and put that in `"command"`, e.g. `"/opt/homebrew/bin/npx"`. |
+| Windows | `npx` is a `.cmd` script: use `"command": "cmd"` with `"args": ["/c", "npx", "-y", "@sakaniui/mcp"]`. |
+| Connects, but tool calls fail (before 0.8.13) | Node older than 16.9. Update Node (18 or later is supported), or use `@sakaniui/mcp@latest`. |
+| "Node.js ... is too old" | Install Node 18 or later: https://nodejs.org (check with `node --version`). |
+| Times out on the first start | The first run downloads about 200 kB. Run `npx -y @sakaniui/mcp --version` once in a terminal to warm the cache, then restart the editor. |
+| Behind a company proxy or private npm registry | The machine must reach `registry.npmjs.org` (check `npm config get registry`) and `@sakaniui/*` packages must be allowed. |
+| Odd `npx` errors, or an old version keeps running | Delete the `_npx` folder inside your npm cache (find it with `npm config get cache`), then restart the editor. |
+| Added it but no tools appear | Restart the editor. In Claude Code run `/mcp` and look for `sakaniui` with 10 tools. |
+| `Failed to connect` after typing the command by hand | Check the package name for a full-width `＠` or stray characters; copy the command from here instead. |
+
 ## Matches your version
 
 It finds the `@sakaniui/react` installed in your project (the folder it runs in, or `--project <dir>`) and

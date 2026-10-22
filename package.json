@@ -1,6 +1,6 @@
 {
   "name": "@sakaniui/react",
-  "version": "0.8.12",
+  "version": "0.8.13",
   "description": "SakaniUI — token-driven React components and blocks with light & dark modes, plus built-in glass and Apple-style liquid glass surfaces.",
   "license": "MIT",
   "repository": {

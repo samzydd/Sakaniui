@@ -219,6 +219,23 @@ for (const [file, content] of Object.entries(shipped)) {
 }
 if (/\bFigma\b/i.test(shipped['dist/manifest.json'])) fail('dist/manifest.json mentions the design tool; design-tool notes are not part of the public contract');
 
+/* ---- the server must run on older Node versions than the one used to build it ---- */
+{
+  const src = shipped['bin/sakaniui-mcp.mjs'];
+  // APIs newer than Node 16: a missing one lets the server connect, list its tools and then fail every call
+  for (const [re, what] of [[/Object\.hasOwn\(/, 'Object.hasOwn (Node 16.9+)'], [/\.findLast\(|\.findLastIndex\(/, 'findLast (Node 18+)'], [/structuredClone\(/, 'structuredClone (Node 17+)'], [/\.toSorted\(|\.toReversed\(/, 'toSorted (Node 20+)'], [/^import .* from 'node:/m, "a 'node:' import (fails on Node 14.0-14.17 before the version check can run)"]]) {
+    if (re.test(src)) fail(`bin/sakaniui-mcp.mjs uses ${what}`);
+  }
+  // behaviour, not just text: run a real tool call with Object.hasOwn deleted from the runtime
+  const input = ['{"jsonrpc":"2.0","id":1,"method":"initialize","params":{}}', '{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"get_tokens","arguments":{"group":"radius"}}}', '{"jsonrpc":"2.0","id":3,"method":"tools/call","params":{"name":"check_usage","arguments":{"component":"Button","props":{}}}}'].join('\n') + '\n';
+  const run = spawnSync('node', ['--import', 'data:text/javascript,delete Object.hasOwn;', path.join(root, 'bin/sakaniui-mcp.mjs')], { input, cwd: root, encoding: 'utf8', timeout: 30000 });
+  const out = (run.stdout || '').trim().split('\n').filter(Boolean).map((l) => { try { return JSON.parse(l); } catch { return {}; } });
+  if (out.length !== 3 || out.some((m) => m.error)) fail(`the server fails when Object.hasOwn is missing (older Node): ${(run.stdout || run.stderr || '').slice(0, 200)}`);
+  // --doctor must run and pass on this build
+  const doc = spawnSync('node', [path.join(root, 'bin/sakaniui-mcp.mjs'), '--doctor'], { cwd: root, encoding: 'utf8', timeout: 30000 });
+  if (doc.status !== 0 || !/SakaniUI MCP doctor/.test(doc.stdout)) fail(`--doctor does not pass: ${(doc.stdout || doc.stderr || '').slice(0, 200)}`);
+}
+
 /* ---- the server must stay read-only ---- */
 const server = shipped['bin/sakaniui-mcp.mjs'];
 for (const re of [/\bwriteFile|appendFile|createWriteStream|unlink|rmSync|rmdir|mkdir|rename\(/, /child_process|(?<![.\w])spawn\(|(?<![.\w])exec\(|execSync|execFile/, /\bfetch\(|node:https?|node:net|node:dgram|XMLHttpRequest/, /\beval\(|new Function/]) {

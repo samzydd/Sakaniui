@@ -2,6 +2,24 @@
 
 All notable changes to `@sakaniui/react` are documented here.
 
+## 0.8.13
+
+A user reported the MCP server "didn't work". Reproduced: on a Node older than 16.9 the server connected
+and listed its tools, then **every tool call failed** with `Object.hasOwn is not a function`.
+
+- **Fixed: tool calls failing on older Node.** The server no longer uses `Object.hasOwn` (Node 16.9+) or the
+  `node:` import prefix, so it works on Node 16 (tested on 16.20) as well as 18, 20, 22 and 26. Node older
+  than 16 now stops with a plain message ("Node.js 14.18.0 is too old... needs Node.js 18 or later") instead
+  of failing later. 18+ remains the supported range.
+- **New: `npx -y @sakaniui/mcp --doctor`** prints a report (Node version, platform, whether `npx` is on the
+  PATH, the reference data, the version found in your project) and exercises three real tools. Also
+  `--version` and `--help`.
+- **The build now guards against this**: it fails if the server uses an API newer than Node 16, and it runs a
+  real tool call with `Object.hasOwn` removed from the runtime.
+- **Troubleshooting** added to the README, the package README and sakaniui.com/docs/ai (PATH problems in
+  desktop editors, Windows, proxies, stale `npx` caches).
+- Correction: the 0.8.12 notes said "250+" aliases; the number is 249.
+
 ## 0.8.12
 
 Found while testing 0.8.11 in Claude Code: after writing correct code, the agent offered to wrap the
