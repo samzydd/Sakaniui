@@ -468,8 +468,10 @@ function checkCode(source) {
     if (imp.def) errors.push({ line: imp.line, message: `${entry} has no default export; use a named import: import { ${imp.def} } from '${entry}';` });
     for (const n of imp.names) {
       if (n.typeOnly) continue;
-      const c = byName.get(n.imported.toLowerCase());
-      const isUtility = manifest.utilities?.some((u) => u.name === n.imported);
+      const util = manifest.utilities?.find((u) => u.name === n.imported);
+      const isUtility = !!util;
+      // an exact helper name (toast) is not a mis-cased component (Toast)
+      const c = isUtility ? undefined : byName.get(n.imported.toLowerCase());
       if (entry === '@sakaniui/react/icons') {
         if (!iconNames.has(n.imported) && !iconOtherExports.has(n.imported)) {
           const hint = searchIcons(n.imported, 3).map((i) => i.name);
@@ -489,6 +491,7 @@ function checkCode(source) {
         errors.push({ line: imp.line, message: `${n.imported} is not exported by @sakaniui/react.${aliasHint(n.imported)}${near.length ? ` Did you mean: ${near.join(', ')}?` : ''} Use search_components.` });
       }
       if (c && inInstalled(c) === false) errors.push({ line: imp.line, message: `${c.name} was added in ${c.since}; the project has ${projectVersion}.` });
+      if (util && inInstalled(util) === false) errors.push({ line: imp.line, message: `${util.name} was added in ${util.since}; the project has ${projectVersion}.` });
     }
   }
 

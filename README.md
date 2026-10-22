@@ -262,7 +262,7 @@ Change a semantic token and every component follows — in both the design file 
 
 **Forms** — Input · Textarea · Select · Checkbox · Radio · Switch · Slider · Combobox (single/multi, async loading) · File Upload
 
-**Composite** — Card · Alert · Toast · Accordion · Tabs · Breadcrumb · Table (generic, selectable) · Stat Card (sparklines) · Stepper · Calendar (single + range, dropdown navigation) · Pagination · Popover · Segmented Control · List Item
+**Composite** — Card · Alert · Toast · Toaster (Sonner-style `toast()` stack) · Accordion · Tabs · Breadcrumb · Table (generic, selectable) · Stat Card (sparklines) · Stepper · Calendar (single + range, dropdown navigation) · Pagination · Popover · Segmented Control · List Item
 
 **Sidebar kit** — Sidebar · Header · Search · Item · Sub Item · Group Label · Divider · Promo · Footer — nine standalone parts that compose into full navigation
 
