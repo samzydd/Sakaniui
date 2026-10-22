@@ -114,3 +114,25 @@ export const DarkMode: Story = {
   ...Types,
   decorators: [(S) => <div className="dark"><S /></div>],
 };
+
+/** Dark mode with the stack spread out (the Expanded state). The button adds three toasts to an expanded Toaster. */
+export const DarkExpanded: Story = {
+  name: 'Dark mode, expanded',
+  args: { expand: true, duration: Infinity },
+  decorators: [(S) => <div className="dark"><S /></div>],
+  render: (args: ToasterProps) => {
+    const show = () => {
+      toast.dismiss();
+      ['Event has been created', 'Your changes have been saved', 'Invitation sent'].forEach((title, i) => {
+        window.setTimeout(() => toast(title, { ...event, id: `dark-expanded-${i}` }), 80 + i * 150);
+      });
+    };
+    return (
+      <Stage>
+        <Button variant="secondary" onClick={show}>Show expanded stack</Button>
+        <Button variant="ghost" onClick={() => toast.dismiss()}>Clear</Button>
+        <Toaster {...args} />
+      </Stage>
+    );
+  },
+};
