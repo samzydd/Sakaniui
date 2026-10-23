@@ -49,9 +49,18 @@ export const Stack: Story = {
   },
 };
 
-/** Every type. Turn on richColors in the controls to tint them. */
-export const Types: Story = {
-  render: (args: ToasterProps) => (
+/** The row of type buttons, plus Expanded (spreads the stack out, adding a few toasts if there are none) and Clear. */
+const TypeButtons = (args: ToasterProps) => {
+  const [expanded, setExpanded] = React.useState(false);
+  const toggleExpanded = () => {
+    if (!expanded && document.querySelectorAll('ol[data-y-position] > li').length < 2) {
+      ['Event has been created', 'Your changes have been saved', 'Invitation sent'].forEach((title, i) => {
+        window.setTimeout(() => toast(title, { ...event, id: `expanded-demo-${i}` }), 80 + i * 150);
+      });
+    }
+    setExpanded((v) => !v);
+  };
+  return (
     <Stage>
       <Button variant="secondary" onClick={() => toast('Event has been created', event)}>Default</Button>
       <Button variant="secondary" onClick={() => toast.success('Event has been created', event)}>Success</Button>
@@ -59,10 +68,16 @@ export const Types: Story = {
       <Button variant="secondary" onClick={() => toast.warning('Event start time cannot be earlier than 8am')}>Warning</Button>
       <Button variant="secondary" onClick={() => toast.error('Event has not been created')}>Error</Button>
       <Button variant="secondary" onClick={() => toast.loading('Uploading file…', { description: 'report-q3.pdf' })}>Loading</Button>
+      <Button variant={expanded ? 'primary' : 'secondary'} onClick={toggleExpanded}>Expanded</Button>
       <Button variant="ghost" onClick={() => toast.dismiss()}>Clear</Button>
-      <Toaster {...args} />
+      <Toaster {...args} expand={expanded || args.expand} duration={expanded ? Infinity : args.duration} />
     </Stage>
-  ),
+  );
+};
+
+/** Every type. Turn on richColors in the controls to tint them. */
+export const Types: Story = {
+  render: (args: ToasterProps) => <TypeButtons {...args} />,
 };
 
 export const RichColors: Story = { ...Types, args: { richColors: true } };
@@ -109,31 +124,8 @@ export const Positions: Story = {
 
 export const Expanded: Story = { ...Stack, args: { expand: true, duration: Infinity } };
 
-/** Dark mode: the .dark class flips the semantic tokens; nothing in the component changes. The Expanded button spreads the stack out (and adds a few toasts if there are none). */
+/** Dark mode: the .dark class flips the semantic tokens; nothing in the component changes. Same buttons as Types, including Expanded. */
 export const DarkMode: Story = {
   decorators: [(S) => <div className="dark"><S /></div>],
-  render: (args: ToasterProps) => {
-    const [expanded, setExpanded] = React.useState(false);
-    const toggleExpanded = () => {
-      if (!expanded && document.querySelectorAll('ol[data-y-position] > li').length < 2) {
-        ['Event has been created', 'Your changes have been saved', 'Invitation sent'].forEach((title, i) => {
-          window.setTimeout(() => toast(title, { ...event, id: `dark-expanded-${i}` }), 80 + i * 150);
-        });
-      }
-      setExpanded((v) => !v);
-    };
-    return (
-      <Stage>
-        <Button variant="secondary" onClick={() => toast('Event has been created', event)}>Default</Button>
-        <Button variant="secondary" onClick={() => toast.success('Event has been created', event)}>Success</Button>
-        <Button variant="secondary" onClick={() => toast.info('Be at the area 10 minutes before the event time')}>Info</Button>
-        <Button variant="secondary" onClick={() => toast.warning('Event start time cannot be earlier than 8am')}>Warning</Button>
-        <Button variant="secondary" onClick={() => toast.error('Event has not been created')}>Error</Button>
-        <Button variant="secondary" onClick={() => toast.loading('Uploading file…', { description: 'report-q3.pdf' })}>Loading</Button>
-        <Button variant={expanded ? 'primary' : 'secondary'} onClick={toggleExpanded}>Expanded</Button>
-        <Button variant="ghost" onClick={() => toast.dismiss()}>Clear</Button>
-        <Toaster {...args} expand={expanded} duration={expanded ? Infinity : args.duration} />
-      </Stage>
-    );
-  },
+  render: (args: ToasterProps) => <TypeButtons {...args} />,
 };
