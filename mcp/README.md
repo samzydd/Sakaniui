@@ -1,6 +1,7 @@
 # @sakaniui/mcp
 
-A [Model Context Protocol](https://modelcontextprotocol.io) server for [SakaniUI](https://www.sakaniui.com).
+A [Model Context Protocol](https://modelcontextprotocol.io) server for [SakaniUI](https://www.sakaniui.com),
+the open-source React design system with 1500+ components and variants.
 It lets an AI assistant (Claude Code, Cursor, Windsurf, Claude Desktop, ...) look the design system up
 instead of guessing: components, props, allowed values, tokens and icons, plus a checker for the code it
 writes.

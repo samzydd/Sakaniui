@@ -1,6 +1,6 @@
 # SakaniUI
 
-An open-source, token-driven React component library for SaaS products — **1,500+ accessible components and variants**, built 1:1 from a Figma design system, across light and dark modes, with **built-in glass and Apple-style liquid glass surfaces**.
+An open-source, token-driven React component library for SaaS products — **1500+ accessible components and variants**, built 1:1 from a Figma design system, across light and dark modes, with **built-in glass and Apple-style liquid glass surfaces**.
 
 **[Live Storybook →](https://main--6a5a658b3681fcc010430db5.chromatic.com)** · **[Figma file →](https://www.figma.com/community/file/1661001585975776295)**
 
@@ -10,7 +10,7 @@ An open-source, token-driven React component library for SaaS products — **1,5
 
 ## Why SakaniUI
 
-Most component libraries start in code and retrofit the design. SakaniUI was built the other way: every component is designed first in Figma with a strict three-layer token architecture, then implemented 1:1 in React — same variants, same states, same tokens. The Figma file has grown into a 1,500+ component-and-variant system across light and dark mode; the React library mirrors it component by component, with new ones landing as they're built out.
+Most component libraries start in code and retrofit the design. SakaniUI was built the other way: every component is designed first in Figma with a strict three-layer token architecture, then implemented 1:1 in React — same variants, same states, same tokens. The Figma file has grown into a 1500+ component-and-variant system across light and dark mode; the React library mirrors it component by component, with new ones landing as they're built out.
 
 - **Token-driven** — components bind only to semantic tokens (`bg/surface`, `fg/muted`, `accent/default`…), so the entire library re-themes from one place
 - **Light & dark mode** — add the `.dark` class to any container; every component re-themes automatically, no per-component dark styles
@@ -256,7 +256,7 @@ Three layers, defined in Figma and exported to `tokens.css`:
 
 Change a semantic token and every component follows — in both the design file and the code.
 
-## Components (114+, syncing toward Figma's 1,500+)
+## Components (1500+ components and variants)
 
 **Core** — Button · Icon Button · Badge · Label · Divider · Link · Kbd · Spinner · Skeleton · Progress · Tooltip · Avatar · Avatar Group
 
