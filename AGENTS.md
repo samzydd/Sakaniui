@@ -16,7 +16,7 @@ import manifest from '@sakaniui/react/manifest.json';
 const button = manifest.components.find((c) => c.name === 'Button'); // props[], contract.requiredProps
 ```
 Editors can query the same data through the bundled MCP server
-(`npx -y @sakaniui/mcp`): `search_components`, `get_component`, `search_icons`,
+(`npx -y @sakaniui/mcp`): `search_components`, `get_component`, `search_icons`, `search_emoji`,
 `check_code`, `check_usage`, `get_tokens`, `get_guide`, `check_compatibility`, `get_changelog`.
 
 **Object props have a shape.** A prop such as `columns`, `items`, `options`, `plans` or `data` takes an array
@@ -147,6 +147,21 @@ CSS of a component into your own file.
   1.5, the Figma icon stroke), `absoluteStrokeWidth`. Add `title` when the icon carries meaning alone.
 - Component props that take an icon (`icon`, `leftIcon` ...) take the component itself, typed
   `IconComponent`; Sakani, Lucide and Tabler React icons all fit.
+
+## 4d. Emoji
+
+- Full-colour emoji (Fluent Emoji, Flat) live in `@sakaniui/react/emoji`, one component per emoji:
+  `EmojiRocket`, `EmojiPartyPopper`, `EmojiWavingHand` (1,594 emoji; names are `Emoji` + PascalCase of the
+  Unicode name, so find them with `search_emoji` instead of guessing). Each is tree-shaken on its own.
+- They are pictures, not icons: render them as elements (`<EmojiRocket />`), never pass them to an `icon`
+  prop, and do not expect `currentColor` (they keep their own colours). Use an icon for UI chrome and an
+  emoji for expression: reactions, empty states, celebration, user-chosen labels.
+- 311 people and hand emoji take `tone`: `<EmojiWavingHand tone="medium-dark" />` (`light`, `medium-light`,
+  `medium`, `medium-dark`, `dark`). Emoji with tones weigh more (about 16 kB) because all six tones ship in
+  the module; the others are about 2 kB.
+- Props: `size` (default 24; `'1em'` follows the text), `tone`, `title`. Without `title` the emoji is
+  decorative (`aria-hidden`); add `title` when it carries meaning alone. `emojiCatalog` lists every emoji
+  with its label, Unicode character and category, for pickers and search.
 
 ## 5. Component guide — what it's for, why it behaves that way, when not to use it
 

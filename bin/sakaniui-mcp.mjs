@@ -42,7 +42,7 @@ const readJson = (root, rel) => { try { return JSON.parse(readText(root, rel)); 
 function loadInstall(root) {
   const pkg = readJson(root, 'package.json');
   if (!pkg || pkg.name !== '@sakaniui/react') return null;
-  return { root, version: pkg.version, manifest: readJson(root, 'dist/manifest.json'), icons: readJson(root, 'dist/icon-index.json'), guide: readText(root, 'AGENTS.md'), changelog: readText(root, 'CHANGELOG.md') };
+  return { root, version: pkg.version, manifest: readJson(root, 'dist/manifest.json'), icons: readJson(root, 'dist/icon-index.json'), emoji: readJson(root, 'dist/emoji-index.json'), guide: readText(root, 'AGENTS.md'), changelog: readText(root, 'CHANGELOG.md') };
 }
 
 function findProjectInstall() {
@@ -93,6 +93,7 @@ const manifest = active.manifest;
 const guide = active.guide || bundled.guide || '';
 const changelog = active.changelog || bundled.changelog || '';
 const iconIndex = (active.icons && active.icons.icons) || (bundled.icons && bundled.icons.icons) || [];
+const emojiIndex = (active.emoji && active.emoji.emoji) || (bundled.emoji && bundled.emoji.emoji) || [];
 const projectVersion = project ? project.version : null;
 
 // The HTML attributes React accepts (shipped in the manifest since 0.8.10; older manifests use the fallback list).
@@ -312,6 +313,34 @@ function iconProblem(propName, raw, importedElsewhere = new Set(), localNames = 
   return `"${v}" is not a SakaniUI icon.${hint.length ? ` Did you mean: ${hint.join(', ')}?` : ''} Use search_icons to find the real name.`;
 }
 
+/* ---------- emoji ---------- */
+const emojiNames = new Set(emojiIndex.map((e) => e.name));
+const emojiOtherExports = new Set(((active.emoji && active.emoji.other) || (bundled.emoji && bundled.emoji.other)) || []);
+const EMOJI_SINCE = '0.10.0';
+const emojiWords = (name) => name.replace(/^Emoji/, '').replace(/([a-z0-9])([A-Z])/g, '$1 $2').replace(/([A-Za-z])(\d)/g, '$1 $2').toLowerCase();
+
+function searchEmoji(query, limit = 12) {
+  const terms = String(query).toLowerCase().replace(/emoji/g, ' ').split(/[^a-z0-9]+/).filter(Boolean);
+  if (!terms.length) return [];
+  return emojiIndex
+    .map((e) => {
+      const words = emojiWords(e.name).split(' ');
+      let s = 0;
+      for (const t of terms) {
+        if (words.join(' ') === t) s += 30;
+        else if (words[0] === t) s += 12;
+        else if (words.includes(t)) s += 8;
+        else if (words.some((w) => w.startsWith(t))) s += 4;
+        if ((e.category || '').toLowerCase().includes(t)) s += 1;
+      }
+      return [s - words.length * 0.1, e];
+    })
+    .filter(([s]) => s > 0.5)
+    .sort((a, b) => b[0] - a[0])
+    .slice(0, limit)
+    .map(([, e]) => e);
+}
+
 // Attributes every component forwards to its root element. A prop outside this list and the contract is worth a warning.
 const NATIVE_FALLBACK = /^(className|style|id|ref|key|children|role|tabIndex|title|hidden|lang|dir|slot|on[A-Z].*|aria-.*|data-.*|href|target|rel|download|name|type|value|defaultValue|checked|defaultChecked|disabled|required|readOnly|placeholder|htmlFor|form|autoFocus|autoComplete|autoCapitalize|spellCheck|inputMode|pattern|min|max|step|minLength|maxLength|rows|cols|multiple|accept|src|srcSet|alt|width|height|loading|draggable|tabindex|ariaLabel)$/;
 
@@ -461,8 +490,8 @@ function checkCode(source) {
   for (const imp of imports) {
     if (!imp.from.startsWith('@sakaniui/react')) continue;
     const entry = imp.from;
-    if (!['@sakaniui/react', '@sakaniui/react/blocks', '@sakaniui/react/icons'].includes(entry)) {
-      if (imp.names.length) errors.push({ line: imp.line, message: `"${entry}" has no named exports. Import components from @sakaniui/react, blocks from @sakaniui/react/blocks and icons from @sakaniui/react/icons.` });
+    if (!['@sakaniui/react', '@sakaniui/react/blocks', '@sakaniui/react/icons', '@sakaniui/react/emoji'].includes(entry)) {
+      if (imp.names.length) errors.push({ line: imp.line, message: `"${entry}" has no named exports. Import components from @sakaniui/react, blocks from @sakaniui/react/blocks icons from @sakaniui/react/icons and emoji from @sakaniui/react/emoji.` });
       continue;
     }
     if (imp.def) errors.push({ line: imp.line, message: `${entry} has no default export; use a named import: import { ${imp.def} } from '${entry}';` });
@@ -472,6 +501,15 @@ function checkCode(source) {
       const isUtility = !!util;
       // an exact helper name (toast) is not a mis-cased component (Toast)
       const c = isUtility ? undefined : byName.get(n.imported.toLowerCase());
+      if (entry === '@sakaniui/react/emoji') {
+        if (!emojiNames.has(n.imported) && !emojiOtherExports.has(n.imported)) {
+          const hint = searchEmoji(n.imported, 3).map((e) => e.name);
+          errors.push({ line: imp.line, message: `${n.imported} is not exported by @sakaniui/react/emoji.${hint.length ? ` Did you mean: ${hint.join(', ')}?` : ''} Use search_emoji to find the real name.` });
+        } else if (inInstalled({ since: EMOJI_SINCE }) === false) {
+          errors.push({ line: imp.line, message: `@sakaniui/react/emoji was added in ${EMOJI_SINCE}; the project has ${projectVersion}.` });
+        }
+        continue;
+      }
       if (entry === '@sakaniui/react/icons') {
         if (!iconNames.has(n.imported) && !iconOtherExports.has(n.imported)) {
           const hint = searchIcons(n.imported, 3).map((i) => i.name);
@@ -787,8 +825,20 @@ const tools = {
       return text({ import: "import { IconName } from '@sakaniui/react/icons';", usage: 'icon={IconName} (the component, not <IconName />)', icons: hits });
     },
   },
+  search_emoji: {
+    description: 'Find real emoji component names (Fluent Emoji, exported from @sakaniui/react/emoji) by meaning, e.g. "rocket", "party", "thumbs up". Emoji are full colour and rendered as elements (<EmojiRocket />), not passed to icon props. Only names returned here exist.',
+    inputSchema: { type: 'object', properties: { query: { type: 'string' }, limit: { type: 'number' } }, required: ['query'] },
+    run(args) {
+      const q = strArg(args, 'query', { required: true }); if (q.err) return fail(q.err);
+      if (!emojiIndex.length) return fail('The emoji index is not available in this install (emoji arrived in 0.10.0).');
+      const limit = Number.isInteger(args.limit) ? Math.min(Math.max(args.limit, 1), 30) : 12;
+      const hits = searchEmoji(q.value, limit).map((e) => { const o = { name: e.name, label: e.label, char: e.char, category: e.category }; if (e.tones) o.tones = true; return o; });
+      if (!hits.length) return text(`No emoji matches "${q.value}". Try a simpler word (e.g. "party" rather than "celebration").`);
+      return text({ import: "import { EmojiName } from '@sakaniui/react/emoji';", usage: '<EmojiName size={24} /> (an element, not an icon prop). Where tones is true: tone="light" | "medium-light" | "medium" | "medium-dark" | "dark".', emoji: hits });
+    },
+  },
   check_code: {
-    description: 'Check a JSX/TSX snippet you wrote: imports from @sakaniui/react (and /blocks, /icons) must exist, every SakaniUI element must have its required props, prop values must be allowed, and icon props must be real icon components passed as components. The code is only read, never run. Run it on every snippet before you answer.',
+    description: 'Check a JSX/TSX snippet you wrote: imports from @sakaniui/react (and /blocks, /icons, /emoji) must exist, every SakaniUI element must have its required props, prop values must be allowed, and icon props must be real icon components passed as components. The code is only read, never run. Run it on every snippet before you answer.',
     inputSchema: { type: 'object', properties: { code: { type: 'string', description: 'The snippet, including its import lines.' } }, required: ['code'] },
     run(args) {
       const code = args.code;
@@ -839,7 +889,7 @@ function handle(msg) {
           protocolVersion: asked && PROTOCOL_VERSIONS.includes(asked) ? asked : PROTOCOL_VERSIONS[0],
           capabilities: { tools: { listChanged: false } },
           serverInfo: { name: 'sakaniui', title: 'SakaniUI', version: bundled.version }, // the server's own version, not the data's
-          instructions: `SakaniUI ${refVersion}${projectVersion ? ` (project has ${projectVersion})` : ''}. Read-only reference. Look components up with search_components / get_component and start from their \`example\`; find icon names with search_icons (never guess them); search by the name you would normally use (dialog, snackbar, navbar, date picker) and it maps to the real component; run check_code on every snippet before you answer; style anything beyond props with the design tokens from get_tokens (CSS variables), not hard-coded colours or utility classes the project may not have; read get_guide when nothing fits.${note ? ` ${note}` : ''}`,
+          instructions: `SakaniUI ${refVersion}${projectVersion ? ` (project has ${projectVersion})` : ''}. Read-only reference. Look components up with search_components / get_component and start from their \`example\`; find icon names with search_icons and emoji names with search_emoji (never guess them); search by the name you would normally use (dialog, snackbar, navbar, date picker) and it maps to the real component; run check_code on every snippet before you answer; style anything beyond props with the design tokens from get_tokens (CSS variables), not hard-coded colours or utility classes the project may not have; read get_guide when nothing fits.${note ? ` ${note}` : ''}`,
         } });
       }
       case 'ping':

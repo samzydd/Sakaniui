@@ -16,7 +16,7 @@ const here = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const root = path.resolve(here, '..');
 const lib = JSON.parse(fs.readFileSync(path.join(root, 'package.json'), 'utf8'));
 
-const need = ['dist/manifest.json', 'dist/icon-index.json', 'AGENTS.md', 'CHANGELOG.md', 'bin/sakaniui-mcp.mjs', 'LICENSE'];
+const need = ['dist/manifest.json', 'dist/icon-index.json', 'dist/emoji-index.json', 'AGENTS.md', 'CHANGELOG.md', 'bin/sakaniui-mcp.mjs', 'LICENSE'];
 for (const f of need) if (!fs.existsSync(path.join(root, f))) { console.error(`mcp: ${f} is missing. Run \`npm run build:lib\` in the repo root first.`); process.exit(1); }
 const manifest = JSON.parse(fs.readFileSync(path.join(root, 'dist/manifest.json'), 'utf8'));
 if (manifest.version !== lib.version) { console.error(`mcp: dist/manifest.json is ${manifest.version} but the library is ${lib.version}. Rebuild with \`npm run build:lib\`.`); process.exit(1); }
@@ -30,6 +30,7 @@ fs.copyFileSync(path.join(root, 'bin/sakaniui-mcp.mjs'), path.join(here, 'bin/sa
 fs.chmodSync(path.join(here, 'bin/sakaniui-mcp.mjs'), 0o755);
 fs.copyFileSync(path.join(root, 'dist/manifest.json'), path.join(here, 'data/dist/manifest.json'));
 fs.copyFileSync(path.join(root, 'dist/icon-index.json'), path.join(here, 'data/dist/icon-index.json'));
+fs.copyFileSync(path.join(root, 'dist/emoji-index.json'), path.join(here, 'data/dist/emoji-index.json'));
 fs.copyFileSync(path.join(root, 'AGENTS.md'), path.join(here, 'data/AGENTS.md'));
 fs.copyFileSync(path.join(root, 'CHANGELOG.md'), path.join(here, 'data/CHANGELOG.md'));
 fs.copyFileSync(path.join(root, 'LICENSE'), path.join(here, 'LICENSE'));

@@ -196,6 +196,16 @@ for (const c of withExample) {
   for (const n of icons ? icons[1].split(',').map((x) => x.trim()).filter(Boolean) : []) if (!exportedIcons.has(n)) fail(`the example for ${c.name} uses ${n}, which does not exist`);
 }
 
+/* ---- emoji: the index is exactly the set of exported emoji ---- */
+const emojiIndex = JSON.parse(read('dist/emoji-index.json'));
+const emojiMod = await import(pathToFileURL(path.join(root, 'dist/emoji.mjs')).href);
+const exportedEmoji = new Set(Object.keys(emojiMod).filter((n) => /^Emoji[A-Z0-9]/.test(n)));
+const indexedEmoji = new Set(emojiIndex.emoji.map((e) => e.name));
+for (const n of indexedEmoji) if (!exportedEmoji.has(n)) fail(`emoji ${n} is in emoji-index.json but not exported`);
+for (const n of exportedEmoji) if (!indexedEmoji.has(n)) fail(`emoji ${n} is exported but missing from emoji-index.json`);
+if (emojiIndex.version !== pkg.version) fail(`emoji-index.json version ${emojiIndex.version} is not ${pkg.version}`);
+if (!exportedEmoji.has('EmojiRocket') || typeof emojiMod.EmojiRocket.emojiName !== 'string') fail('EmojiRocket is not a Sakani emoji component');
+
 /* ---- tokens ---- */
 const css = read('dist/tokens.css').replace(/\/\*[\s\S]*?\*\//g, '');
 const defined = new Set([...css.matchAll(/(--[a-z0-9-]+)\s*:/gi)].map((m) => m[1]));
@@ -251,4 +261,4 @@ if (problems.length) {
   for (const p of problems.slice(0, 40)) console.error('  - ' + p);
   process.exit(1);
 }
-console.log(`manifest verified: ${manifest.components.length} entries exist at runtime, ${checkedProps} props match the type definitions, ${withExample.length} examples type-check and pass check_code, ${indexed.size} icons match the exports, ${listed.size} tokens match tokens.css, no private references, server is read-only`);
+console.log(`manifest verified: ${manifest.components.length} entries exist at runtime, ${checkedProps} props match the type definitions, ${withExample.length} examples type-check and pass check_code, ${indexed.size} icons and ${indexedEmoji.size} emoji match the exports, ${listed.size} tokens match tokens.css, no private references, server is read-only`);

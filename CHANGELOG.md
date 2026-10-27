@@ -2,6 +2,22 @@
 
 All notable changes to `@sakaniui/react` are documented here.
 
+## 0.10.0
+
+- **New: `@sakaniui/react/emoji`**, 1,594 full-colour emoji (Fluent Emoji, Flat style, by Microsoft, MIT), built
+  from the new *↳ Emoji* page in Figma. One component per emoji, tree-shaken on its own:
+  `<EmojiRocket />`, `<EmojiPartyPopper size={32} />`.
+  - 311 people and hand emoji take a skin tone: `<EmojiWavingHand tone="medium-dark" />`
+    (`light`, `medium-light`, `medium`, `medium-dark`, `dark`).
+  - Props: `size` (default 24, `'1em'` follows the text), `tone`, `title` (without it the emoji is decorative).
+  - `emojiCatalog`, `emojiCategories` and `emojiNames` list every emoji with its label, Unicode character and
+    category, for pickers and search; `createEmoji` builds one from your own artwork.
+  - The docs *Icons* page is now *Icons & emoji*, with a searchable emoji gallery (category, skin tone, copy
+    JSX or the character).
+- Agent contract: the MCP server has a new `search_emoji` tool, `check_code` validates imports from
+  `@sakaniui/react/emoji`, and `emoji-index.json` ships next to `icon-index.json`.
+- Licence notice for Fluent Emoji added to `THIRD_PARTY_NOTICES.md`.
+
 ## 0.9.0
 
 - **New: `Toaster` and `toast()`**, a managed toast stack (Sonner-style) built from the new *↳ Sonner* page in Figma.

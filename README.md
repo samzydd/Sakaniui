@@ -17,7 +17,7 @@ Most component libraries start in code and retrofit the design. SakaniUI was bui
 - **Glass & liquid glass** — a third theme axis, *Surface* (Solid · Glass · Liquid): frosted glassmorphism and Apple-style liquid glass with real lens refraction, switched per area with one attribute — see [Glass & liquid glass](#glass--liquid-glass)
 - **Accessible by default** — WCAG AA contrast audited, global focus-ring system, `prefers-reduced-motion` support, full ARIA semantics (combobox active-descendant, calendar date labels, live-region toasts, focus-return popovers)
 - **Typed & composable** — strict TypeScript, generic `Table<T>`, slot-based composition, controlled + uncontrolled patterns
-- **Geist typography** and **Tabler Icons** (5,184 outline + 1,054 filled), matching the Figma source exactly
+- **Geist typography**, **Tabler Icons** (5,184 outline + 1,054 filled) and **Fluent Emoji** (1,594, 311 with skin tones), matching the Figma source exactly
 
 
 ## Icons
@@ -36,6 +36,22 @@ import { IconHome, IconBell, IconHeartFilled } from '@sakaniui/react/icons';
 Names follow Tabler (`IconName` / `IconNameFilled`), so tabler.io/icons is the search. Props follow
 lucide-react (`size`, `color`, `strokeWidth`), and every component prop that takes an icon still
 accepts Lucide or Tabler React icons. See `THIRD_PARTY_NOTICES.md` for the MIT licence.
+
+## Emoji
+
+Full-colour emoji from [Fluent Emoji](https://github.com/microsoft/fluentui-emoji) (Flat style, MIT): 1,594
+of them, the same as the Figma *↳ Emoji* page. One component per emoji, tree-shaken individually:
+
+```tsx
+import { EmojiRocket, EmojiPartyPopper, EmojiWavingHand } from '@sakaniui/react/emoji';
+
+<EmojiRocket />                              {/* 24px */}
+<EmojiPartyPopper size={32} />
+<EmojiWavingHand tone="medium-dark" />       {/* 311 people and hand emoji take a skin tone */}
+<EmojiRocket size="1em" />                   {/* follows the surrounding text */}
+```
+
+`emojiCatalog` lists every emoji with its label, Unicode character and category, for pickers and search.
 
 ## Install
 
@@ -141,7 +157,7 @@ or `claude mcp add sakaniui -- cmd /c npx -y @sakaniui/mcp`). Needs Node.js 18 o
 
 The server is its own tiny package, [`@sakaniui/mcp`](https://www.npmjs.com/package/@sakaniui/mcp) (about 1 MB, starts in a couple of seconds; it does not install the component library). The copy bundled in `@sakaniui/react` (`npx -y -p @sakaniui/react sakaniui-mcp`) still works but downloads far more.
 
-Tools: `search_components`, `get_component` (with a type-checked `example`), `search_icons`,
+Tools: `search_components`, `get_component` (with a type-checked `example`), `search_icons`, `search_emoji`,
 `check_code` (checks a whole snippet: imports, required props, values, icon names, and the field names of object props such as table columns), `check_usage`,
 `list_components`, `get_tokens`, `get_guide`, `check_compatibility` and `get_changelog`.
 

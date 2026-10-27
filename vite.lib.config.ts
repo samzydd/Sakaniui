@@ -10,6 +10,7 @@ import path from 'node:path';
 // Two entry points, published as two subpaths:
 //   .        -> src/index.ts   (stable, fully-configurable components)
 //   ./icons       -> src/icons/index.ts (the icon set: Tabler Icons, outline + filled)
+//   ./emoji       -> src/emoji/index.ts (the emoji set: Fluent Emoji Flat, full colour)
 //   ./blocks -> src/blocks/index.ts (copy-paste composition examples --
 //     kept out of the main entry so importing them is an explicit,
 //     separate choice, matching how they're already split out in Storybook)
@@ -23,6 +24,7 @@ export default defineConfig({
         'src/components/**/*.ts', 'src/components/**/*.tsx', 'src/index.ts',
         'src/blocks/**/*.ts', 'src/blocks/**/*.tsx',
         'src/icons/**/*.ts', 'src/icons/**/*.tsx',
+        'src/emoji/**/*.ts', 'src/emoji/**/*.tsx',
         // index.ts re-exports from ./lib (LiquidGlass, HoverGroup, helpers): without these their types are `any`
         'src/lib/**/*.ts', 'src/lib/**/*.tsx',
       ],
@@ -50,6 +52,8 @@ export default defineConfig({
         // doesn't carry them, and each export is pure so apps keep only the
         // icons they import.
         icons: path.resolve(__dirname, 'src/icons/index.ts'),
+        // 1,594 generated emoji modules, same idea: their own entry, pure exports.
+        emoji: path.resolve(__dirname, 'src/emoji/index.ts'),
       },
       name: 'SakaniDesignSystem',
       formats: ['es', 'cjs'],

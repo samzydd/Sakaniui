@@ -1,6 +1,6 @@
 {
   "name": "@sakaniui/mcp",
-  "version": "0.9.0",
+  "version": "0.10.0",
   "description": "SakaniUI MCP server: lets AI editors look up components, props, tokens and icons, and check code, instead of guessing. Read-only, zero dependencies.",
   "type": "module",
   "bin": {

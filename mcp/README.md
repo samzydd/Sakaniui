@@ -3,7 +3,7 @@
 A [Model Context Protocol](https://modelcontextprotocol.io) server for [SakaniUI](https://www.sakaniui.com),
 the open-source React design system with 1500+ components and variants.
 It lets an AI assistant (Claude Code, Cursor, Windsurf, Claude Desktop, ...) look the design system up
-instead of guessing: components, props, allowed values, tokens and icons, plus a checker for the code it
+instead of guessing: components, props, allowed values, tokens, icons and emoji, plus a checker for the code it
 writes.
 
 Read-only, no dependencies, starts in about a second.
@@ -45,6 +45,7 @@ show 10 tools.
 | `get_component` | full contract for one: props, types, allowed values, required props, and a type-checked `example` |
 | `list_components` | browse everything, by kind or category |
 | `search_icons` | find real icon names by meaning ("delete" gives `IconTrash`) |
+| `search_emoji` | find real emoji names by meaning ("party" gives `EmojiPartyPopper`) |
 | `check_code` | check a whole snippet: imports, required props, allowed values, icon names, and the field names of object props like table columns (the code is read, never run) |
 | `check_usage` | check one component's props |
 | `get_tokens` | the design tokens that exist |

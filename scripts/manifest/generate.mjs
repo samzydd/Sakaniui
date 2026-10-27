@@ -656,6 +656,23 @@ const iconsEntryNames = exportedNames('icons.mjs');
 iconIndex.other = [...iconsEntryNames].filter((n) => !/^Icon[A-Z0-9]/.test(n)).sort();
 fs.writeFileSync(path.join(root, 'dist/icon-index.json'), JSON.stringify(iconIndex) + '\n');
 
+/* ---- emoji: every exported emoji, with its label, character and category (from src/emoji/catalog.ts) ---- */
+const pascalCase = (n) => n.split('-').map((p) => p[0].toUpperCase() + p.slice(1)).join('');
+const emojiCatalog = [...fs.readFileSync(path.join(root, 'src/emoji/catalog.ts'), 'utf8').matchAll(/^  (\{"name".*\}),$/gm)].map((m) => JSON.parse(m[1]));
+const emojiIndex = {
+  name: pkg.name,
+  version: pkg.version,
+  import: '@sakaniui/react/emoji',
+  note: 'Full-colour emoji, one component per emoji: <EmojiRocket />. Emoji with `tones: true` take tone="light" | "medium-light" | "medium" | "medium-dark" | "dark". They are not icon props: render them as elements.',
+  emoji: emojiCatalog.map((e) => {
+    const o = { name: 'Emoji' + pascalCase(e.name), label: e.label, char: e.char, category: e.category };
+    if (e.tones) o.tones = true;
+    return o;
+  }),
+};
+emojiIndex.other = [...exportedNames('emoji.mjs')].filter((n) => !/^Emoji[A-Z0-9]/.test(n)).sort();
+fs.writeFileSync(path.join(root, 'dist/emoji-index.json'), JSON.stringify(emojiIndex) + '\n');
+
 const manifest = {
   schemaVersion: 6,
   name: pkg.name,
@@ -673,13 +690,14 @@ const manifest = {
     '@sakaniui/react': 'Components, hooks and helpers.',
     '@sakaniui/react/blocks': 'Full sections assembled from components (composition examples).',
     '@sakaniui/react/icons': `Tabler icons: IconName and IconNameFilled, one module each (${count('outline')} outline, ${count('filled')} filled).`,
+    '@sakaniui/react/emoji': `Fluent Emoji (full colour): EmojiName, one module each (${emojiCatalog.length} emoji, ${emojiCatalog.filter((e) => e.tones).length} with skin tones).`,
   },
   conventions: {
     version: `This manifest describes ${pkg.name}@${pkg.version}. Each component has \`since\`, the first release that contained it; a prop added later has its own \`since\`, and a value added later is listed in the prop's \`valuesSince\`. If the project has an older version installed, anything newer than that does not exist there.`,
     acceptsNativeProps: 'Components forward native HTML attributes (className, style, aria-*, event handlers) to their root element unless a prop says otherwise; only the props that are specific to SakaniUI are listed here.',
     accessibleName: 'When `contract.requiresAccessibleName` is true, a required prop (aria-label, aria-labelledby or an alt text) is the only thing that names the control or image. Do not omit it.',
     tokens: 'Use only the token names listed under `tokens`. Colour tokens follow the theme (the `.dark` class flips them); do not hard-code colours.',
-    icons: 'Icon props take the component itself (IconSettings), not an element (<IconSettings />). Only names in icon-index.json exist; search them (MCP: search_icons) instead of guessing.',
+    icons: 'Icon props take the component itself (IconSettings), not an element (<IconSettings />). Only names in icon-index.json exist; search them (MCP: search_icons) instead of guessing. Emoji are separate (`@sakaniui/react/emoji`, emoji-index.json, MCP: search_emoji) and are rendered as elements, not passed to icon props.',
     examples: 'Each component has `example`: its imports and the element with every required prop filled in, type-checked against this build. Start from it.',
     shapes: 'A prop with a `shape` takes an object (collection "object") or an array of objects (collection "array") with exactly those fields; `required` fields must be present. In a generic shape (`typeParameters: ["T"]`) T is the type of your own data: `key: keyof T & string` means the key must be a field of your row type. `recipes` hold patterns the types alone do not teach.',
     literals: 'Prop `values` keep their real type: a number is a number (columns: 2), a string is a string ("md").',
