@@ -140,6 +140,9 @@ up instead of guessing prop names.
 - `@sakaniui/react/manifest.json` -- every component and block with props, types, allowed values,
   defaults, required props and all design tokens, generated from the source on every build.
 - `AGENTS.md` -- the "why" guide (principles, when nothing fits, glass, icons, checklist).
+- **Agent skill** -- `skills/sakaniui/SKILL.md` tells Claude when to use SakaniUI and where to look things up
+  (the MCP server, the manifest, `AGENTS.md`). Install it with
+  `cp -r node_modules/@sakaniui/react/skills/sakaniui .claude/skills/` (or `~/.claude/skills/` for every project).
 - **MCP server** -- add it to your editor's MCP config (Claude Code, Cursor, Windsurf, ...):
 
 ```json

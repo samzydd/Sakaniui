@@ -2,6 +2,14 @@
 
 All notable changes to `@sakaniui/react` are documented here.
 
+## 0.10.1
+
+- **New: an agent skill.** `skills/sakaniui/SKILL.md` ships in the package. It triggers when someone asks an
+  agent for UI in a project that uses `@sakaniui/react` and points it at the MCP server, `manifest.json` and
+  `AGENTS.md` instead of repeating them, so it cannot go stale. Install it with
+  `cp -r node_modules/@sakaniui/react/skills/sakaniui .claude/skills/` (or `~/.claude/skills/` for every project).
+- No component or API changes.
+
 ## 0.10.0
 
 - **New: `@sakaniui/react/emoji`**, 1,594 full-colour emoji (Fluent Emoji, Flat style, by Microsoft, MIT), built
