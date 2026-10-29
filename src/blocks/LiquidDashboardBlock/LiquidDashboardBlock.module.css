@@ -10,9 +10,6 @@
    glass/bg-subtle (5% ink) in light, a real scrim in dark (light labels have to
    read over the bright parts of the photo). Every lens sees it too. */
 
-/* The header's logo is the dark (fg/default) mark in the design. */
-.logoDark { display: block; width: 100%; height: 100%; }
-.logoDark svg > path:first-of-type { fill: var(--color-neutral-950); }
 
 /* 2 · the overlay: one sheet over the photo, under everything else */
 .overlay {

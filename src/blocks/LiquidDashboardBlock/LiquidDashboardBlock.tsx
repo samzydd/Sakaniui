@@ -257,7 +257,7 @@ export const LiquidDashboardBlock: React.FC<LiquidDashboardBlockProps> = ({ back
                 type="brand-toggle"
                 title="csakani"
                 subtitle="Workspace"
-                logo={<span className={styles.logoDark}><SakaniLogo /></span>}
+                logo={<SakaniLogo />}
                 collapsed={collapsed}
                 onToggle={() => { userToggled.current = true; setCollapsed((c) => !c); }}
                 toggleIcon={collapsed ? PanelRightOpen : PanelRightClose}

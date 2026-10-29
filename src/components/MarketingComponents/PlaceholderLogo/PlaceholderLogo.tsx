@@ -5,10 +5,9 @@
  * sm 22 / md 40 / lg 46) -- a bg/surface + border/subtle + radius/lg
  * square slot for a company/brand mark, same "empty-state avatar" role
  * Avatar's own Icon type fills for a person. Figma's own asset inside
- * this frame is this library's own Sakani mark (a real image asset --
- * a colored square with the wordmark baked in, not a plain stroke
- * glyph), used here as the default fill exactly as shown in the design
- * file. `logo` is still a consumer-supplied override slot exactly like
+ * this frame is this library's own SakaniUI arc mark, used here as the
+ * default fill exactly as shown in the design file. It is drawn inline in
+ * fg/default, so it re-themes with the frame. `logo` is still a consumer-supplied override slot exactly like
  * Avatar's own `icon` prop -- a real usage (a logo wall, a company
  * directory row, a "brands using this" grid) drops in an arbitrary
  * company's own mark instead, whether that's another lucide icon (still
@@ -22,7 +21,7 @@
  */
 
 import React from 'react';
-import sakaniMark from '../../../assets/marketing/sakani-mark.svg';
+import { SakaniLogo } from '../../../lib/SakaniLogo';
 import { iconStrokeWidth } from '../../../lib/iconStrokeWidth';
 import styles from './PlaceholderLogo.module.css';
 
@@ -46,7 +45,7 @@ export const PlaceholderLogo: React.FC<PlaceholderLogoProps> = ({
   const iconPx = ICON_PX[size];
   const renderedLogo = React.isValidElement<{ size?: number; strokeWidth?: number }>(logo)
     ? React.cloneElement(logo, { size: iconPx, strokeWidth: iconStrokeWidth(iconPx) })
-    : (logo ?? <img src={sakaniMark} alt="" width={iconPx} height={iconPx} className={styles.defaultMark} />);
+    : (logo ?? <span className={styles.defaultMark} style={{ width: iconPx, height: iconPx }}><SakaniLogo size={iconPx} /></span>);
 
   return (
     <span

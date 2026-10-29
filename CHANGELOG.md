@@ -2,6 +2,13 @@
 
 All notable changes to `@sakaniui/react` are documented here.
 
+## Unreleased
+
+- **New logo.** The SakaniUI arc mark replaces the orange "S" tile everywhere the library shows its own brand:
+  `PlaceholderLogo`'s default mark (now drawn inline in fg/default, so it re-themes), the demo blocks' sidebar
+  logos, and the Storybook tab icon. `SidebarHeader` drops its accent tile when the logo is the SakaniUI mark.
+  No API changes.
+
 ## 0.10.1
 
 - **New: an agent skill.** `skills/sakaniui/SKILL.md` ships in the package. It triggers when someone asks an

@@ -46,6 +46,9 @@ button.header__logoWrap {
   color: var(--color-fg-on-accent);
   font-weight: 600;
 }
+/* The SakaniUI mark sits on the header itself, without the accent tile
+   (Figma "Logo / SakaniUI arc mark" in the Sidebar Header variants). */
+.header__logo:has(> [data-sakani-logo]) { background: none; }
 
 /* Collapsed brand-toggle: same dark 28x28 square always -- on hover, just
  * the glyph inside swaps from the logo to the expand-panel icon. */
