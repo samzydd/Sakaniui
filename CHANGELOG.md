@@ -2,7 +2,7 @@
 
 All notable changes to `@sakaniui/react` are documented here.
 
-## Unreleased
+## 0.10.2
 
 - **New logo.** The SakaniUI arc mark replaces the orange "S" tile everywhere the library shows its own brand:
   `PlaceholderLogo`'s default mark (now drawn inline in fg/default, so it re-themes), the demo blocks' sidebar
