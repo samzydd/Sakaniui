@@ -18,8 +18,19 @@ All notable changes to `@sakaniui/react` are documented here.
   - **`MapClusterLayer`**: pass `points` and a `renderPoint`; nearby places group into counted cluster markers
     that zoom to their places on click, and only what is in view is rendered (a zoom step takes about 5 ms with
     10,000 places). `radius`, `clusterMaxZoom` and `onClusterClick` tune it.
+  - **Dark mode** like the Figma *Dark* example: the map follows a `.dark` class on `<html>` or any ancestor, or
+    pass `theme="dark"` to make just that map dark on a light page (tiles, markers, controls and popups all switch).
+    The default tiles are darkened to flat near-black land with blue water and roads darker than the land;
+    `tileUrlDark` swaps in a provider's own dark tiles instead.
+  - **Every Figma variant and state:** `MapMarker` Pin / Dot / Cluster × Default / Hover / Selected (hover works on
+    every marker, and the hovered or selected one rises above its neighbours); new `MapControlButton` and
+    `MapControls` (Default / Hover / Disabled, with or without the locate button); `MapPopup` gains `pointer`
+    (Figma *Show pointer*). `hovered` pins the hover look on markers and control buttons for docs and visual tests.
   - `useMapContext()` gives custom overlays `project`, `zoom`, `flyTo` and `fitBounds`.
-- **New: `MapGlobe`**, a 3D dotted globe (the Figma *Map Globe*). `variant` "land" dots the continents and "ocean"
+- **New: `MapGlobe`**, a 3D dotted globe (the Figma *Map Globe*), with hover too: markers have Default, Hover
+  (soft halo), Selected (larger halo) and Active (pulse) states; hovering one stops the spin and shows its `label`
+  in a small card; `onMarkerClick` / `onMarkerHover` report the marker, and labelled markers are reachable with Tab.
+  `theme="dark"` makes a globe on a dark surface draw light dots. `variant` "land" dots the continents and "ocean"
   dots the sea; it spins, can be dragged with inertia, and pauses offscreen and under reduced motion. `markers`
   (with `active` pulses) and `arcs` are plain props, so a feed can drive them. It is a canvas with an orthographic
   projection and an 11 KB land mask (Natural Earth, public domain, notice in `THIRD_PARTY_NOTICES.md`), so it adds

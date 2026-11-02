@@ -14,6 +14,11 @@
  * mask (11 KB, see landMask.ts) and the sphere is an orthographic projection.
  * It spins on its own, can be dragged (with inertia), and pauses while
  * offscreen. Reduced motion keeps it still; dragging still works.
+ *
+ * Markers follow Map Marker Dot: default, hover (a soft halo, the marker grows a little), selected (a larger
+ * halo) and active (a pulse). Hovering one stops the spin so it can be clicked, and a marker with a `label`
+ * shows it in a small card while hovered or selected. `theme="dark"` makes just this globe dark, like Figma's
+ * explicit Dark mode.
  */
 
 import React from 'react';
@@ -26,6 +31,12 @@ export interface MapGlobeMarker {
   position: LatLng;
   /** Draws a pulsing ring around it. */
   active?: boolean;
+  /** The larger halo, for the marker the user picked. */
+  selected?: boolean;
+  /** Shows the hover appearance without a pointer (documentation and visual tests). Real hover works on its own. */
+  hovered?: boolean;
+  /** Name shown in a small card above the marker while it is hovered or selected; also its accessible name. */
+  label?: string;
 }
 
 export interface MapGlobeArc {
@@ -50,6 +61,15 @@ export interface MapGlobeProps {
   atmosphere?: boolean;
   /** Degrees between dots; smaller is denser. Defaults to 1.3. */
   dotSpacing?: number;
+  /**
+   * "auto" follows the surrounding theme. "dark" draws light dots wherever the globe sits, for a globe on a
+   * dark surface inside a light page. (The globe has no background of its own; it takes the colour behind it.)
+   */
+  theme?: 'auto' | 'dark';
+  /** Called when a marker is clicked or activated from the keyboard (markers with a `label` get a hidden button). */
+  onMarkerClick?: (index: number, marker: MapGlobeMarker) => void;
+  /** Called when the pointer or keyboard focus moves onto a marker, and with null when it leaves. */
+  onMarkerHover?: (index: number | null) => void;
   /** Accessible description. Defaults to "Globe". */
   'aria-label'?: string;
   className?: string;
@@ -78,6 +98,9 @@ export const MapGlobe: React.FC<MapGlobeProps> = ({
   draggable = true,
   atmosphere = true,
   dotSpacing = 1.3,
+  theme = 'auto',
+  onMarkerClick,
+  onMarkerHover,
   'aria-label': ariaLabel = 'Globe',
   className,
 }) => {
@@ -87,9 +110,19 @@ export const MapGlobe: React.FC<MapGlobeProps> = ({
   const dots = React.useMemo<GlobeDot[]>(() => globeDots(dotSpacing), [dotSpacing]);
   const arcPts = React.useMemo(() => arcs.map((a) => arcPath(a.from, a.to)), [arcs]);
   const view = React.useRef({ rot: center[1], tilt: clamp(center[0], -60, 60), vr: 0, vt: 0, dragging: false, idleUntil: 0 });
-  const state = React.useRef({ rgb: '20,20,20', visible: true, size: 0 });
+  const state = React.useRef({ rgb: '20,20,20', surface: '255,255,255', border: '230,230,230', font: 'sans-serif', visible: true, size: 0, hits: [] as { i: number; x: number; y: number }[] });
   const live = React.useRef({ markers, arcPts, variant, atmosphere, autoRotate, rotationSpeed });
   live.current = { markers, arcPts, variant, atmosphere, autoRotate, rotationSpeed };
+  const callbacks = React.useRef({ onMarkerClick, onMarkerHover });
+  callbacks.current = { onMarkerClick, onMarkerHover };
+  /** The marker under the pointer or keyboard focus, or null. */
+  const hover = React.useRef<number | null>(null);
+  const setHover = (i: number | null) => {
+    if (hover.current === i) return;
+    hover.current = i;
+    if (wrap.current) wrap.current.style.cursor = i != null ? 'pointer' : '';
+    callbacks.current.onMarkerHover?.(i);
+  };
 
   // colour follows the theme
   React.useEffect(() => {
@@ -97,8 +130,13 @@ export const MapGlobe: React.FC<MapGlobeProps> = ({
     if (!c) return;
     const probe = document.createElement('canvas').getContext('2d');
     if (!probe) return;
-    state.current.rgb = rgbOf(getComputedStyle(c).getPropertyValue('--color-fg-default').trim() || getComputedStyle(c).color, probe);
-  }, [themeTick]);
+    const cs = getComputedStyle(c);
+    const token = (name: string, fallback: string) => rgbOf(cs.getPropertyValue(name).trim() || fallback, probe);
+    state.current.rgb = rgbOf(cs.getPropertyValue('--color-fg-default').trim() || cs.color, probe);
+    state.current.surface = token('--color-bg-surface', '#ffffff');
+    state.current.border = token('--color-border-subtle', '#e5e5e5');
+    state.current.font = cs.fontFamily || 'sans-serif';
+  }, [themeTick, theme]);
 
   React.useEffect(() => {
     const c = canvas.current, w = wrap.current;
@@ -176,11 +214,21 @@ export const MapGlobe: React.FC<MapGlobeProps> = ({
         }
       });
 
-      // markers, matching Map Marker Dot: core, 2px ring in the background colour, halo when active
-      for (const m of L.markers) {
+      // markers, matching Map Marker Dot: core, 2px ring in the background colour, a halo when hovered or
+      // selected (Hover, Selected), a pulse when active
+      const hits: { i: number; x: number; y: number }[] = [];
+      const tips: { x: number; y: number; label: string; k: number }[] = [];
+      L.markers.forEach((m, i) => {
         const s = sphere(m.position), p = P(s.cp, s.sp, s.lam);
-        if (p.z <= 0.06) continue;
+        if (p.z <= 0.06) return;
         const x = cx + R * p.x, y = cy - R * p.y, k = Math.min(1, (p.z - 0.06) / 0.2);
+        hits.push({ i, x, y });
+        const picked = !!m.selected, hot = !!m.hovered || hover.current === i;
+        if (picked || hot) {
+          g.fillStyle = `rgba(${rgb},${(picked ? 0.2 : 0.14) * k})`;
+          g.beginPath(); g.arc(x, y, (picked ? 15 : 11) * px, 0, Math.PI * 2); g.fill();
+          if (m.label) tips.push({ x, y, label: m.label, k });
+        }
         if (m.active) {
           const pulse = (time % 2) / 2;
           g.strokeStyle = `rgba(${rgb},${0.5 * (1 - pulse) * k})`; g.lineWidth = 1.5 * px;
@@ -188,9 +236,28 @@ export const MapGlobe: React.FC<MapGlobeProps> = ({
           g.fillStyle = `rgba(${rgb},${0.16 * k})`; g.beginPath(); g.arc(x, y, 9 * px, 0, Math.PI * 2); g.fill();
         }
         g.globalCompositeOperation = 'destination-out';
-        g.beginPath(); g.arc(x, y, 5.5 * px, 0, Math.PI * 2); g.fill();
+        g.beginPath(); g.arc(x, y, (picked ? 7 : hot ? 6.5 : 5.5) * px, 0, Math.PI * 2); g.fill();
         g.globalCompositeOperation = 'source-over';
-        g.fillStyle = `rgba(${rgb},${k})`; g.beginPath(); g.arc(x, y, 3.5 * px, 0, Math.PI * 2); g.fill();
+        g.fillStyle = `rgba(${rgb},${k})`; g.beginPath(); g.arc(x, y, (picked ? 5 : hot ? 4.5 : 3.5) * px, 0, Math.PI * 2); g.fill();
+      });
+      state.current.hits = hits;
+
+      // labels: a small card above the marker (below it when there is no room), like Map Popup
+      for (const t of tips) {
+        g.font = `500 ${12 * px}px ${state.current.font}`;
+        const w = g.measureText(t.label).width + 16 * px, h = 24 * px, gap = 16 * px;
+        const lx = clamp(t.x - w / 2, 4 * px, S - w - 4 * px);
+        const ly = t.y - gap - h < 4 * px ? t.y + gap : t.y - gap - h;
+        g.save();
+        g.globalAlpha = t.k;
+        g.shadowColor = 'rgba(0,0,0,0.18)'; g.shadowBlur = 8 * px; g.shadowOffsetY = 2 * px;
+        g.fillStyle = `rgb(${state.current.surface})`;
+        g.beginPath(); if (g.roundRect) g.roundRect(lx, ly, w, h, 6 * px); else g.rect(lx, ly, w, h); g.fill();
+        g.shadowColor = 'transparent';
+        g.strokeStyle = `rgb(${state.current.border})`; g.lineWidth = px; g.stroke();
+        g.fillStyle = `rgb(${rgb})`; g.textBaseline = 'middle';
+        g.fillText(t.label, lx + 8 * px, ly + h / 2 + px * 0.5);
+        g.restore();
       }
     };
 
@@ -202,7 +269,7 @@ export const MapGlobe: React.FC<MapGlobeProps> = ({
         // inertia from a drag, then back to the gentle spin once it settles
         v.rot += v.vr * dt; v.tilt = clamp(v.tilt + v.vt * dt, -60, 60);
         v.vr *= Math.pow(0.04, dt); v.vt *= Math.pow(0.04, dt);
-        if (L.autoRotate && !reduced() && now > v.idleUntil) v.rot += L.rotationSpeed * dt;
+        if (L.autoRotate && !reduced() && now > v.idleUntil && hover.current == null) v.rot += L.rotationSpeed * dt;
       }
       if (state.current.visible) draw(now);
       raf = requestAnimationFrame(tick);
@@ -211,24 +278,44 @@ export const MapGlobe: React.FC<MapGlobeProps> = ({
     return () => { cancelAnimationFrame(raf); ro.disconnect(); io.disconnect(); };
   }, [dots]);
 
-  /* drag to spin */
+  /* markers: hover, click; drag to spin */
+  const hitAt = (clientX: number, clientY: number) => {
+    const r = wrap.current?.getBoundingClientRect();
+    if (!r) return null;
+    const x = clientX - r.left, y = clientY - r.top, reach = Math.max(10, (state.current.size / 480) * 12);
+    let best: number | null = null, bestD = reach;
+    for (const h of state.current.hits) {
+      const d = Math.hypot(h.x - x, h.y - y);
+      if (d <= bestD) { best = h.i; bestD = d; }
+    }
+    return best;
+  };
   const drag = React.useRef<{ x: number; y: number; t: number } | null>(null);
+  const press = React.useRef<{ x: number; y: number; hit: number | null } | null>(null);
   const onPointerDown = (e: React.PointerEvent) => {
+    const hit = hitAt(e.clientX, e.clientY);
+    press.current = { x: e.clientX, y: e.clientY, hit };
+    setHover(hit);
     if (!draggable) return;
     e.currentTarget.setPointerCapture(e.pointerId);
     drag.current = { x: e.clientX, y: e.clientY, t: performance.now() };
     view.current.dragging = true; view.current.vr = 0; view.current.vt = 0;
   };
   const onPointerMove = (e: React.PointerEvent) => {
+    const pr = press.current;
+    if (pr && Math.hypot(e.clientX - pr.x, e.clientY - pr.y) > 4) pr.hit = null; // it was a drag, not a click
     const d = drag.current;
-    if (!d) return;
+    if (!d) { if (!pr) setHover(hitAt(e.clientX, e.clientY)); return; }
     const v = view.current, k = 180 / Math.max(1, state.current.size * 0.84 * Math.PI) * 1.6;
     const dx = e.clientX - d.x, dy = e.clientY - d.y, dt = Math.max(1, performance.now() - d.t) / 1000;
     v.rot -= dx * k; v.tilt = clamp(v.tilt + dy * k, -60, 60);
     v.vr = (-dx * k) / dt; v.vt = (dy * k) / dt;
     d.x = e.clientX; d.y = e.clientY; d.t = performance.now();
   };
-  const onPointerUp = () => {
+  const onPointerUp = (e: React.PointerEvent) => {
+    const pr = press.current;
+    press.current = null;
+    if (pr && pr.hit != null && e.type === 'pointerup') callbacks.current.onMarkerClick?.(pr.hit, live.current.markers[pr.hit]);
     if (!drag.current) return;
     drag.current = null;
     const v = view.current;
@@ -239,15 +326,21 @@ export const MapGlobe: React.FC<MapGlobeProps> = ({
   return (
     <div
       ref={wrap}
-      className={[styles.globe, draggable ? styles['globe--draggable'] : '', className ?? ''].filter(Boolean).join(' ')}
-      role="img"
+      className={[styles.globe, draggable ? styles['globe--draggable'] : '', theme === 'dark' ? 'dark' : '', className ?? ''].filter(Boolean).join(' ')}
+      role={onMarkerClick ? 'group' : 'img'}
       aria-label={ariaLabel}
       onPointerDown={onPointerDown}
       onPointerMove={onPointerMove}
       onPointerUp={onPointerUp}
       onPointerCancel={onPointerUp}
+      onPointerLeave={() => { if (!press.current) setHover(null); }}
     >
-      <canvas ref={canvas} className={styles.canvas} />
+      <canvas ref={canvas} className={styles.canvas} aria-hidden={onMarkerClick ? true : undefined} />
+      {onMarkerClick && markers.map((m, i) => m.label && (
+        <button key={i} type="button" className={styles.srOnly} onFocus={() => setHover(i)} onBlur={() => setHover(null)} onClick={() => onMarkerClick(i, m)}>
+          {m.label}
+        </button>
+      ))}
     </div>
   );
 };

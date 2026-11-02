@@ -9,3 +9,5 @@ export { MapGlobe } from './MapGlobe';
 export type { MapGlobeProps, MapGlobeMarker, MapGlobeArc } from './MapGlobe';
 export { MapClusterLayer } from './MapClusterLayer';
 export type { MapClusterLayerProps, MapClusterPoint } from './MapClusterLayer';
+export { MapControlButton, MapControls } from './MapControls';
+export type { MapControlButtonProps, MapControlsProps } from './MapControls';

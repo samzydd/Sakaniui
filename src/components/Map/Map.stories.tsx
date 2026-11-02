@@ -4,6 +4,9 @@ import { Map } from './Map';
 import { MapMarker } from './MapMarker';
 import { MapPopup } from './MapPopup';
 import { MapClusterLayer } from './MapClusterLayer';
+import { MapControlButton, MapControls } from './MapControls';
+import { MapContext } from './context';
+import { IconPlus } from '../../icons/outline/plus';
 import type { LatLng } from './geo';
 
 const PLACES: { name: string; note: string; position: LatLng }[] = [
@@ -14,11 +17,11 @@ const PLACES: { name: string; note: string; position: LatLng }[] = [
   { name: 'The Shard', note: '32 London Bridge St', position: [51.5045, -0.0865] },
 ];
 
-function Places() {
+function Places({ theme }: { theme?: 'auto' | 'dark' }) {
   const [selected, setSelected] = React.useState<number | null>(0);
   const place = selected == null ? null : PLACES[selected];
   return (
-    <Map center={[51.5062, -0.0930]} zoom={15} locate height={460}>
+    <Map center={[51.5062, -0.0930]} zoom={15} locate height={460} theme={theme}>
       {PLACES.map((p, i) => (
         <MapMarker key={p.name} position={p.position} label={p.name} selected={selected === i} onClick={() => setSelected(i)} />
       ))}
@@ -58,7 +61,13 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = { render: () => <Places /> };
 
+/** The Figma "Dark" example: this map is dark on a light page, because `theme="dark"` re-themes the whole map. */
 export const DarkMode: Story = {
+  render: () => <Places theme="dark" />,
+};
+
+/** `theme` left on "auto": the map follows a `.dark` class on <html> or any ancestor. */
+export const DarkFollowsPage: Story = {
   render: () => <Places />,
   decorators: [(S) => <div className="dark" style={{ background: 'var(--color-bg-canvas)', padding: 24 }}><S /></div>],
 };
@@ -164,4 +173,119 @@ export const ClusteredPlaces: Story = {
 export const ClusteredPlaces10k: Story = {
   name: 'Clustered places (10,000)',
   render: () => <Clusters count={10000} />,
+};
+
+/* ---- Every Figma variant, side by side ---- */
+
+/** Lays markers out by pixel instead of by place, so a board of states needs no tiles. */
+const Board: React.FC<{ children: React.ReactNode; w: number; h: number }> = ({ children, w, h }) => (
+  <MapContext.Provider value={{ zoom: 15, maxZoom: 18, flyTo: () => {}, fitBounds: () => {}, project: ([y, x]) => ({ x, y }) }}>
+    <div style={{ position: 'relative', width: w, height: h }}>{children}</div>
+  </MapContext.Provider>
+);
+
+const label: React.CSSProperties = { position: 'absolute', transform: 'translateX(-50%)', font: '500 12px var(--font-sans)', color: 'var(--color-fg-muted)', whiteSpace: 'nowrap' };
+
+function MarkerStates() {
+  const states = [['Default', {}], ['Hover', { hovered: true }], ['Selected', { selected: true }]] as const;
+  const types = ['pin', 'dot', 'cluster'] as const;
+  return (
+    <Board w={520} h={330}>
+      {states.map(([name], c) => <span key={name} style={{ ...label, left: 130 + c * 150, top: 0 }}>{name}</span>)}
+      {types.map((t, r) => (
+        <React.Fragment key={t}>
+          <span style={{ ...label, left: 28, top: 82 + r * 100, transform: 'none', textTransform: 'capitalize' }}>{t}</span>
+          {states.map(([name, props], c) => (
+            <MapMarker key={name} variant={t} count={12} label={`${t} ${name}`} position={[t === 'pin' ? 100 + r * 100 : 82 + r * 100, 130 + c * 150]} {...props} />
+          ))}
+        </React.Fragment>
+      ))}
+    </Board>
+  );
+}
+
+const sheet = (dark?: boolean): React.CSSProperties => ({ padding: 24, borderRadius: 16, background: 'var(--color-bg-canvas)', border: '1px solid var(--color-border-subtle)', ...(dark ? {} : {}) });
+
+export const MarkerStatesBoard: Story = {
+  name: 'Marker: type × state (Figma Map Marker)',
+  render: () => (
+    <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
+      <div style={sheet()}><MarkerStates /></div>
+      <div className="dark" style={sheet(true)}><MarkerStates /></div>
+    </div>
+  ),
+  decorators: [(S) => <div style={{ padding: 24, width: 1180 }}><S /></div>],
+  parameters: { docs: { description: { story: 'Pin, Dot and Cluster in Default, Hover and Selected, in light and dark. Hover is a real `:hover` on every marker; `hovered` pins it here so the board can show it.' } } },
+};
+
+export const ControlStates: Story = {
+  name: 'Controls: button states (Figma Map Control Button)',
+  render: () => (
+    <div style={{ display: 'flex', gap: 32, alignItems: 'flex-start' }}>
+      {[false, true].map((dark) => (
+        <div key={String(dark)} className={dark ? 'dark' : undefined} style={{ ...sheet(dark), display: 'flex', gap: 28, alignItems: 'flex-start' }}>
+          {([['Default', {}], ['Hover', { hovered: true }], ['Disabled', { disabled: true }]] as const).map(([name, props]) => (
+            <div key={name} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
+              <div style={{ border: '1px solid var(--color-border-default)', borderRadius: 8, background: 'var(--color-bg-surface)', boxShadow: 'var(--shadow-md)', overflow: 'hidden' }}>
+                <MapControlButton icon={IconPlus} aria-label={`${name} button`} {...props} />
+              </div>
+              <span style={{ font: '500 12px var(--font-sans)', color: 'var(--color-fg-muted)' }}>{name}</span>
+            </div>
+          ))}
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
+            <div style={{ position: 'relative', width: 58, height: 133 }}><MapControls locate /></div>
+            <span style={{ font: '500 12px var(--font-sans)', color: 'var(--color-fg-muted)' }}>Controls</span>
+          </div>
+        </div>
+      ))}
+    </div>
+  ),
+  parameters: { docs: { description: { story: 'Default, Hover (pinned with `hovered`; real hover works on its own) and Disabled, then the whole Map Controls group with the locate button. Light, then dark.' } } },
+};
+
+export const PopupOptions: Story = {
+  name: 'Popup: options (Figma Map Popup)',
+  render: () => (
+    <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
+      {[false, true].map((dark) => (
+        <div key={String(dark)} className={dark ? 'dark' : undefined} style={sheet(dark)}>
+          <Board w={560} h={310}>
+            {[
+              [{ title: 'Blue Bottle Coffee', description: '300 Webster St · Open until 6pm', onClose: () => {} }, 'Full'],
+              [{ title: 'Blue Bottle Coffee', onClose: () => {} }, 'No description'],
+              [{ title: 'Blue Bottle Coffee', description: '300 Webster St · Open until 6pm' }, 'No close'],
+              [{ title: 'Blue Bottle Coffee', description: '300 Webster St · Open until 6pm', onClose: () => {}, pointer: false }, 'No pointer'],
+            ].map(([props, name], i) => (
+              <React.Fragment key={String(name)}>
+                <MapPopup {...(props as object)} position={[88 + Math.floor(i / 2) * 150, 140 + (i % 2) * 280]} offset={0} />
+                <span style={{ ...label, left: 140 + (i % 2) * 280, top: 112 + Math.floor(i / 2) * 150 }}>{String(name)}</span>
+              </React.Fragment>
+            ))}
+          </Board>
+        </div>
+      ))}
+    </div>
+  ),
+  decorators: [(S) => <div style={{ padding: 24, width: 1280 }}><S /></div>],
+};
+
+export const NoControlsNoAttribution: Story = {
+  name: 'Map: controls and attribution off',
+  render: () => (
+    <Map center={[51.5062, -0.0930]} zoom={15} controls={false} attribution={null} height={320}>
+      <MapMarker position={[51.5062, -0.0930]} label="Here" />
+    </Map>
+  ),
+};
+
+export const ControlsAtTheLimit: Story = {
+  name: 'Map: zoom limit (disabled control)',
+  render: () => <Map center={[51.5062, -0.0930]} zoom={18} maxZoom={18} locate height={320} />,
+  parameters: { docs: { description: { story: 'At `maxZoom` the zoom-in button is Disabled, as in the Figma Map Control Button set.' } } },
+};
+
+export const CustomDarkTiles: Story = {
+  name: 'Map: tileUrlDark',
+  render: () => <Map center={[51.5062, -0.0930]} zoom={15} theme="dark" tileUrl="https://tile.openstreetmap.org/{z}/{x}/{y}.png" tileUrlDark="https://tile.openstreetmap.org/{z}/{x}/{y}.png" height={320} />,
+  parameters: { docs: { description: { story: 'With `tileUrlDark` the dark map uses tiles from a dark style instead of darkening the light ones. (This demo points it at the same OpenStreetMap tiles to show the plumbing; use your provider\'s dark style.)' } } },
 };

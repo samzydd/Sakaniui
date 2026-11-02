@@ -122,6 +122,8 @@ const accessibleNameProp = (n) => /^aria-(label|labelledby)$/.test(n) || /^(alt|
 // Hand-written, checked against the code. For files whose header is only maintainer notes, or is shared by several components.
 const SUMMARY_OVERRIDE = {
   Map: 'Interactive tile map with pan, zoom and controls. Place MapMarker and MapPopup children by [latitude, longitude]; `tileUrl` swaps the tile provider (OpenStreetMap by default).',
+  MapControlButton: 'A 32px icon button for a map overlay (the zoom and locate buttons Map shows). Needs an icon and an aria-label; has hover and disabled states.',
+  MapControls: 'The zoom group and optional locate button a Map shows top-right. Map renders it itself; use it to build a custom overlay.',
   MapClusterLayer: 'Draws thousands of places on a Map by grouping nearby ones into counted cluster markers (click to zoom in) and rendering only what is in view. `renderPoint` draws each single place.',
   MapGlobe: 'A 3D dotted globe that spins and can be dragged. `variant` "land" dots the continents, "ocean" dots the sea; pass `markers` and `arcs` to show places and routes. Follows light and dark.',
   ChatComposer: 'Message input for a chat thread: attach, text input, emoji and send, with default, typing, uploading and disabled states.',
@@ -433,6 +435,8 @@ const ALIASES = {
   Map: ['map view', 'interactive map', 'street map', 'location map', 'leaflet', 'mapbox', 'google map', 'google maps', 'slippy map', 'tile map'],
   MapMarker: ['map pin', 'pin', 'location pin', 'map marker pin', 'live marker', 'moving marker', 'vehicle marker'],
   MapPopup: ['map tooltip', 'info window', 'marker popup'],
+  MapControlButton: ['map button', 'zoom button', 'map control'],
+  MapControls: ['zoom controls', 'map zoom', 'zoom in out', 'locate button'],
   MapClusterLayer: ['marker clustering', 'cluster markers', 'supercluster', 'many markers', 'point clustering', 'heatmap markers'],
   MapGlobe: ['globe', '3d globe', 'world globe', 'earth', 'dotted globe', 'spinning globe', 'world map', 'dot globe'],
   Menu: ['dropdown', 'dropdown menu', 'context menu', 'actions menu', 'kebab menu'],

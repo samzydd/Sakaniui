@@ -26,10 +26,8 @@
  */
 
 import React from 'react';
-import { IconPlus as Plus } from '../../icons/outline/plus';
-import { IconMinus as Minus } from '../../icons/outline/minus';
-import { IconCurrentLocation as Locate } from '../../icons/outline/current-location';
-import { iconStrokeWidth } from '../../lib/iconStrokeWidth';
+import { useThemeTick } from '../../lib/useThemeTick';
+import { MapControls } from './MapControls';
 import { clamp, fromWorld, toWorld, wrapLng, TILE_SIZE, type LatLng } from './geo';
 import { MapMarker } from './MapMarker';
 import { MapContext, type MapContextValue } from './context';
@@ -52,6 +50,16 @@ export interface MapProps {
   onViewChange?: (view: MapView) => void;
   /** Tile URL template with {z}, {x} and {y}. Defaults to OpenStreetMap. */
   tileUrl?: string;
+  /**
+   * Tiles to use in dark mode, from a provider that has a dark style. Without it the same tiles are
+   * darkened with `--map-tile-filter` (flat dark land, blue water, roads darker than the land).
+   */
+  tileUrlDark?: string;
+  /**
+   * "auto" follows the surrounding theme (a `.dark` class on <html> or any ancestor). "dark" makes this map dark
+   * wherever it sits, like the Figma "Dark" example: tiles, markers, controls and popups all switch.
+   */
+  theme?: 'auto' | 'dark';
   /** Attribution text required by the tile provider. Pass null to hide it (only if your provider allows). */
   attribution?: React.ReactNode | null;
   /** Show the zoom controls. Defaults to true. */
@@ -85,6 +93,8 @@ export const Map: React.FC<MapProps> = ({
   maxZoom = 18,
   onViewChange,
   tileUrl = OSM_TILES,
+  tileUrlDark,
+  theme = 'auto',
   attribution = OSM_ATTRIBUTION,
   controls = true,
   locate = false,
@@ -102,6 +112,15 @@ export const Map: React.FC<MapProps> = ({
   viewRef.current = view;
   const anim = React.useRef(0);
   const [located, setLocated] = React.useState<LatLng | null>(null);
+
+  // Is this map dark right now? Only matters when there are dedicated dark tiles to switch to.
+  const themeTick = useThemeTick();
+  const [dark, setDark] = React.useState(theme === 'dark');
+  React.useLayoutEffect(() => {
+    setDark(theme === 'dark' || !!ref.current?.closest('.dark'));
+  }, [theme, themeTick]);
+  const darkTiles = dark && !!tileUrlDark;
+  const tileTemplate = darkTiles ? tileUrlDark! : tileUrl;
 
   React.useLayoutEffect(() => {
     const el = ref.current;
@@ -290,7 +309,7 @@ export const Map: React.FC<MapProps> = ({
       const wx = ((tx % n) + n) % n;
       tiles.push({
         key: `${level}/${tx}/${ty}`,
-        src: tileUrl.replace('{z}', String(level)).replace('{x}', String(wx)).replace('{y}', String(ty)),
+        src: tileTemplate.replace('{z}', String(level)).replace('{x}', String(wx)).replace('{y}', String(ty)),
         left: (tx * TILE_SIZE - c.x) * scale + size.w / 2,
         top: (ty * TILE_SIZE - c.y) * scale + size.h / 2,
       });
@@ -321,7 +340,8 @@ export const Map: React.FC<MapProps> = ({
   return (
     <div
       ref={ref}
-      className={[styles.map, className ?? ''].filter(Boolean).join(' ')}
+      className={[styles.map, theme === 'dark' ? 'dark' : '', className ?? ''].filter(Boolean).join(' ')}
+      data-own-dark-tiles={darkTiles ? '' : undefined}
       style={{ height }}
       role="region"
       aria-roledescription="map"
@@ -356,28 +376,15 @@ export const Map: React.FC<MapProps> = ({
       </MapContext.Provider>
 
       {(controls || locate) && (
-        <div className={styles.controls} data-map-ui="">
-          {controls && (
-            <div className={styles.group}>
-              <button type="button" className={styles.button} aria-label="Zoom in" disabled={view.zoom >= maxZoom}
-                onClick={() => animateTo({ center: view.center, zoom: Math.round(view.zoom) + 1 })}>
-                <Plus size={16} strokeWidth={iconStrokeWidth(16)} aria-hidden="true" />
-              </button>
-              <span className={styles.divider} />
-              <button type="button" className={styles.button} aria-label="Zoom out" disabled={view.zoom <= minZoom}
-                onClick={() => animateTo({ center: view.center, zoom: Math.round(view.zoom) - 1 })}>
-                <Minus size={16} strokeWidth={iconStrokeWidth(16)} aria-hidden="true" />
-              </button>
-            </div>
-          )}
-          {locate && (
-            <div className={styles.group}>
-              <button type="button" className={styles.button} aria-label="Show my location" onClick={findMe}>
-                <Locate size={16} strokeWidth={iconStrokeWidth(16)} aria-hidden="true" />
-              </button>
-            </div>
-          )}
-        </div>
+        <MapControls
+          zoom={controls}
+          locate={locate}
+          onLocate={findMe}
+          zoomInDisabled={view.zoom >= maxZoom}
+          zoomOutDisabled={view.zoom <= minZoom}
+          onZoomIn={() => animateTo({ center: view.center, zoom: Math.round(view.zoom) + 1 })}
+          onZoomOut={() => animateTo({ center: view.center, zoom: Math.round(view.zoom) - 1 })}
+        />
       )}
 
       {attribution != null && <div className={styles.attribution} data-map-ui="">{attribution}</div>}

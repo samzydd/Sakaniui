@@ -18,7 +18,10 @@
 }
 .map:active { cursor: grabbing; }
 .map:focus-visible { box-shadow: 0 0 0 2px var(--color-bg-canvas), 0 0 0 4px var(--color-border-focus); }
-:global(.dark) .map { --map-tile-filter: invert(1) hue-rotate(180deg) saturate(0.28) brightness(0.9) contrast(0.92); }
+/* Dark: invert the light tiles, turn the hues back, then flatten (Figma "Dark": near-black land, roads darker than land, blue water). */
+:global(.dark) .map, .map:global(.dark) { --map-tile-filter: invert(1) hue-rotate(180deg) saturate(0.5) brightness(0.8) contrast(0.8); }
+/* Tiles drawn dark by the provider are shown as they are. */
+.map[data-own-dark-tiles] { --map-tile-filter: none; }
 
 .tiles { position: absolute; inset: 0; filter: var(--map-tile-filter); }
 .tile {
@@ -41,7 +44,7 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-8);
-  z-index: 2;
+  z-index: 5;
 }
 .group {
   display: flex;
@@ -65,7 +68,7 @@
   cursor: pointer;
   transition: background-color var(--transition-base), color var(--transition-base);
 }
-.button:hover:not(:disabled) { background: var(--color-bg-subtle); }
+.button:hover:not(:disabled), .button[data-hovered]:not(:disabled) { background: var(--color-bg-subtle); }
 .button:focus-visible { outline: 2px solid var(--color-border-focus); outline-offset: -2px; }
 .button:disabled { color: var(--color-fg-subtle); cursor: default; }
 .divider { height: 1px; background: var(--color-border-subtle); }
@@ -75,7 +78,7 @@
   position: absolute;
   right: var(--space-8);
   bottom: var(--space-8);
-  z-index: 2;
+  z-index: 5;
   padding: var(--space-2) var(--space-6);
   border-radius: var(--radius-sm);
   background: color-mix(in srgb, var(--color-bg-surface) 85%, transparent);
@@ -98,6 +101,8 @@
   transform: translate(-50%, -50%);
 }
 button.marker { cursor: pointer; }
+.marker:hover, .marker[data-hovered] { z-index: 3; }
+.marker--selected { z-index: 2; }
 button.marker:focus-visible { outline: 2px solid var(--color-border-focus); outline-offset: 2px; border-radius: var(--radius-full); }
 
 /* Pin: 32x40, anchored at its tip (bottom centre). */
@@ -126,8 +131,8 @@ button.marker:focus-visible { outline: 2px solid var(--color-border-focus); outl
   opacity: 0.22;
   transition: transform 160ms, opacity 160ms, background-color 160ms;
 }
-.marker--pin:hover .pin { transform: translateY(-3px); filter: drop-shadow(0 4px 6px rgb(0 0 0 / 0.2)); }
-.marker--pin:hover .pinShadow { transform: scaleX(0.86); opacity: 0.14; }
+.marker--pin:hover .pin, .marker--pin[data-hovered] .pin { transform: translateY(-3px); filter: drop-shadow(0 4px 6px rgb(0 0 0 / 0.2)); }
+.marker--pin:hover .pinShadow, .marker--pin[data-hovered] .pinShadow { transform: scaleX(0.86); opacity: 0.14; }
 .marker--pin.marker--selected .pin { transform: scale(1.25); filter: drop-shadow(0 4px 6px rgb(0 0 0 / 0.2)); }
 .marker--pin.marker--selected .pinShadow { width: 30px; height: 11px; margin-left: -15px; bottom: -5.5px; background: var(--color-accent-subtle); opacity: 1; }
 
@@ -140,7 +145,7 @@ button.marker:focus-visible { outline: 2px solid var(--color-border-focus); outl
   box-shadow: 0 0 0 2px var(--color-bg-surface), var(--shadow-sm);
   transition: box-shadow 160ms, width 160ms, height 160ms;
 }
-.marker--dot:hover { box-shadow: 0 0 0 2px var(--color-bg-surface), 0 0 0 6px var(--color-accent-subtle); }
+.marker--dot:hover, .marker--dot[data-hovered] { box-shadow: 0 0 0 2px var(--color-bg-surface), 0 0 0 6px var(--color-accent-subtle); }
 .marker--dot.marker--selected { width: 20px; height: 20px; box-shadow: 0 0 0 2px var(--color-bg-surface), 0 0 0 10px var(--color-accent-subtle); }
 
 /* Cluster: 40px (44 selected) with the count in label/md-strong, fg/on-accent. */
@@ -155,14 +160,14 @@ button.marker:focus-visible { outline: 2px solid var(--color-border-focus); outl
   box-shadow: 0 0 0 2px var(--color-bg-surface), var(--shadow-md);
   transition: box-shadow 160ms, width 160ms, height 160ms;
 }
-.marker--cluster:hover { box-shadow: 0 0 0 2px var(--color-bg-surface), 0 0 0 6px var(--color-accent-subtle), var(--shadow-md); }
+.marker--cluster:hover, .marker--cluster[data-hovered] { box-shadow: 0 0 0 2px var(--color-bg-surface), 0 0 0 6px var(--color-accent-subtle), var(--shadow-md); }
 .marker--cluster.marker--selected { width: 44px; height: 44px; box-shadow: 0 0 0 2px var(--color-bg-surface), 0 0 0 6px var(--color-accent-subtle), var(--shadow-md); }
 .clusterCount { color: var(--color-fg-on-accent); font-size: 14px; font-weight: 600; line-height: 1; font-variant-numeric: tabular-nums; }
 
 /* ---- MapPopup (Figma "Map Popup") ---- */
 .popup {
   position: absolute;
-  z-index: 1;
+  z-index: 4;
   display: flex;
   flex-direction: column;
   gap: var(--space-4);

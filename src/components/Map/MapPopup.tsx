@@ -25,6 +25,8 @@ export interface MapPopupProps {
   onClose?: () => void;
   /** Gap between the place and the pointer tip, in px. Defaults to 48 (above a pin); use 14 for a dot. */
   offset?: number;
+  /** Show the pointer notch under the card (Figma "Show pointer"). Defaults to true. */
+  pointer?: boolean;
   /** Milliseconds to follow a moving `position`; use the same value as the marker it points at. */
   glide?: number;
   /** Extra content under the description (actions, a thumbnail...). */
@@ -33,7 +35,7 @@ export interface MapPopupProps {
 }
 
 export const MapPopup: React.FC<MapPopupProps> = ({
-  position, title, description, onClose, offset = 48, glide, children, className,
+  position, title, description, onClose, offset = 48, pointer = true, glide, children, className,
 }) => {
   const { project } = useMapContext();
   const shown = useGlide(position, glide);
@@ -60,7 +62,7 @@ export const MapPopup: React.FC<MapPopupProps> = ({
       )}
       {description && <div className={styles.popupDescription}>{description}</div>}
       {children}
-      <span className={styles.popupPointer} aria-hidden="true" />
+      {pointer && <span className={styles.popupPointer} aria-hidden="true" />}
     </div>
   );
 };
