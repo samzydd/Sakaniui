@@ -53,7 +53,7 @@ Drag to pan, scroll or pinch to zoom at the pointer, double-click to zoom in; wi
       },
     },
   },
-  decorators: [(S) => <div style={{ padding: 24, width: 880, maxWidth: '100%', boxSizing: 'border-box' }}><S /></div>],
+  decorators: [(S, { parameters }) => <div style={{ padding: 24, width: parameters.fullWidth ? 'max-content' : 880, maxWidth: parameters.fullWidth ? 'none' : '100%', boxSizing: 'border-box' }}><S /></div>],
 } satisfies Meta<typeof Map>;
 
 export default meta;
@@ -214,8 +214,7 @@ export const MarkerStatesBoard: Story = {
       <div className="dark" style={sheet(true)}><MarkerStates /></div>
     </div>
   ),
-  decorators: [(S) => <div style={{ padding: 24, width: 1180 }}><S /></div>],
-  parameters: { docs: { description: { story: 'Pin, Dot and Cluster in Default, Hover and Selected, in light and dark. Hover is a real `:hover` on every marker; `hovered` pins it here so the board can show it.' } } },
+  parameters: { fullWidth: true, docs: { description: { story: 'Pin, Dot and Cluster in Default, Hover and Selected, in light and dark. Hover is a real `:hover` on every marker; `hovered` pins it here so the board can show it.' } } },
 };
 
 export const ControlStates: Story = {
@@ -240,7 +239,7 @@ export const ControlStates: Story = {
       ))}
     </div>
   ),
-  parameters: { docs: { description: { story: 'Default, Hover (pinned with `hovered`; real hover works on its own) and Disabled, then the whole Map Controls group with the locate button. Light, then dark.' } } },
+  parameters: { fullWidth: true, docs: { description: { story: 'Default, Hover (pinned with `hovered`; real hover works on its own) and Disabled, then the whole Map Controls group with the locate button. Light, then dark.' } } },
 };
 
 export const PopupOptions: Story = {
@@ -266,7 +265,7 @@ export const PopupOptions: Story = {
       ))}
     </div>
   ),
-  decorators: [(S) => <div style={{ padding: 24, width: 1280 }}><S /></div>],
+  parameters: { fullWidth: true },
 };
 
 export const NoControlsNoAttribution: Story = {

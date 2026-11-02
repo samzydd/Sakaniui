@@ -31,7 +31,7 @@ No dependencies: a canvas, an orthographic projection and an 11 KB Natural Earth
     },
   },
   args: { markers, arcs, center: [12, 70] },
-  decorators: [(S) => <div style={{ width: 520, padding: 24 }}><S /></div>],
+  decorators: [(S, { parameters }) => <div style={{ width: parameters.fullWidth ? 'max-content' : 520, padding: 24 }}><S /></div>],
 } satisfies Meta<typeof MapGlobe>;
 
 export default meta;
@@ -94,7 +94,7 @@ export const MarkerStates: Story = {
       <div className="dark" style={{ flex: 1, padding: 24, borderRadius: 16, background: 'var(--color-bg-canvas)', border: '1px solid var(--color-border-subtle)' }}><S /></div>
     </div>
   )],
-  parameters: { docs: { description: { story: 'Default, Hover (pinned with `hovered`), Selected and Active, each with a `label`. Real hover works on its own: point at any marker and the spin stops so it can be clicked.' } } },
+  parameters: { fullWidth: true, docs: { description: { story: 'Default, Hover (pinned with `hovered`), Selected and Active, each with a `label`. Real hover works on its own: point at any marker and the spin stops so it can be clicked.' } } },
 };
 
 function Interactive({ theme }: { theme?: 'auto' | 'dark' }) {
