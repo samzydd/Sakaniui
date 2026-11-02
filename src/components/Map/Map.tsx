@@ -14,7 +14,7 @@
  * tile URL is a prop; the default is OpenStreetMap's standard tiles, which are
  * fine for development and light use (their usage policy asks heavy users to
  * bring their own provider). In dark mode the tiles are inverted and muted
- * through --map-tile-filter, which a consumer can override.
+ * through --map-tile-filter, which a consumer can override on the map or any ancestor.
  *
  * Live data: MapMarker and MapPopup take `glide` (ms) to slide to a new position instead of jumping,
  * and MapClusterLayer groups thousands of places into counted clusters that open on click.
@@ -26,7 +26,6 @@
  */
 
 import React from 'react';
-import { useThemeTick } from '../../lib/useThemeTick';
 import { MapControls } from './MapControls';
 import { clamp, fromWorld, toWorld, wrapLng, TILE_SIZE, type LatLng } from './geo';
 import { MapMarker } from './MapMarker';
@@ -114,11 +113,17 @@ export const Map: React.FC<MapProps> = ({
   const [located, setLocated] = React.useState<LatLng | null>(null);
 
   // Is this map dark right now? Only matters when there are dedicated dark tiles to switch to.
-  const themeTick = useThemeTick();
   const [dark, setDark] = React.useState(theme === 'dark');
   React.useLayoutEffect(() => {
-    setDark(theme === 'dark' || !!ref.current?.closest('.dark'));
-  }, [theme, themeTick]);
+    const el = ref.current;
+    if (!el) return;
+    const check = () => setDark(theme === 'dark' || !!el.closest('.dark'));
+    check();
+    // a .dark class can be toggled on <html> or on any wrapper above the map
+    const mo = new MutationObserver(check);
+    for (let n: HTMLElement | null = el; n; n = n.parentElement) mo.observe(n, { attributes: true, attributeFilter: ['class'] });
+    return () => mo.disconnect();
+  }, [theme]);
   const darkTiles = dark && !!tileUrlDark;
   const tileTemplate = darkTiles ? tileUrlDark! : tileUrl;
 
@@ -326,6 +331,7 @@ export const Map: React.FC<MapProps> = ({
       fitBounds,
       maxZoom,
       project: (position) => {
+        if (!size.w || !size.h) return null; // not measured yet (server render): place nothing rather than against a 0x0 map
         const p = toWorld(position, view.zoom);
         let dx = p.x - c.x;
         // take the nearest copy of the world, so markers near the antimeridian behave

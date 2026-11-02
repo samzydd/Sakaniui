@@ -1,7 +1,8 @@
 /* Map — radius-xl container, border/default, bg/subtle behind the tiles (Figma "Map"). */
 .map {
-  /* OpenStreetMap's palette is loud next to the tokens; mute it. Override to restyle the tiles. */
-  --map-tile-filter: saturate(0.45) contrast(0.96) brightness(1.02);
+  /* OpenStreetMap's palette is loud next to the tokens; mute it. To restyle the tiles, set --map-tile-filter on
+     the map or on any ancestor (for example a panel that forces the light tokens inside a dark page). */
+  --map-tile-filter-default: saturate(0.45) contrast(0.96) brightness(1.02);
   position: relative;
   width: 100%;
   overflow: hidden;
@@ -19,11 +20,11 @@
 .map:active { cursor: grabbing; }
 .map:focus-visible { box-shadow: 0 0 0 2px var(--color-bg-canvas), 0 0 0 4px var(--color-border-focus); }
 /* Dark: invert the light tiles, turn the hues back, then flatten (Figma "Dark": near-black land, roads darker than land, blue water). */
-:global(.dark) .map, .map:global(.dark) { --map-tile-filter: invert(1) hue-rotate(180deg) saturate(0.5) brightness(0.8) contrast(0.8); }
+:global(.dark) .map, .map:global(.dark) { --map-tile-filter-default: invert(1) hue-rotate(180deg) saturate(0.5) brightness(0.8) contrast(0.8); }
 /* Tiles drawn dark by the provider are shown as they are. */
-.map[data-own-dark-tiles] { --map-tile-filter: none; }
+.map[data-own-dark-tiles] .tiles { filter: none; }
 
-.tiles { position: absolute; inset: 0; filter: var(--map-tile-filter); }
+.tiles { position: absolute; inset: 0; filter: var(--map-tile-filter, var(--map-tile-filter-default)); }
 .tile {
   position: absolute;
   max-width: none;

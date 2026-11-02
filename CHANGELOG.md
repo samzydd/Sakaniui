@@ -2,6 +2,16 @@
 
 All notable changes to `@sakaniui/react` are documented here.
 
+## 0.11.1
+
+- **Fixed: `Map` markers on the server.** Rendered before the map is measured, markers and popups were placed
+  against a 0x0 map and then jumped, and Next.js logged a hydration warning. They now appear once the map has a
+  size. No API changes.
+- **Fixed: `--map-tile-filter` can be set from outside.** It was declared on the map itself, so a value set on a
+  wrapper was ignored, and a panel that forces the light tokens inside a dark page still got dark tiles. It now
+  falls back to the built-in light or dark filter, so setting `--map-tile-filter` on the map or on any ancestor wins.
+- **Fixed: `tileUrlDark` now reacts to a `.dark` class added or removed on any ancestor**, not only on `<html>`.
+
 ## 0.11.0
 
 - **New: `Map`**, an interactive tile map built from the new *↳ Map* page in Figma, with no map library.
