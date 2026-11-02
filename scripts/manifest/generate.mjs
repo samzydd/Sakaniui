@@ -238,6 +238,12 @@ function computeSince(sourceFiles) {
       try { v = JSON.parse(git('show', `${h}:package.json`)).version; } catch { continue; }
       if (v && !seenVersions.has(v)) { seenVersions.add(v); releases.push({ v, h }); }
     }
+    // A version is normally the commit that bumped package.json, but a release is sometimes published from a
+    // later commit (more landed before `npm publish`). releases.json says which commit actually shipped.
+    try {
+      const shipped = JSON.parse(fs.readFileSync(path.join(root, 'scripts/manifest/releases.json'), 'utf8'));
+      for (const r of releases) if (shipped[r.v]) r.h = shipped[r.v];
+    } catch { /* no overrides */ }
     if (!releases.length) return null;
   } catch { return null; }
   const result = {};

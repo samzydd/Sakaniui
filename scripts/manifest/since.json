@@ -295,6 +295,7 @@
   "src/components/ListItem/ListItem.tsx": "0.1.0",
   "src/components/Map/Map.tsx": "0.11.0",
   "src/components/Map/MapClusterLayer.tsx": "0.11.0",
+  "src/components/Map/MapControls.tsx": "0.11.0",
   "src/components/Map/MapGlobe.tsx": "0.11.0",
   "src/components/Map/MapMarker.tsx": "0.11.0",
   "src/components/Map/MapPopup.tsx": "0.11.0",

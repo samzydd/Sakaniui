@@ -2,6 +2,17 @@
 
 All notable changes to `@sakaniui/react` are documented here.
 
+## 0.11.2
+
+- **Agent guide:** `AGENTS.md` gains a Map section (when to use `Map` or `MapGlobe`, latitude first, tile providers,
+  `glide` for live feeds, `MapClusterLayer` for many places, dark mode, accessibility), served by the MCP
+  server's `get_guide`.
+- **MCP server:** `@sakaniui/mcp` 0.11.2 carries the 0.11 reference, so Map and its parts are found even in a
+  project that has no `@sakaniui/react` installed (a project that has it was already answered from its own copy).
+- **Fixed: `since` for `MapControlButton` and `MapControls`** was 0.11.1; they shipped in 0.11.0. The release
+  history can now name the commit a version was actually published from (`scripts/manifest/releases.json`).
+- No component or API changes.
+
 ## 0.11.1
 
 - **Fixed: `Map` markers on the server.** Rendered before the map is measured, markers and popups were placed

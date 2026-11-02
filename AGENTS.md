@@ -245,6 +245,20 @@ lists its other names under `aliases` in `manifest.json`, and `search_components
   row in a list. **Charts** — pick by question: trend over time → Line/Area; compare categories → Bar;
   part of whole → Pie/Donut (few slices only); progress to a target → Radial; compare several measures →
   Radar; drop-off → Funnel; intensity across two dimensions → Heatmap.
+- **Map / MapMarker / MapPopup / MapClusterLayer** — an interactive tile map with no map library. Put `MapMarker`
+  (`pin`, `dot`, `cluster`) and `MapPopup` children inside `Map`, placed by `[latitude, longitude]` (latitude
+  first). Give every marker a `label`; a marker with `onClick` is a button and `selected` is yours to set. The
+  default tiles are OpenStreetMap's, fine for development and light use: for production traffic pass `tileUrl`
+  (and `attribution`) from a tile provider. For a live feed keep positions in state and give the markers `glide`
+  (about the interval between updates, in ms) so they slide instead of jumping. For more than a few dozen places
+  use `MapClusterLayer` (`points`, `renderPoint`) instead of mapping hundreds of `MapMarker`s. Dark mode follows
+  `.dark`; `theme="dark"` makes one map dark, `tileUrlDark` supplies a dark tile style. It only draws a map: no
+  routing, geocoding or search, and a map is hard to use without a pointer, so list the places beside it.
+  **MapGlobe** — a 3D dotted globe for places across the whole world (offices, customers, routes), not for
+  navigation: `variant` land or ocean, `markers`, `arcs`. It has no background of its own, so place it on the
+  colour you want (`theme="dark"` for a dark surface inside a light page); give markers a `label` and
+  `onMarkerClick` to make them selectable. Choose Map when people need streets and zoom, MapGlobe when the point
+  is global spread.
 - **Avatar / AvatarGroup** — Avatar type is inferred: `src` → image, `initials` → initials, else icon.
   Prefer a real image when you have one; initials are the fallback, not the default.
 - **BoardCard / BoardColumn** — kanban pieces. `BoardColumn state="loading"` styles the column; *you* pass
