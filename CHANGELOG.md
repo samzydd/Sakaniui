@@ -2,6 +2,32 @@
 
 All notable changes to `@sakaniui/react` are documented here.
 
+## 0.11.0
+
+- **New: `Map`**, an interactive tile map built from the new *↳ Map* page in Figma, with no map library.
+  Tiles are plain images on a Web Mercator grid (OpenStreetMap by default; pass `tileUrl` and `attribution` for
+  your own provider). Drag to pan with inertia, scroll or pinch to zoom at the pointer, double-click to zoom in;
+  with focus, arrows pan and + / - zoom. Props: `center`, `zoom`, `minZoom`, `maxZoom` (changing `center` or `zoom`
+  flies the map there), `onViewChange`, `controls`, `locate` with `onLocate` / `onLocateError`, `height`, `tileUrl`,
+  `attribution`. Dark mode inverts and mutes the tiles through `--map-tile-filter`, which you can override.
+  - **`MapMarker`**: `pin`, `dot` or `cluster` (with `count`), `selected`, `label`, `onClick`.
+  - **`MapPopup`**: a card that opens above a place, with `title`, `description`, `onClose` and `offset`.
+  - **Live data:** `glide` (ms) on `MapMarker` and `MapPopup` slides them to each new `position` instead of
+    jumping, for markers fed by a WebSocket, server-sent events or polling. It interpolates the place, so it stays
+    correct while the map is panned or zoomed, and reduced motion turns it off.
+  - **`MapClusterLayer`**: pass `points` and a `renderPoint`; nearby places group into counted cluster markers
+    that zoom to their places on click, and only what is in view is rendered (a zoom step takes about 5 ms with
+    10,000 places). `radius`, `clusterMaxZoom` and `onClusterClick` tune it.
+  - `useMapContext()` gives custom overlays `project`, `zoom`, `flyTo` and `fitBounds`.
+- **New: `MapGlobe`**, a 3D dotted globe (the Figma *Map Globe*). `variant` "land" dots the continents and "ocean"
+  dots the sea; it spins, can be dragged with inertia, and pauses offscreen and under reduced motion. `markers`
+  (with `active` pulses) and `arcs` are plain props, so a feed can drive them. It is a canvas with an orthographic
+  projection and an 11 KB land mask (Natural Earth, public domain, notice in `THIRD_PARTY_NOTICES.md`), so it adds
+  no dependency.
+- Agent contract: `Map`, `MapMarker`, `MapPopup`, `MapClusterLayer` and `MapGlobe` are in the manifest with the
+  aliases *google maps*, *leaflet*, *mapbox*, *globe*, *marker clustering* and more, plus recipes for a live feed
+  and for clustering.
+
 ## 0.10.2
 
 - **New logo.** The SakaniUI arc mark replaces the orange "S" tile everywhere the library shows its own brand:

@@ -1,0 +1,228 @@
+/* Map — radius-xl container, border/default, bg/subtle behind the tiles (Figma "Map"). */
+.map {
+  /* OpenStreetMap's palette is loud next to the tokens; mute it. Override to restyle the tiles. */
+  --map-tile-filter: saturate(0.45) contrast(0.96) brightness(1.02);
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  isolation: isolate;
+  background: var(--color-bg-subtle);
+  border: var(--border-width-100) solid var(--color-border-default);
+  border-radius: var(--radius-xl);
+  font-family: var(--font-sans);
+  touch-action: none;
+  user-select: none;
+  cursor: grab;
+  outline: none;
+  box-sizing: border-box;
+}
+.map:active { cursor: grabbing; }
+.map:focus-visible { box-shadow: 0 0 0 2px var(--color-bg-canvas), 0 0 0 4px var(--color-border-focus); }
+:global(.dark) .map { --map-tile-filter: invert(1) hue-rotate(180deg) saturate(0.28) brightness(0.9) contrast(0.92); }
+
+.tiles { position: absolute; inset: 0; filter: var(--map-tile-filter); }
+.tile {
+  position: absolute;
+  max-width: none;
+  opacity: 0;
+  transition: opacity 160ms ease-out;
+  pointer-events: none;
+}
+.tile[data-loaded] { opacity: 1; }
+
+.overlay { position: absolute; inset: 0; pointer-events: none; }
+.overlay > * { pointer-events: auto; }
+
+/* Controls — 12px in from the top-right; zoom group and locate, 8px apart (Figma "Map Controls"). */
+.controls {
+  position: absolute;
+  top: var(--space-12);
+  right: var(--space-12);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+  z-index: 2;
+}
+.group {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--color-bg-surface);
+  border: var(--border-width-100) solid var(--color-border-default);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+}
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--color-fg-default);
+  cursor: pointer;
+  transition: background-color var(--transition-base), color var(--transition-base);
+}
+.button:hover:not(:disabled) { background: var(--color-bg-subtle); }
+.button:focus-visible { outline: 2px solid var(--color-border-focus); outline-offset: -2px; }
+.button:disabled { color: var(--color-fg-subtle); cursor: default; }
+.divider { height: 1px; background: var(--color-border-subtle); }
+
+/* Attribution — 8px in from the bottom-right, bg/surface at 85%. */
+.attribution {
+  position: absolute;
+  right: var(--space-8);
+  bottom: var(--space-8);
+  z-index: 2;
+  padding: var(--space-2) var(--space-6);
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--color-bg-surface) 85%, transparent);
+  color: var(--color-fg-muted);
+  font-size: 10px;
+  line-height: 14px;
+  cursor: default;
+}
+.attribution a { color: inherit; }
+
+/* ---- MapMarker (Figma "Map Marker") ---- */
+.marker {
+  position: absolute;
+  display: block;
+  padding: 0;
+  border: none;
+  background: none;
+  font: inherit;
+  cursor: default;
+  transform: translate(-50%, -50%);
+}
+button.marker { cursor: pointer; }
+button.marker:focus-visible { outline: 2px solid var(--color-border-focus); outline-offset: 2px; border-radius: var(--radius-full); }
+
+/* Pin: 32x40, anchored at its tip (bottom centre). */
+.marker--pin { width: 32px; height: 40px; transform: translate(-50%, -100%); }
+.pin {
+  position: absolute;
+  inset: -1px;
+  width: 34px;
+  height: 42px;
+  overflow: visible;
+  filter: drop-shadow(0 1px 2px rgb(0 0 0 / 0.18));
+  transform-origin: 50% 100%;
+  transition: transform 160ms cubic-bezier(0.4, 0, 0.2, 1), filter 160ms;
+}
+.pin path { fill: var(--color-accent-default); stroke: var(--color-bg-surface); stroke-width: 2; }
+.pin circle { fill: var(--color-fg-on-accent); }
+.pinShadow {
+  position: absolute;
+  left: 50%;
+  bottom: -2.5px;
+  width: 14px;
+  height: 5px;
+  margin-left: -7px;
+  border-radius: 50%;
+  background: var(--color-bg-inverse);
+  opacity: 0.22;
+  transition: transform 160ms, opacity 160ms, background-color 160ms;
+}
+.marker--pin:hover .pin { transform: translateY(-3px); filter: drop-shadow(0 4px 6px rgb(0 0 0 / 0.2)); }
+.marker--pin:hover .pinShadow { transform: scaleX(0.86); opacity: 0.14; }
+.marker--pin.marker--selected .pin { transform: scale(1.25); filter: drop-shadow(0 4px 6px rgb(0 0 0 / 0.2)); }
+.marker--pin.marker--selected .pinShadow { width: 30px; height: 11px; margin-left: -15px; bottom: -5.5px; background: var(--color-accent-subtle); opacity: 1; }
+
+/* Dot: 16px core, 2px bg/surface ring; halo on hover (28) and when selected (40, core 20). */
+.marker--dot {
+  width: 16px;
+  height: 16px;
+  border-radius: var(--radius-full);
+  background: var(--color-accent-default);
+  box-shadow: 0 0 0 2px var(--color-bg-surface), var(--shadow-sm);
+  transition: box-shadow 160ms, width 160ms, height 160ms;
+}
+.marker--dot:hover { box-shadow: 0 0 0 2px var(--color-bg-surface), 0 0 0 6px var(--color-accent-subtle); }
+.marker--dot.marker--selected { width: 20px; height: 20px; box-shadow: 0 0 0 2px var(--color-bg-surface), 0 0 0 10px var(--color-accent-subtle); }
+
+/* Cluster: 40px (44 selected) with the count in label/md-strong, fg/on-accent. */
+.marker--cluster {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-full);
+  background: var(--color-accent-default);
+  box-shadow: 0 0 0 2px var(--color-bg-surface), var(--shadow-md);
+  transition: box-shadow 160ms, width 160ms, height 160ms;
+}
+.marker--cluster:hover { box-shadow: 0 0 0 2px var(--color-bg-surface), 0 0 0 6px var(--color-accent-subtle), var(--shadow-md); }
+.marker--cluster.marker--selected { width: 44px; height: 44px; box-shadow: 0 0 0 2px var(--color-bg-surface), 0 0 0 6px var(--color-accent-subtle), var(--shadow-md); }
+.clusterCount { color: var(--color-fg-on-accent); font-size: 14px; font-weight: 600; line-height: 1; font-variant-numeric: tabular-nums; }
+
+/* ---- MapPopup (Figma "Map Popup") ---- */
+.popup {
+  position: absolute;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  width: 240px;
+  padding: var(--space-12);
+  background: var(--color-bg-surface);
+  border: var(--border-width-100) solid var(--color-border-subtle);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  box-sizing: border-box;
+  cursor: default;
+  transform: translate(-50%, calc(-100% - 8px));
+  animation: sakani-map-popup-in 180ms cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+@keyframes sakani-map-popup-in {
+  from { opacity: 0; translate: 0 4px; scale: 0.98; }
+  to { opacity: 1; translate: 0 0; scale: 1; }
+}
+.popupHeader { display: flex; align-items: flex-start; gap: var(--space-8); }
+.popupTitle { flex: 1; min-width: 0; color: var(--color-fg-default); font-size: 14px; font-weight: 600; line-height: 20px; }
+.popupClose {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--color-fg-muted);
+  cursor: pointer;
+}
+.popupClose:hover { background: var(--color-bg-subtle); color: var(--color-fg-default); }
+.popupDescription { color: var(--color-fg-muted); font-size: 12px; line-height: 16px; }
+/* The pointer: a 16x8 notch, its top edge tucked under the card's border. */
+.popupPointer {
+  position: absolute;
+  left: 50%;
+  bottom: -8px;
+  width: 16px;
+  height: 8px;
+  margin-left: -8px;
+  overflow: hidden;
+}
+.popupPointer::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: -7px;
+  width: 11px;
+  height: 11px;
+  background: var(--color-bg-surface);
+  border-right: var(--border-width-100) solid var(--color-border-subtle);
+  border-bottom: var(--border-width-100) solid var(--color-border-subtle);
+  transform: translateX(-50%) rotate(45deg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tile, .pin, .pinShadow, .marker--dot, .marker--cluster { transition: none; }
+  .popup { animation: none; }
+}

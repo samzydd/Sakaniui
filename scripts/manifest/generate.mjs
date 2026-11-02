@@ -121,6 +121,9 @@ const accessibleNameProp = (n) => /^aria-(label|labelledby)$/.test(n) || /^(alt|
 
 // Hand-written, checked against the code. For files whose header is only maintainer notes, or is shared by several components.
 const SUMMARY_OVERRIDE = {
+  Map: 'Interactive tile map with pan, zoom and controls. Place MapMarker and MapPopup children by [latitude, longitude]; `tileUrl` swaps the tile provider (OpenStreetMap by default).',
+  MapClusterLayer: 'Draws thousands of places on a Map by grouping nearby ones into counted cluster markers (click to zoom in) and rendering only what is in view. `renderPoint` draws each single place.',
+  MapGlobe: 'A 3D dotted globe that spins and can be dragged. `variant` "land" dots the continents, "ocean" dots the sea; pass `markers` and `arcs` to show places and routes. Follows light and dark.',
   ChatComposer: 'Message input for a chat thread: attach, text input, emoji and send, with default, typing, uploading and disabled states.',
   PriceDisplay: 'A product price. Pass `compareAtPrice` for a struck-through original price with the current price in the danger colour; `showBadge` adds the sale badge.',
   LiquidGlass: 'Apple-style liquid glass material (the Liquid surface mode): bends the backdrop at the edge with refraction, dispersion, rim light and depth. Use it inside a LiquidBackdrop when the image behind the UI is known.',
@@ -427,6 +430,11 @@ components.sort((a, b) => (a.kind === b.kind ? a.name.localeCompare(b.name) : a.
 const ALIASES = {
   Modal: ['dialog', 'alert dialog', 'alertdialog', 'confirm dialog', 'confirmation dialog', 'confirmation', 'modal window', 'popup dialog', 'lightbox'],
   Popover: ['popup', 'flyout', 'floating panel', 'popup panel'],
+  Map: ['map view', 'interactive map', 'street map', 'location map', 'leaflet', 'mapbox', 'google map', 'google maps', 'slippy map', 'tile map'],
+  MapMarker: ['map pin', 'pin', 'location pin', 'map marker pin', 'live marker', 'moving marker', 'vehicle marker'],
+  MapPopup: ['map tooltip', 'info window', 'marker popup'],
+  MapClusterLayer: ['marker clustering', 'cluster markers', 'supercluster', 'many markers', 'point clustering', 'heatmap markers'],
+  MapGlobe: ['globe', '3d globe', 'world globe', 'earth', 'dotted globe', 'spinning globe', 'world map', 'dot globe'],
   Menu: ['dropdown', 'dropdown menu', 'context menu', 'actions menu', 'kebab menu'],
   Toast: ['snackbar', 'toast notification', 'flash message', 'transient notification'],
   Toaster: ['sonner', 'toast stack', 'toast provider', 'toast container', 'toast queue', 'notification stack', 'stacked toasts', 'toast manager'],
@@ -493,6 +501,46 @@ for (const name of Object.keys(ALIASES)) if (!listed0.has(name)) { console.error
 
 /* ---- recipes: patterns the types alone do not teach, written by hand and compiled on every build ---- */
 const RECIPES = {
+  Map: [{
+    title: 'A live feed: markers that slide to each new position',
+    description: 'Keep the positions in state, update them when the feed (WebSocket, server-sent events, polling) delivers, and give each MapMarker `glide` of about the interval between updates so it slides instead of jumping. A MapPopup that points at a moving marker needs the same `glide`.',
+    code: `import React from 'react';
+import { Map, MapMarker, type LatLng } from '@sakaniui/react';
+
+export const Example = () => {
+  const [vehicles, setVehicles] = React.useState<{ id: string; position: LatLng }[]>([{ id: 'v1', position: [51.5, -0.09] }]);
+  React.useEffect(() => {
+    const socket = new WebSocket('wss://example.com/vehicles');
+    socket.onmessage = (e) => setVehicles(JSON.parse(e.data));
+    return () => socket.close();
+  }, []);
+  return (
+    <Map center={[51.5, -0.09]} zoom={13} height={420}>
+      {vehicles.map((v) => (
+        <MapMarker key={v.id} variant="dot" position={v.position} glide={1900} label={v.id} />
+      ))}
+    </Map>
+  );
+};`,
+  }, {
+    title: 'Thousands of places: cluster them',
+    description: 'Put the places in a MapClusterLayer instead of mapping them to MapMarkers yourself. Nearby places become a counted cluster that zooms in on click, and only what is in view is rendered. Key each marker returned from `renderPoint` by the point id.',
+    code: `import { Map, MapMarker, MapClusterLayer, type LatLng } from '@sakaniui/react';
+
+const points: { id: number; position: LatLng }[] = [
+  { id: 1, position: [51.5, -0.12] },
+  { id: 2, position: [53.48, -2.24] },
+];
+
+export const Example = () => (
+  <Map center={[53, -1.8]} zoom={6} height={420}>
+    <MapClusterLayer
+      points={points}
+      renderPoint={(p) => <MapMarker key={p.id} variant="dot" position={p.position} label={\`Place \${p.id}\`} />}
+    />
+  </Map>
+);`,
+  }],
   Table: [{
     title: 'A column that is not data (a delete button, a menu)',
     description: 'Every column `key` must be a field of the row type (`keyof T & string`), so a button column needs a key too. Give the row type an optional `never` field for it and render the control; do not invent a key that is not on the row type, it will not compile.',

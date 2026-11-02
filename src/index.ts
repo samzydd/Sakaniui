@@ -91,6 +91,7 @@ export { LineChart } from './components/LineChart';
 export type { LineChartProps, LineChartVariant } from './components/LineChart';
 export * from './components/Link';
 export * from './components/ListItem';
+export * from './components/Map';
 export * from './components/Menu';
 export * from './components/MenuItem';
 export * from './components/MessageBubble';

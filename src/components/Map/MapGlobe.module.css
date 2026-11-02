@@ -1,0 +1,12 @@
+/* MapGlobe — a square canvas that fills its width (Figma "Map Globe", 480x480). */
+.globe {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1;
+  color: var(--color-fg-default);
+  touch-action: pan-y;
+  user-select: none;
+}
+.globe--draggable { cursor: grab; touch-action: none; }
+.globe--draggable:active { cursor: grabbing; }
+.canvas { display: block; }
