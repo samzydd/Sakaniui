@@ -73,13 +73,19 @@
 /* ---- step ---- */
 .step {
   position: relative;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-4);
-  padding: 0 0 var(--space-8) var(--space-24);
+  display: grid;
+  grid-template-rows: 1fr;
+  padding: 0 0 0 var(--space-24);
   font-size: 14px;
   line-height: 20px;
   font-weight: 500;
+}
+.step__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  min-height: 0;
+  padding-bottom: var(--space-8);
 }
 /* rail: a vertical line through the step, and an elbow into the icon */
 .step::before {
@@ -90,8 +96,11 @@
   bottom: 0;
   width: 1px;
   background: var(--color-border-default);
+  transform-origin: 0 0;
+  transition: bottom 300ms ease;
 }
-.step:last-child::before { bottom: auto; height: 11px; }
+/* the last step's line stops at its icon (11px); when another step follows, it grows to meet it */
+.step:last-child::before { bottom: calc(100% - 11px); }
 .step::after {
   content: '';
   position: absolute;
@@ -100,6 +109,7 @@
   width: 12px;
   height: 1px;
   background: var(--color-border-default);
+  transform-origin: 0 50%;
 }
 
 .step__row { display: flex; align-items: center; gap: var(--space-8); min-width: 0; }
@@ -117,6 +127,9 @@
   white-space: nowrap;
 }
 .step__count { flex-shrink: 0; font-size: 13px; line-height: 18px; font-variant-numeric: tabular-nums; }
+
+/* a step turning done eases from full to muted */
+.step__icon, .step__label, .step__query, .step__count { transition: color 300ms ease; }
 
 /* status colours: the active step reads in full, the rest is muted. Text never uses fg/subtle
    (2.5:1 on white, below WCAG AA); only the pending icon does, and it is decorative. */
@@ -181,7 +194,51 @@
   animation: chain-of-thought-shimmer 1.8s linear infinite;
 }
 
+/* ---- motion (Figma "Chain of Thought · motion") ---- */
+@keyframes chain-of-thought-step-in {
+  from { grid-template-rows: 0fr; opacity: 0; transform: translateY(-6px); }
+  to { grid-template-rows: 1fr; opacity: 1; transform: none; }
+}
+@keyframes chain-of-thought-rail-down { from { transform: scaleY(0); } to { transform: scaleY(1); } }
+@keyframes chain-of-thought-rail-across { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+@keyframes chain-of-thought-fade-in { from { opacity: 0; transform: translateX(4px); } to { opacity: 1; transform: none; } }
+@keyframes chain-of-thought-chip-in { from { opacity: 0; transform: scale(0.4); } to { opacity: 1; transform: none; } }
+@keyframes chain-of-thought-breathe { 0%, 100% { opacity: 1; } 50% { opacity: 0.55; } }
+@keyframes chain-of-thought-twinkle { 0%, 100% { transform: scale(1) rotate(0); } 50% { transform: scale(1.18) rotate(14deg); } }
+@keyframes chain-of-thought-pop { from { transform: scale(0.6); opacity: 0; } to { transform: none; opacity: 1; } }
+@keyframes chain-of-thought-check { from { stroke-dashoffset: 12; } to { stroke-dashoffset: 0; } }
+@keyframes chain-of-thought-title { from { opacity: 0; transform: translateY(3px); } to { opacity: 1; transform: none; } }
+
+/* a step that arrives after the container is up: its row opens, the rail draws, the count and chips follow */
+.step[data-entering] { animation: chain-of-thought-step-in 280ms cubic-bezier(0.22, 1, 0.36, 1) both; }
+.step[data-entering] .step__body { overflow: hidden; }
+.step[data-entering]::before { animation: chain-of-thought-rail-down 320ms ease-out both; }
+.step[data-entering]::after { animation: chain-of-thought-rail-across 160ms ease-out 120ms both; }
+.step__count[data-fresh] { animation: chain-of-thought-fade-in 260ms ease-out both; }
+.step[data-entering] .step__count[data-fresh] { animation-delay: 150ms; }
+.chip[data-fresh] {
+  animation: chain-of-thought-chip-in 280ms cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  animation-delay: calc(var(--i, 0) * 45ms + 120ms);
+}
+
+/* the step in progress breathes */
+.step--active .step__icon { animation: chain-of-thought-breathe 1.6s ease-in-out infinite; }
+
+/* working: the sparkle twinkles; finishing draws the check in */
+.indicator--working .indicator__icon { animation: chain-of-thought-twinkle 1.8s ease-in-out infinite; }
+.indicator--done[data-changed] .indicator__icon { animation: chain-of-thought-pop 300ms cubic-bezier(0.34, 1.56, 0.64, 1) both; }
+.indicator--done[data-changed] .indicator__icon path:last-child { stroke-dasharray: 12; animation: chain-of-thought-check 400ms ease-out 120ms both; }
+
+/* a new header title fades in */
+.header__title[data-changed] { animation: chain-of-thought-title 240ms ease-out both; }
+
 @media (prefers-reduced-motion: reduce) {
+  .step[data-entering], .step[data-entering]::before, .step[data-entering]::after,
+  .step__count[data-fresh], .chip[data-fresh], .step--active .step__icon,
+  .indicator--working .indicator__icon, .indicator--done[data-changed] .indicator__icon,
+  .indicator--done[data-changed] .indicator__icon path:last-child, .header__title[data-changed] { animation: none; }
+  .step::before, .step__icon, .step__label, .step__query, .step__count { transition: none; }
+  .step[data-entering] .step__body { overflow: visible; }
   .header__chevron, .panel, .root[data-open] .panel { transition: none; }
   .indicator--working .indicator__label { animation: none; background: none; -webkit-text-fill-color: currentColor; color: var(--color-fg-muted); }
 }

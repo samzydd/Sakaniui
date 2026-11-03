@@ -16,6 +16,11 @@ All notable changes to `@sakaniui/react` are documented here.
   - **`WorkingIndicator`**: the working line on its own: a sparkle and a shimmering "Working" with the elapsed
     time, or a check and "Worked for 11.2s". The shimmer stops under reduced motion.
   - Presentational: you append steps as your agent produces them. Light and dark through the tokens.
+  - **Motion**, from the Figma *Chain of Thought · motion* table: an appended step fades in and slides down while
+    its row opens, its rail draws itself and the previous step's rail extends to meet it, the count fades in and
+    the source chips pop in one by one. The active step's icon breathes, a step turning done eases to muted, the
+    working label shimmers and the sparkle twinkles, and finishing swaps the sparkle for a check that draws itself
+    in. Only what arrives after the first render animates, and reduced motion makes all of it instant.
 - Agent contract: the four components are in the manifest with a streaming-run recipe and the aliases *chain of
   thought*, *reasoning steps*, *agent steps*, *tool calls*, *sources*, *favicon stack* and more; the agent guide's
   "moments an AI product needs" now points at `ChainOfThought`.

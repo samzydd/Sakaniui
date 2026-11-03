@@ -18,6 +18,14 @@
  * The component is presentational: you feed it steps as your agent produces them
  * (append a ChainOfThoughtStep, flip the previous one to "done"). `status="working"` plus
  * `startedAt` makes the elapsed time tick on its own.
+ *
+ * Motion (the Figma "Chain of Thought · motion" table): a step you append fades in and
+ * slides down while its row opens, its rail draws itself and the previous step's rail
+ * extends to meet it, the count fades in and the source chips pop in one by one. The active
+ * step's icon breathes, a step turning done eases to muted, the working label shimmers and
+ * the sparkle twinkles, and finishing swaps the sparkle for a check that draws itself in.
+ * Nothing animates on first render, only what arrives afterwards, and reduced motion makes
+ * all of it instant.
  */
 
 import React from 'react';
@@ -31,6 +39,29 @@ import type { IconComponent } from '../../icons/types';
 import styles from './ChainOfThought.module.css';
 
 const cx = (...parts: (string | false | null | undefined)[]) => parts.filter(Boolean).join(' ');
+
+/** True once the container has painted its first frame: parts that mount after that animate in; parts there from the start do not. */
+const ReadyContext = React.createContext(false);
+
+/** Whether this part mounted after the container was ready (so it should animate in). Decided once, at mount. */
+function useArrivedLate() {
+  const ready = React.useContext(ReadyContext);
+  const [late] = React.useState(ready);
+  return late;
+}
+
+/** True for a moment after `value` changes (never on first render). */
+function useChanged(value: unknown, ms = 700) {
+  const [changed, setChanged] = React.useState(false);
+  const first = React.useRef(true);
+  React.useEffect(() => {
+    if (first.current) { first.current = false; return; }
+    setChanged(true);
+    const t = setTimeout(() => setChanged(false), ms);
+    return () => clearTimeout(t);
+  }, [value, ms]);
+  return changed;
+}
 
 /** 6.5 -> "6.5s", 72 -> "1m 12s". */
 function formatElapsed(seconds: number) {
@@ -69,8 +100,9 @@ export const WorkingIndicator: React.FC<WorkingIndicatorProps> = ({
 
   const seconds = elapsed ?? (startedAt != null ? Math.max(0, (now - startedAt) / 1000) : undefined);
   const Icon = working ? Sparkles : CircleCheck;
+  const changed = useChanged(status);
   return (
-    <div className={cx(styles.indicator, working && styles['indicator--working'], className)} role="status">
+    <div className={cx(styles.indicator, working ? styles['indicator--working'] : styles['indicator--done'], className)} data-changed={changed || undefined} role="status">
       <Icon className={styles.indicator__icon} size={16} strokeWidth={iconStrokeWidth(16)} aria-hidden="true" />
       <span className={styles.indicator__label}>{label ?? (working ? 'Working' : 'Worked for')}</span>
       {seconds != null && (
@@ -99,19 +131,22 @@ export interface SourceStackProps {
   className?: string;
 }
 
-export const SourceStack: React.FC<SourceStackProps> = ({ sources, className }) => (
+export const SourceStack: React.FC<SourceStackProps> = ({ sources, className }) => {
+  const late = useArrivedLate();
+  return (
   <ul className={cx(styles.stack, className)} aria-label={`${sources.length} source${sources.length === 1 ? '' : 's'}`}>
     {sources.map((s, i) => {
       const Icon = s.icon ?? World;
       return (
-        <li key={`${s.label}-${i}`} className={styles.chip} title={s.label}>
+        <li key={`${s.label}-${i}`} className={styles.chip} title={s.label} data-fresh={late || undefined} style={{ ['--i' as string]: i }}>
           <Icon size={10} strokeWidth={iconStrokeWidth(10, 1)} aria-hidden="true" />
           <span className={styles.sr}>{s.label}</span>
         </li>
       );
     })}
   </ul>
-);
+  );
+};
 SourceStack.displayName = 'SourceStack';
 
 /* ------------------------------------------------------------------ */
@@ -140,12 +175,25 @@ export interface ChainOfThoughtStepProps {
   className?: string;
 }
 
+/** The result count: fades in when it arrives after the container is up (a step's results land after the step starts). */
+const StepCount: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const late = useArrivedLate();
+  return <span className={styles.step__count} data-fresh={late || undefined}>{children}</span>;
+};
+
 const STATUS_TEXT: Record<ChainOfThoughtStepStatus, string> = { pending: 'Pending: ', active: 'In progress: ', done: 'Done: ' };
 
 export const ChainOfThoughtStep: React.FC<ChainOfThoughtStepProps> = ({
   status = 'done', icon, label, query, count, sources, sourcesLabel = 'Sources', onSourcesClick, className,
 }) => {
   const Icon = icon ?? Search;
+  const late = useArrivedLate();
+  const [entering, setEntering] = React.useState(late);
+  React.useEffect(() => {
+    if (!entering) return;
+    const t = setTimeout(() => setEntering(false), 900);
+    return () => clearTimeout(t);
+  }, [entering]);
   const sourcesRow = (
     <>
       <span className={styles.step__sourcesLabel}>{sourcesLabel}</span>
@@ -154,7 +202,8 @@ export const ChainOfThoughtStep: React.FC<ChainOfThoughtStepProps> = ({
     </>
   );
   return (
-    <li className={cx(styles.step, styles[`step--${status}`], className)} aria-current={status === 'active' ? 'step' : undefined}>
+    <li className={cx(styles.step, styles[`step--${status}`], className)} data-entering={entering || undefined} aria-current={status === 'active' ? 'step' : undefined}>
+      <div className={styles.step__body}>
       <div className={styles.step__row}>
         <Icon className={styles.step__icon} size={16} strokeWidth={iconStrokeWidth(16)} aria-hidden="true" />
         <span className={styles.step__content}>
@@ -162,13 +211,14 @@ export const ChainOfThoughtStep: React.FC<ChainOfThoughtStepProps> = ({
           <span className={styles.step__label}>{label}</span>
           {query && <code className={styles.step__query}>{query}</code>}
         </span>
-        {count != null && <span className={styles.step__count}>{count}</span>}
+        {count != null && <StepCount>{count}</StepCount>}
       </div>
       {sources && (
         onSourcesClick
           ? <button type="button" className={cx(styles.step__sources, styles['step__sources--button'])} onClick={onSourcesClick}>{sourcesRow}</button>
           : <div className={styles.step__sources}>{sourcesRow}</div>
       )}
+      </div>
     </li>
   );
 };
@@ -205,6 +255,12 @@ export const ChainOfThought: React.FC<ChainOfThoughtProps> = ({
 }) => {
   const Icon = icon ?? Search;
   const panelId = React.useId();
+  const [ready, setReady] = React.useState(false);
+  React.useEffect(() => {
+    const id = requestAnimationFrame(() => setReady(true));
+    return () => cancelAnimationFrame(id);
+  }, []);
+  const titleChanged = useChanged(typeof title === 'string' ? title : undefined);
   const [inner, setInner] = React.useState(defaultOpen);
   const isOpen = open ?? inner;
   const toggle = () => {
@@ -216,12 +272,14 @@ export const ChainOfThought: React.FC<ChainOfThoughtProps> = ({
     <div className={cx(styles.root, className)} data-open={isOpen || undefined}>
       <button type="button" className={styles.header} aria-expanded={isOpen} aria-controls={panelId} onClick={toggle}>
         <Icon className={styles.header__icon} size={16} strokeWidth={iconStrokeWidth(16)} aria-hidden="true" />
-        <span className={styles.header__title}>{title}</span>
+        <span className={styles.header__title} data-changed={titleChanged || undefined}>{title}</span>
         <ChevronDown className={styles.header__chevron} size={14} strokeWidth={iconStrokeWidth(14)} aria-hidden="true" />
       </button>
       <div id={panelId} className={styles.panel} aria-hidden={!isOpen || undefined}>
         <div className={styles.panel__inner}>
-          {children != null && <ol className={styles.steps}>{children}</ol>}
+          <ReadyContext.Provider value={ready}>
+            {children != null && <ol className={styles.steps}>{children}</ol>}
+          </ReadyContext.Provider>
           {status && (
             <div className={styles.working}>
               <WorkingIndicator status={status} elapsed={elapsed} startedAt={startedAt} />
