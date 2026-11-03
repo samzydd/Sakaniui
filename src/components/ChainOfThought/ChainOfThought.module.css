@@ -118,12 +118,13 @@
 }
 .step__count { flex-shrink: 0; font-size: 13px; line-height: 18px; font-variant-numeric: tabular-nums; }
 
-/* status colours: done is muted, active reads in full, pending is faint */
-.step--done .step__icon, .step--done .step__label { color: var(--color-fg-muted); }
-.step--done .step__query, .step--done .step__count { color: var(--color-fg-subtle); }
+/* status colours: the active step reads in full, the rest is muted. Text never uses fg/subtle
+   (2.5:1 on white, below WCAG AA); only the pending icon does, and it is decorative. */
+.step--done .step__icon, .step--done .step__label, .step--done .step__query, .step--done .step__count { color: var(--color-fg-muted); }
 .step--active .step__icon, .step--active .step__label { color: var(--color-fg-default); }
 .step--active .step__query, .step--active .step__count { color: var(--color-fg-muted); }
-.step--pending .step__icon, .step--pending .step__label, .step--pending .step__query, .step--pending .step__count { color: var(--color-fg-subtle); }
+.step--pending .step__label, .step--pending .step__query, .step--pending .step__count { color: var(--color-fg-muted); }
+.step--pending .step__icon { color: var(--color-fg-subtle); }
 
 /* sources row, aligned with the label */
 .step__sources {
@@ -138,7 +139,6 @@
   color: var(--color-fg-muted);
   text-align: left;
 }
-.step--pending .step__sources { color: var(--color-fg-subtle); }
 .step__sources--button { cursor: pointer; }
 .step__sources--button:hover .step__sourcesLabel { color: var(--color-fg-default); }
 .step__sources--button:focus-visible { outline: 2px solid var(--color-border-focus); outline-offset: 2px; border-radius: var(--radius-sm); }
@@ -165,7 +165,7 @@
 .indicator { display: flex; align-items: center; gap: var(--space-8); font-size: 14px; line-height: 20px; font-weight: 500; font-family: var(--font-sans); }
 .indicator__icon { flex-shrink: 0; color: var(--color-fg-muted); }
 .indicator__label { color: var(--color-fg-muted); }
-.indicator__time { color: var(--color-fg-subtle); font-variant-numeric: tabular-nums; }
+.indicator__time { color: var(--color-fg-muted); font-variant-numeric: tabular-nums; }
 
 @keyframes chain-of-thought-shimmer {
   from { background-position: 100% 0; }
