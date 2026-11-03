@@ -1,18 +1,20 @@
 import React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { ChainOfThought, ChainOfThoughtStep, SourceStack } from './ChainOfThought';
-import { IconBulb } from '../../icons/outline/bulb';
-import { IconBrandX } from '../../icons/outline/brand-x';
-import { IconBrandReddit } from '../../icons/outline/brand-reddit';
-import { IconBrandGithub } from '../../icons/outline/brand-github';
-import { IconBrandLinkedin } from '../../icons/outline/brand-linkedin';
-import { IconBrandFigma } from '../../icons/outline/brand-figma';
-import { IconBrandNotion } from '../../icons/outline/brand-notion';
-import { IconFileText } from '../../icons/outline/file-text';
+import { SourceLogo } from './SourceLogo';
+import { sourceLogo, sourceLogoNames } from './logoIcons';
+import { EmojiLightBulb } from '../../emoji/art/light-bulb';
+import { EmojiPageFacingUp } from '../../emoji/art/page-facing-up';
+import { EmojiMagnifyingGlassTiltedLeft } from '../../emoji/art/magnifying-glass-tilted-left';
+import { EmojiBrain } from '../../emoji/art/brain';
+import { EmojiMemo } from '../../emoji/art/memo';
+import { EmojiNewspaper } from '../../emoji/art/newspaper';
+
+const X = sourceLogo('x'), Reddit = sourceLogo('reddit'), HackerNews = sourceLogo('hackernews'), Google = sourceLogo('google');
 
 const SOURCES = [
-  { label: 'Reddit', icon: IconBrandReddit }, { label: 'LinkedIn', icon: IconBrandLinkedin },
-  { label: 'GitHub', icon: IconBrandGithub }, { label: 'Figma', icon: IconBrandFigma },
+  { label: 'Reddit', icon: sourceLogo('reddit') }, { label: 'LinkedIn', icon: sourceLogo('linkedin') },
+  { label: 'GitHub', icon: sourceLogo('github') }, { label: 'Product Hunt', icon: sourceLogo('producthunt') },
 ];
 
 const meta = {
@@ -38,7 +40,7 @@ produces it and mark the previous one done.`,
     },
   },
   decorators: [(S) => <div style={{ width: 560, maxWidth: '100%', padding: 24, boxSizing: 'border-box' }}><S /></div>],
-  args: { title: 'Ran 3 searches' },
+  args: { title: 'Ran 3 searches', icon: EmojiMagnifyingGlassTiltedLeft },
 } satisfies Meta<typeof ChainOfThought>;
 
 export default meta;
@@ -46,10 +48,10 @@ type Story = StoryObj<typeof meta>;
 
 const steps = (last: 'active' | 'done' = 'active') => (
   <>
-    <ChainOfThoughtStep icon={IconBulb} label="Searching for what teams pay for" count="5 results" sources={<SourceStack sources={SOURCES} />} onSourcesClick={() => {}} />
-    <ChainOfThoughtStep icon={IconBrandX} label="Searched X for" query="design system pricing" count="7 posts" />
-    <ChainOfThoughtStep icon={IconBrandReddit} label="Searched Reddit for" query="r/reactjs worth paying for" count="12 threads" />
-    <ChainOfThoughtStep status={last} icon={IconFileText} label="Reading the strongest three threads" />
+    <ChainOfThoughtStep icon={EmojiLightBulb} label="Searching for what teams pay for" count="5 results" sources={<SourceStack sources={SOURCES} />} onSourcesClick={() => {}} />
+    <ChainOfThoughtStep icon={X} label="Searched X for" query="design system pricing" count="7 posts" />
+    <ChainOfThoughtStep icon={Reddit} label="Searched Reddit for" query="r/reactjs worth paying for" count="12 threads" />
+    <ChainOfThoughtStep status={last} icon={EmojiPageFacingUp} label="Reading the strongest three threads" />
   </>
 );
 
@@ -69,9 +71,9 @@ export const StepStates: Story = {
   name: 'Step states (pending, active, done)',
   render: () => (
     <ChainOfThought title="Step states">
-      <ChainOfThoughtStep status="done" label="Searched X for" query="design system pricing" count="7 posts" sources={<SourceStack sources={SOURCES} />} />
-      <ChainOfThoughtStep status="active" label="Searched Reddit for" query="r/reactjs worth paying for" count="12 threads" sources={<SourceStack sources={SOURCES.slice(0, 3)} />} />
-      <ChainOfThoughtStep status="pending" label="Reading the strongest three threads" sources={<SourceStack sources={SOURCES.slice(0, 2)} />} />
+      <ChainOfThoughtStep status="done" icon={X} label="Searched X for" query="design system pricing" count="7 posts" sources={<SourceStack sources={SOURCES} />} />
+      <ChainOfThoughtStep status="active" icon={Reddit} label="Searched Reddit for" query="r/reactjs worth paying for" count="12 threads" sources={<SourceStack sources={SOURCES.slice(0, 3)} />} />
+      <ChainOfThoughtStep status="pending" icon={HackerNews} label="Searching Hacker News for" query="design system" sources={<SourceStack sources={SOURCES.slice(0, 2)} />} />
     </ChainOfThought>
   ),
 };
@@ -79,13 +81,44 @@ export const StepStates: Story = {
 export const SourceStacks: Story = {
   name: 'Source stack (3, 4, 5)',
   render: () => {
-    const all = [...SOURCES, { label: 'Notion', icon: IconBrandNotion }];
+    const all = [...SOURCES, { label: 'Notion', icon: sourceLogo('notion') }];
     return (
       <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
         {[3, 4, 5].map((n) => <SourceStack key={n} sources={all.slice(0, n)} />)}
       </div>
     );
   },
+};
+
+export const Logos: Story = {
+  name: 'Source logos (real, in brand colour)',
+  parameters: { docs: { description: { story: 'The real logo of the site a result came from, in its brand colour, through `<SourceLogo name="reddit" />` or `sourceLogo(\'reddit\')` for any `icon` prop. Black brands (X, GitHub, Notion, Medium, Wikipedia) draw in the text colour so they stay visible in dark mode.' } } },
+  decorators: [(S) => <div style={{ width: 720, maxWidth: '100%', padding: 24, boxSizing: 'border-box' }}><S /></div>],
+  render: () => (
+    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: 8 }}>
+      {sourceLogoNames.map((name) => (
+        <div key={name} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', border: '1px solid var(--color-border-subtle)', borderRadius: 10, font: '500 13px var(--font-sans)', color: 'var(--color-fg-default)' }}>
+          <SourceLogo name={name} size={20} />
+          <span>{name}</span>
+        </div>
+      ))}
+    </div>
+  ),
+};
+
+export const Colourful: Story = {
+  name: 'Logos and emoji together',
+  parameters: { docs: { description: { story: 'Thinking and reading steps carry an emoji; steps that searched a site carry that site\'s logo; the stack under a step shows where its results came from. A pending step is grey until it starts.' } } },
+  render: () => (
+    <ChainOfThought title="Researched the market" icon={EmojiBrain} status="done" elapsed={14.8}>
+      <ChainOfThoughtStep icon={EmojiLightBulb} label="Planning the search" count="3 angles" />
+      <ChainOfThoughtStep icon={Google} label="Searched Google for" query="design system pricing 2026" count="10 results" sources={<SourceStack sources={[{ label: 'Google', icon: Google }, { label: 'Product Hunt', icon: sourceLogo('producthunt') }, { label: 'Medium', icon: sourceLogo('medium') }, { label: 'Wikipedia', icon: sourceLogo('wikipedia') }]} />} onSourcesClick={() => {}} />
+      <ChainOfThoughtStep icon={X} label="Searched X for" query="paid design systems" count="7 posts" />
+      <ChainOfThoughtStep icon={Reddit} label="Searched Reddit for" query="r/reactjs worth paying for" count="12 threads" sources={<SourceStack sources={[{ label: 'Reddit', icon: Reddit }, { label: 'Hacker News', icon: HackerNews }, { label: 'Stack Overflow', icon: sourceLogo('stackoverflow') }]} />} onSourcesClick={() => {}} />
+      <ChainOfThoughtStep icon={EmojiNewspaper} label="Reading the strongest three articles" count="3 pages" />
+      <ChainOfThoughtStep icon={EmojiMemo} label="Writing the summary" />
+    </ChainOfThought>
+  ),
 };
 
 export const Dark: Story = {
@@ -97,10 +130,11 @@ export const Dark: Story = {
 function LiveRun() {
   // each step arrives without results, works for `ms`, then its results land and the next step starts
   const SCRIPT = [
-    { icon: IconBulb, label: 'Searching for what teams pay for', count: '5 results', sources: SOURCES, ms: 1500 },
-    { icon: IconBrandX, label: 'Searched X for', query: 'design system pricing', count: '7 posts', ms: 1900 },
-    { icon: IconBrandReddit, label: 'Searched Reddit for', query: 'r/reactjs worth paying for', count: '12 threads', ms: 2300 },
-    { icon: IconFileText, label: 'Reading the strongest three threads', ms: 2600 },
+    { icon: EmojiLightBulb, label: 'Planning the search', count: '3 angles', ms: 1300 },
+    { icon: Google, label: 'Searched Google for', query: 'design system pricing 2026', count: '10 results', sources: [{ label: 'Google', icon: Google }, { label: 'Product Hunt', icon: sourceLogo('producthunt') }, { label: 'Medium', icon: sourceLogo('medium') }, { label: 'Wikipedia', icon: sourceLogo('wikipedia') }], ms: 1900 },
+    { icon: X, label: 'Searched X for', query: 'paid design systems', count: '7 posts', ms: 1800 },
+    { icon: Reddit, label: 'Searched Reddit for', query: 'r/reactjs worth paying for', count: '12 threads', sources: [{ label: 'Reddit', icon: Reddit }, { label: 'Hacker News', icon: HackerNews }, { label: 'Stack Overflow', icon: sourceLogo('stackoverflow') }], ms: 2200 },
+    { icon: EmojiPageFacingUp, label: 'Reading the strongest three threads', ms: 2400 },
   ];
   const [run, setRun] = React.useState(0);
   const [shown, setShown] = React.useState(0);
@@ -125,7 +159,7 @@ function LiveRun() {
   const done = finishedIn != null;
   return (
     <div>
-      <ChainOfThought title={done ? `Ran ${SCRIPT.filter((s) => s.query).length + 1} searches` : 'Researching'} status={done ? 'done' : 'working'} startedAt={startedAt} elapsed={finishedIn}>
+      <ChainOfThought title={done ? `Ran ${SCRIPT.filter((s) => s.query).length} searches` : 'Researching'} icon={EmojiMagnifyingGlassTiltedLeft} status={done ? 'done' : 'working'} startedAt={startedAt} elapsed={finishedIn}>
         {SCRIPT.slice(0, shown).map((s, i) => (
           <ChainOfThoughtStep
             key={`${run}-${s.label}`}

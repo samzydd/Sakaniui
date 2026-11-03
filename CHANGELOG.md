@@ -9,6 +9,12 @@ All notable changes to `@sakaniui/react` are documented here.
   - **`ChainOfThought`**: `title`, `icon`, `open` / `defaultOpen` / `onOpenChange` (the header toggles it, with
     an animated open and close), `status` (`"working"` or `"done"`) with `elapsed` (seconds) or `startedAt`
     (the time then counts up on its own), and `children`.
+  - **`SourceLogo`** and **`sourceLogo(name)`**: the real logo of the site a step searched or read, in its brand
+    colour, for the `icon` props of a step or a `SourceStack` chip (or `<SourceLogo name="reddit" />` on its own).
+    Seventeen sites: Google, X, Reddit, GitHub, LinkedIn, YouTube, Hacker News, Wikipedia, Stack Overflow, Product
+    Hunt, Medium, Notion, Substack, arXiv, Bluesky, Perplexity, DuckDuckGo. Black brands draw in the text colour so
+    they stay visible in dark mode. Emoji work as step icons too (`icon={EmojiLightBulb}`). A pending step's icon is
+    grey until it starts, and the spark that runs into the active step takes the logo's colour.
   - **`ChainOfThoughtStep`**: `status` pending, active (read in full) or done (muted), an `icon`, a `label`, an
     optional monospace `query`, a result `count`, and a `sources` row (add `onSourcesClick` to make it a button
     with a chevron). The rail stops at the last step by itself; screen readers get each step's status.

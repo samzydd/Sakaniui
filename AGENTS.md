@@ -281,7 +281,10 @@ user when you are composing** rather than implying a dedicated component exists.
   the `query` in monospace, a result `count`, and a `SourceStack` as `sources`). Append a step as the agent starts
   it, mark the active one `status="active"` and finished ones `"done"` (they read muted), and give the container
   `status="working"` with `startedAt` so the timer ticks on its own; switch to `status="done"` and the final
-  `elapsed` when the run ends. It only displays: you stream the steps in. Do not build this from `Stepper` (a
+  `elapsed` when the run ends. Give each step a recognisable icon: the site's real logo in its brand colour
+  (`icon={sourceLogo('reddit')}`, and the same in the `SourceStack`), or an emoji for steps with no site
+  (`EmojiLightBulb` for planning, `EmojiPageFacingUp` for reading). Do not use a generic magnifier for every
+  step. It only displays: you stream the steps in. Do not build this from `Stepper` (a
   progress bar for a known sequence) or `ActivityFeed` (a log of past events).
 - **The model isn't sure.** State uncertainty in words next to the claim, not hidden in colour. Use an
   `Alert` (`color="info"` or `"warning"`) or a `Badge` ("Low confidence"). Offer the next step: verify,

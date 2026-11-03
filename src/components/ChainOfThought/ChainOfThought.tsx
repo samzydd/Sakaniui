@@ -10,6 +10,11 @@
  *   Source Stack             3 to 5 overlapping site-icon chips (Source Chip, 18px)
  *   Working Indicator        Working (sparkle, "Working", elapsed) | Done ("Worked for 11s")
  *
+ * Icons can be anything: a Sakani icon, an emoji (💡 for thinking, 📄 for reading) or the real logo of the
+ * site searched, in its brand colour (`sourceLogo('reddit')`). Colour stays on in every state; a pending
+ * step shows its logo in grey until it starts, and the spark that runs into the active step takes the
+ * logo's colour.
+ *
  * Done steps read muted and the active one reads in full, so the eye lands on what is
  * happening now. The tree rail (a 1px border/default line with an elbow into each icon)
  * stops at the last step by itself. While working, the label shimmers; reduced motion
@@ -174,6 +179,8 @@ export interface ChainOfThoughtStepProps {
   query?: string;
   /** A result count on the right, e.g. "7 posts". */
   count?: React.ReactNode;
+  /** Colour of the spark that runs into the step while it is active. Defaults to the icon's brand colour when it is a logo from `sourceLogo()`. */
+  accent?: string;
   /** A row under the step, usually a <SourceStack>. */
   sources?: React.ReactNode;
   /** Text before the sources. Defaults to "Sources". */
@@ -220,9 +227,10 @@ const StepSources: React.FC<{ onClick?: () => void; children: React.ReactNode }>
 const STATUS_TEXT: Record<ChainOfThoughtStepStatus, string> = { pending: 'Pending: ', active: 'In progress: ', done: 'Done: ' };
 
 export const ChainOfThoughtStep: React.FC<ChainOfThoughtStepProps> = ({
-  status = 'done', icon, label, query, count, sources, sourcesLabel = 'Sources', onSourcesClick, className,
+  status = 'done', icon, label, query, count, accent, sources, sourcesLabel = 'Sources', onSourcesClick, className,
 }) => {
   const Icon = icon ?? Search;
+  const spark = accent ?? (Icon as { brandColor?: string | null }).brandColor ?? undefined;
   const late = useArrivedLate();
   const [entering, setEntering] = React.useState(late);
   // results that come with the step wait for its label; results that land later show at once
@@ -240,7 +248,7 @@ export const ChainOfThoughtStep: React.FC<ChainOfThoughtStepProps> = ({
     </>
   );
   return (
-    <li className={cx(styles.step, styles[`step--${status}`], className)} data-entering={entering || undefined} data-with-results={(entering && withResults) || undefined} aria-current={status === 'active' ? 'step' : undefined}>
+    <li className={cx(styles.step, styles[`step--${status}`], className)} style={spark ? { ['--cot-spark' as string]: spark } : undefined} data-entering={entering || undefined} data-with-results={(entering && withResults) || undefined} aria-current={status === 'active' ? 'step' : undefined}>
       <div className={styles.step__body}>
       <div className={styles.step__row}>
         <Icon className={styles.step__icon} size={16} strokeWidth={iconStrokeWidth(16)} aria-hidden="true" />

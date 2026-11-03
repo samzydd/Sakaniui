@@ -129,7 +129,7 @@
 .step__count { flex-shrink: 0; font-size: 13px; line-height: 18px; font-variant-numeric: tabular-nums; }
 
 /* a step turning done eases from full to muted */
-.step__icon, .step__label, .step__query, .step__count { transition: color 480ms ease; }
+.step__label, .step__query, .step__count { transition: color 480ms ease; }
 
 /* status colours: the active step reads in full, the rest is muted. Text never uses fg/subtle
    (2.5:1 on white, below WCAG AA); only the pending icon does, and it is decorative. */
@@ -137,7 +137,9 @@
 .step--active .step__icon, .step--active .step__label { color: var(--color-fg-default); }
 .step--active .step__query, .step--active .step__count { color: var(--color-fg-muted); }
 .step--pending .step__label, .step--pending .step__query, .step--pending .step__count { color: var(--color-fg-muted); }
-.step--pending .step__icon { color: var(--color-fg-subtle); }
+/* a pending step's icon is grey (colour logos and emoji included) and comes into colour when the step starts */
+.step--pending .step__icon { color: var(--color-fg-subtle); filter: grayscale(1); opacity: 0.75; }
+.step__icon { transition: color 480ms ease, filter 520ms ease, opacity 520ms ease; }
 
 /* sources row, aligned with the label */
 .step__sources {
