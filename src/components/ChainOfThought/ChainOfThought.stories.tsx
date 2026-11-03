@@ -95,34 +95,51 @@ export const Dark: Story = {
 
 /** A simulated agent run: steps stream in, the previous one turns done, the timer counts up, then it finishes. */
 function LiveRun() {
+  // each step arrives without results, works for `ms`, then its results land and the next step starts
   const SCRIPT = [
-    { icon: IconBulb, label: 'Searching for what teams pay for', count: '5 results' },
-    { icon: IconBrandX, label: 'Searched X for', query: 'design system pricing', count: '7 posts' },
-    { icon: IconBrandReddit, label: 'Searched Reddit for', query: 'r/reactjs worth paying for', count: '12 threads' },
-    { icon: IconFileText, label: 'Reading the strongest three threads' },
+    { icon: IconBulb, label: 'Searching for what teams pay for', count: '5 results', sources: SOURCES, ms: 1500 },
+    { icon: IconBrandX, label: 'Searched X for', query: 'design system pricing', count: '7 posts', ms: 1900 },
+    { icon: IconBrandReddit, label: 'Searched Reddit for', query: 'r/reactjs worth paying for', count: '12 threads', ms: 2300 },
+    { icon: IconFileText, label: 'Reading the strongest three threads', ms: 2600 },
   ];
-  const [shown, setShown] = React.useState(1);
-  const [done, setDone] = React.useState(false);
+  const [run, setRun] = React.useState(0);
+  const [shown, setShown] = React.useState(0);
+  const [landed, setLanded] = React.useState(0);
   const [startedAt, setStartedAt] = React.useState(() => Date.now());
   const [finishedIn, setFinishedIn] = React.useState<number | undefined>();
   React.useEffect(() => {
-    if (done) return;
-    const t = setTimeout(() => {
-      if (shown < SCRIPT.length) setShown((n) => n + 1);
-      else { setDone(true); setFinishedIn((Date.now() - startedAt) / 1000); }
-    }, 1800);
-    return () => clearTimeout(t);
+    const start = Date.now();
+    setShown(0); setLanded(0); setFinishedIn(undefined); setStartedAt(start);
+    const timers: ReturnType<typeof setTimeout>[] = [];
+    let at = 700;
+    SCRIPT.forEach((s, i) => {
+      timers.push(setTimeout(() => setShown(i + 1), at));
+      at += s.ms;
+      timers.push(setTimeout(() => setLanded(i + 1), at));
+      at += 450;
+    });
+    timers.push(setTimeout(() => setFinishedIn((Date.now() - start) / 1000), at - 200));
+    return () => timers.forEach(clearTimeout);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [shown, done]);
-  const replay = () => { setShown(1); setDone(false); setFinishedIn(undefined); setStartedAt(Date.now()); };
+  }, [run]);
+  const done = finishedIn != null;
   return (
     <div>
       <ChainOfThought title={done ? `Ran ${SCRIPT.filter((s) => s.query).length + 1} searches` : 'Researching'} status={done ? 'done' : 'working'} startedAt={startedAt} elapsed={finishedIn}>
         {SCRIPT.slice(0, shown).map((s, i) => (
-          <ChainOfThoughtStep key={s.label} status={!done && i === shown - 1 ? 'active' : 'done'} icon={s.icon} label={s.label} query={s.query} count={s.count} />
+          <ChainOfThoughtStep
+            key={`${run}-${s.label}`}
+            status={!done && i === shown - 1 && landed < shown ? 'active' : 'done'}
+            icon={s.icon}
+            label={s.label}
+            query={s.query}
+            count={i < landed ? s.count : undefined}
+            sources={i < landed && s.sources ? <SourceStack sources={s.sources} /> : undefined}
+            onSourcesClick={s.sources ? () => {} : undefined}
+          />
         ))}
       </ChainOfThought>
-      <button type="button" onClick={replay} style={{ marginTop: 16, font: '500 13px var(--font-sans)', padding: '6px 12px', border: '1px solid var(--color-border-default)', borderRadius: 8, background: 'var(--color-bg-surface)', color: 'var(--color-fg-default)', cursor: 'pointer' }}>
+      <button type="button" onClick={() => setRun((n) => n + 1)} style={{ marginTop: 16, font: '500 13px var(--font-sans)', padding: '6px 12px', border: '1px solid var(--color-border-default)', borderRadius: 8, background: 'var(--color-bg-surface)', color: 'var(--color-fg-default)', cursor: 'pointer' }}>
         Replay
       </button>
     </div>
@@ -131,5 +148,5 @@ function LiveRun() {
 
 export const Live: Story = {
   render: () => <LiveRun />,
-  parameters: { docs: { description: { story: 'A simulated run: each step arrives, the previous one turns done, the timer counts up from `startedAt`, then the run finishes.' } } },
+  parameters: { docs: { description: { story: 'A simulated run: each step arrives and works, its results land (the count ticks up, the sources fan out), the next step starts, and finishing sweeps the rail down to the check. Press Replay to watch again.' } } },
 };

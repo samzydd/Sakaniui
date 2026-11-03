@@ -267,6 +267,7 @@
   "src/components/Calendar/Calendar.tsx": "0.1.0",
   "src/components/Card/Card.tsx": "0.1.0",
   "src/components/CardMetaItem/CardMetaItem.tsx": "0.1.0",
+  "src/components/ChainOfThought/ChainOfThought.tsx": "0.12.0",
   "src/components/ChatComposer/ChatComposer-simple.tsx": "0.1.0",
   "src/components/ChatComposer/ChatComposer.tsx": "0.1.0",
   "src/components/Checkbox/Checkbox.tsx": "0.1.0",

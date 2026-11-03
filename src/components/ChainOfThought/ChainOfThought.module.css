@@ -43,7 +43,7 @@
 .header:focus-visible { outline: 2px solid var(--color-border-focus); outline-offset: 2px; border-radius: var(--radius-sm); }
 .header__icon { flex-shrink: 0; }
 .header__title { flex: 1; min-width: 0; }
-.header__chevron { flex-shrink: 0; color: var(--color-fg-subtle); transition: transform 200ms ease; transform: rotate(-90deg); }
+.header__chevron { flex-shrink: 0; color: var(--color-fg-subtle); transition: transform 360ms cubic-bezier(0.34, 1.56, 0.64, 1); transform: rotate(-90deg); }
 .root[data-open] .header { padding-bottom: var(--space-8); }
 .root[data-open] .header__chevron { transform: none; }
 
@@ -53,12 +53,12 @@
   display: grid;
   grid-template-rows: 0fr;
   visibility: hidden;
-  transition: grid-template-rows 220ms ease, visibility 0s linear 220ms;
+  transition: grid-template-rows 240ms cubic-bezier(0.4, 0, 0.6, 1), visibility 0s linear 240ms;
 }
-.root[data-open] .panel { grid-template-rows: 1fr; visibility: visible; transition: grid-template-rows 220ms ease, visibility 0s; }
+.root[data-open] .panel { grid-template-rows: 1fr; visibility: visible; transition: grid-template-rows 420ms cubic-bezier(0.16, 1, 0.3, 1), visibility 0s; }
 .panel__inner { min-height: 0; overflow: hidden; }
 /* the short rail from the header icon down into the first step */
-.root[data-open] .panel:has(.steps)::before {
+.root[data-open] .panel:has(.step)::before {
   content: '';
   position: absolute;
   left: 8px;
@@ -97,7 +97,7 @@
   width: 1px;
   background: var(--color-border-default);
   transform-origin: 0 0;
-  transition: bottom 300ms ease;
+  transition: bottom 260ms cubic-bezier(0.45, 0, 0.55, 1);
 }
 /* the last step's line stops at its icon (11px); when another step follows, it grows to meet it */
 .step:last-child::before { bottom: calc(100% - 11px); }
@@ -129,7 +129,7 @@
 .step__count { flex-shrink: 0; font-size: 13px; line-height: 18px; font-variant-numeric: tabular-nums; }
 
 /* a step turning done eases from full to muted */
-.step__icon, .step__label, .step__query, .step__count { transition: color 300ms ease; }
+.step__icon, .step__label, .step__query, .step__count { transition: color 480ms ease; }
 
 /* status colours: the active step reads in full, the rest is muted. Text never uses fg/subtle
    (2.5:1 on white, below WCAG AA); only the pending icon does, and it is decorative. */
@@ -185,60 +185,132 @@
   to { background-position: -100% 0; }
 }
 .indicator--working .indicator__label {
-  background: linear-gradient(90deg, var(--color-fg-muted) 40%, var(--color-fg-default) 50%, var(--color-fg-muted) 60%);
+  background: linear-gradient(90deg, var(--color-fg-muted) 35%, var(--color-fg-default) 50%, var(--color-fg-muted) 65%);
   background-size: 250% 100%;
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
   color: transparent;
-  animation: chain-of-thought-shimmer 1.8s linear infinite;
+  animation: chain-of-thought-shimmer 2.4s cubic-bezier(0.45, 0, 0.55, 1) infinite;
 }
 
-/* ---- motion (Figma "Chain of Thought · motion") ---- */
-@keyframes chain-of-thought-step-in {
-  from { grid-template-rows: 0fr; opacity: 0; transform: translateY(-6px); }
-  to { grid-template-rows: 1fr; opacity: 1; transform: none; }
-}
+/* ---- motion (Figma "Chain of Thought · motion"): ink running down the rail ----
+   An arriving step (0 = the moment it mounts):
+     0     its row opens (520ms) while the previous rail flows down to meet it (260ms)
+     220   its own rail runs on to the icon, 320 turns the corner, 420 the icon lands
+     480   the label is written in, 640 the query types itself, 760 the count and chips follow */
+.root { --cot-ease-out: cubic-bezier(0.16, 1, 0.3, 1); --cot-spring: cubic-bezier(0.34, 1.56, 0.64, 1); --cot-spark: var(--color-fg-default); }
+
+@keyframes chain-of-thought-open { from { grid-template-rows: 0fr; } to { grid-template-rows: 1fr; } }
 @keyframes chain-of-thought-rail-down { from { transform: scaleY(0); } to { transform: scaleY(1); } }
 @keyframes chain-of-thought-rail-across { from { transform: scaleX(0); } to { transform: scaleX(1); } }
-@keyframes chain-of-thought-fade-in { from { opacity: 0; transform: translateX(4px); } to { opacity: 1; transform: none; } }
-@keyframes chain-of-thought-chip-in { from { opacity: 0; transform: scale(0.4); } to { opacity: 1; transform: none; } }
-@keyframes chain-of-thought-breathe { 0%, 100% { opacity: 1; } 50% { opacity: 0.55; } }
-@keyframes chain-of-thought-twinkle { 0%, 100% { transform: scale(1) rotate(0); } 50% { transform: scale(1.18) rotate(14deg); } }
+@keyframes chain-of-thought-land { from { opacity: 0; transform: scale(0.4); } to { opacity: 1; transform: none; } }
+@keyframes chain-of-thought-write {
+  from { opacity: 0; filter: blur(3px); -webkit-mask-position: 100% 0; mask-position: 100% 0; }
+  to { opacity: 1; filter: none; -webkit-mask-position: 0 0; mask-position: 0 0; }
+}
+@keyframes chain-of-thought-type { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0 0 0 0); } }
+@keyframes chain-of-thought-fade-in { from { opacity: 0; filter: blur(2px); transform: translateX(4px); } to { opacity: 1; filter: none; transform: none; } }
+@keyframes chain-of-thought-fan { from { opacity: 0; transform: translateX(calc(var(--i, 0) * -12px)) scale(0.7); } to { opacity: 1; transform: none; } }
+@keyframes chain-of-thought-rise { from { opacity: 0; filter: blur(2px); transform: translateY(-4px); } to { opacity: 1; filter: none; transform: none; } }
+
+.step[data-entering] { animation: chain-of-thought-open 520ms var(--cot-ease-out) both; }
+.step[data-entering] .step__body { overflow: hidden; }
+.step[data-entering]::before { animation: chain-of-thought-rail-down 120ms linear 220ms both; }
+.step[data-entering]::after { animation: chain-of-thought-rail-across 140ms cubic-bezier(0, 0, 0.4, 1) 320ms both; }
+.step[data-entering] .step__icon { animation: chain-of-thought-land 440ms var(--cot-spring) 420ms both; }
+.step[data-entering] .step__label,
+.step[data-entering] .step__sourcesLabel {
+  -webkit-mask-image: linear-gradient(90deg, #000 33%, transparent 66%);
+  mask-image: linear-gradient(90deg, #000 33%, transparent 66%);
+  -webkit-mask-size: 300% 100%;
+  mask-size: 300% 100%;
+  animation: chain-of-thought-write 560ms cubic-bezier(0.33, 1, 0.68, 1) 480ms both;
+}
+.step[data-entering] .step__sourcesLabel { animation-delay: 620ms; }
+.step[data-entering] .step__query { animation: chain-of-thought-type calc(var(--chars, 12) * 24ms) steps(var(--chars, 12), end) 640ms both; }
+.step[data-entering] .step__sourcesChevron { animation: chain-of-thought-fade-in 300ms ease-out 900ms both; }
+/* the first step also draws the stub down from the header icon */
+.root[data-open] .panel:has(.step:first-child[data-entering])::before { transform-origin: 0 0; animation: chain-of-thought-rail-down 200ms ease-in both; }
+
+/* results that land later (or with the step, after its label) */
+.step__count[data-fresh] { animation: chain-of-thought-fade-in 360ms ease-out both; }
+.step[data-with-results] .step__count[data-fresh] { animation-delay: 760ms; }
+/* a sources row that lands after its step opens under it, and its label is written in */
+@keyframes chain-of-thought-row-open { from { max-height: 0; min-height: 0; margin-top: -4px; opacity: 0; } to { max-height: 20px; opacity: 1; } }
+.step:not([data-with-results]) .step__sources[data-fresh] { overflow: hidden; animation: chain-of-thought-row-open 360ms var(--cot-ease-out) both; }
+.step:not([data-with-results]) .step__sources[data-fresh] .step__sourcesLabel {
+  -webkit-mask-image: linear-gradient(90deg, #000 33%, transparent 66%);
+  mask-image: linear-gradient(90deg, #000 33%, transparent 66%);
+  -webkit-mask-size: 300% 100%;
+  mask-size: 300% 100%;
+  animation: chain-of-thought-write 480ms cubic-bezier(0.33, 1, 0.68, 1) 80ms both;
+}
+.step:not([data-with-results]) .step__sources[data-fresh] .step__sourcesChevron { animation: chain-of-thought-fade-in 300ms ease-out 420ms both; }
+.chip[data-fresh] { animation: chain-of-thought-fan 460ms var(--cot-spring) calc(var(--i, 0) * 60ms + 60ms) both; }
+.step[data-with-results] .chip[data-fresh] { animation-delay: calc(var(--i, 0) * 60ms + 760ms); }
+
+/* the active step: a spark runs down the rail, turns the corner, and the icon beats as it lands */
+@keyframes chain-of-thought-spark-down { 0% { background-position: 0 -8px, 0 0; } 34%, 100% { background-position: 0 12px, 0 0; } }
+@keyframes chain-of-thought-spark-across { 0%, 30% { background-position: -8px 0, 0 0; } 62%, 100% { background-position: 14px 0, 0 0; } }
+@keyframes chain-of-thought-beat {
+  0%, 56% { opacity: 0.82; transform: none; }
+  68% { opacity: 1; transform: scale(1.1); }
+  100% { opacity: 0.82; transform: none; }
+}
+.step--active::before {
+  background: linear-gradient(to bottom, transparent, var(--cot-spark), transparent) 0 -8px / 1px 8px no-repeat, var(--color-border-default);
+  animation: chain-of-thought-spark-down 2.2s linear infinite;
+}
+.step--active::after {
+  background: linear-gradient(90deg, transparent, var(--cot-spark), transparent) -8px 0 / 8px 1px no-repeat, var(--color-border-default);
+  animation: chain-of-thought-spark-across 2.2s linear infinite;
+}
+.step--active .step__icon { animation: chain-of-thought-beat 2.2s ease-in-out infinite; }
+.step--active[data-entering]::before { animation: chain-of-thought-rail-down 120ms linear 220ms both, chain-of-thought-spark-down 2.2s linear 900ms infinite; }
+.step--active[data-entering]::after { animation: chain-of-thought-rail-across 140ms cubic-bezier(0, 0, 0.4, 1) 320ms both, chain-of-thought-spark-across 2.2s linear 900ms infinite; }
+.step--active[data-entering] .step__icon { animation: chain-of-thought-land 440ms var(--cot-spring) 420ms both, chain-of-thought-beat 2.2s ease-in-out 900ms infinite; }
+
+/* working: the sparkle twinkles in time with the shimmer */
+@keyframes chain-of-thought-twinkle {
+  0%, 100% { transform: none; }
+  45% { transform: scale(1.16) rotate(18deg); }
+  70% { transform: scale(0.96) rotate(-4deg); }
+}
+.indicator--working .indicator__icon { animation: chain-of-thought-twinkle 2.4s ease-in-out infinite; }
+
+/* finishing: one sweep down the whole rail, lighting each icon as it passes, lands on the check */
+@keyframes chain-of-thought-sweep { from { background-position: 0 -24px, 0 0; } to { background-position: 0 calc(100% + 24px), 0 0; } }
+@keyframes chain-of-thought-glint { 35% { color: var(--color-fg-default); transform: scale(1.12); } }
 @keyframes chain-of-thought-pop { from { transform: scale(0.6); opacity: 0; } to { transform: none; opacity: 1; } }
 @keyframes chain-of-thought-check { from { stroke-dashoffset: 12; } to { stroke-dashoffset: 0; } }
-@keyframes chain-of-thought-title { from { opacity: 0; transform: translateY(3px); } to { opacity: 1; transform: none; } }
-
-/* a step that arrives after the container is up: its row opens, the rail draws, the count and chips follow */
-.step[data-entering] { animation: chain-of-thought-step-in 280ms cubic-bezier(0.22, 1, 0.36, 1) both; }
-.step[data-entering] .step__body { overflow: hidden; }
-.step[data-entering]::before { animation: chain-of-thought-rail-down 320ms ease-out both; }
-.step[data-entering]::after { animation: chain-of-thought-rail-across 160ms ease-out 120ms both; }
-.step__count[data-fresh] { animation: chain-of-thought-fade-in 260ms ease-out both; }
-.step[data-entering] .step__count[data-fresh] { animation-delay: 150ms; }
-.chip[data-fresh] {
-  animation: chain-of-thought-chip-in 280ms cubic-bezier(0.34, 1.56, 0.64, 1) both;
-  animation-delay: calc(var(--i, 0) * 45ms + 120ms);
+.root[data-finishing] .panel::before,
+.root[data-finishing] .step::before {
+  background: linear-gradient(to bottom, transparent, var(--cot-spark), transparent) 0 -24px / 1px 24px no-repeat, var(--color-border-default);
+  animation: chain-of-thought-sweep 260ms linear calc(var(--step, -1) * 110ms + 110ms) both;
 }
+.root[data-finishing] .step::after { animation: none; }
+.root[data-finishing] .step__icon { animation: chain-of-thought-glint 520ms ease-out calc(var(--step, 0) * 110ms + 200ms); }
+.indicator--done[data-changed] .indicator__icon { animation: chain-of-thought-pop 460ms var(--cot-spring) both; }
+.indicator--done[data-changed] .indicator__icon path:last-child { stroke-dasharray: 12; animation: chain-of-thought-check 420ms ease-out 180ms both; }
+/* the ring and "Worked for" switch in at once; the check is drawn when the sweep lands */
+.root[data-finishing] .indicator--done .indicator__icon path:last-child { animation-delay: calc(var(--steps, 0) * 110ms + 200ms); }
+.indicator--done[data-changed] .indicator__label,
+.indicator--done[data-changed] .indicator__time { animation: chain-of-thought-rise 420ms var(--cot-ease-out) both; }
 
-/* the step in progress breathes */
-.step--active .step__icon { animation: chain-of-thought-breathe 1.6s ease-in-out infinite; }
+/* a new header title is written in */
+@keyframes chain-of-thought-title { from { opacity: 0; filter: blur(4px); transform: translateY(4px); } to { opacity: 1; filter: none; transform: none; } }
+.header__title[data-changed] { animation: chain-of-thought-title 460ms var(--cot-ease-out) both; }
 
-/* working: the sparkle twinkles; finishing draws the check in */
-.indicator--working .indicator__icon { animation: chain-of-thought-twinkle 1.8s ease-in-out infinite; }
-.indicator--done[data-changed] .indicator__icon { animation: chain-of-thought-pop 300ms cubic-bezier(0.34, 1.56, 0.64, 1) both; }
-.indicator--done[data-changed] .indicator__icon path:last-child { stroke-dasharray: 12; animation: chain-of-thought-check 400ms ease-out 120ms both; }
-
-/* a new header title fades in */
-.header__title[data-changed] { animation: chain-of-thought-title 240ms ease-out both; }
+/* opening the panel: the steps rise in turn, then the working line */
+.root[data-opening] .step__body { animation: chain-of-thought-rise 440ms var(--cot-ease-out) calc(var(--step, 0) * 45ms + 60ms) both; }
+.root[data-opening] .working { animation: chain-of-thought-rise 440ms var(--cot-ease-out) calc(var(--steps, 0) * 45ms + 60ms) both; }
 
 @media (prefers-reduced-motion: reduce) {
-  .step[data-entering], .step[data-entering]::before, .step[data-entering]::after,
-  .step__count[data-fresh], .chip[data-fresh], .step--active .step__icon,
-  .indicator--working .indicator__icon, .indicator--done[data-changed] .indicator__icon,
-  .indicator--done[data-changed] .indicator__icon path:last-child, .header__title[data-changed] { animation: none; }
+  .root *, .root *::before, .root *::after, .root .panel::before { animation: none !important; }
   .step::before, .step__icon, .step__label, .step__query, .step__count { transition: none; }
   .step[data-entering] .step__body { overflow: visible; }
   .header__chevron, .panel, .root[data-open] .panel { transition: none; }
-  .indicator--working .indicator__label { animation: none; background: none; -webkit-text-fill-color: currentColor; color: var(--color-fg-muted); }
+  .step--active::before, .step--active::after, .root[data-finishing] .step::before, .root[data-finishing] .panel::before { background: var(--color-border-default); }
+  .indicator--working .indicator__label { background: none; -webkit-text-fill-color: currentColor; color: var(--color-fg-muted); }
 }

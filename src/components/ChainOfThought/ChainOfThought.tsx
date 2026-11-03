@@ -19,11 +19,13 @@
  * (append a ChainOfThoughtStep, flip the previous one to "done"). `status="working"` plus
  * `startedAt` makes the elapsed time tick on its own.
  *
- * Motion (the Figma "Chain of Thought · motion" table): a step you append fades in and
- * slides down while its row opens, its rail draws itself and the previous step's rail
- * extends to meet it, the count fades in and the source chips pop in one by one. The active
- * step's icon breathes, a step turning done eases to muted, the working label shimmers and
- * the sparkle twinkles, and finishing swaps the sparkle for a check that draws itself in.
+ * Motion (the Figma "Chain of Thought · motion" table) reads as ink running down the rail.
+ * A step you append opens its row while the previous rail flows down into it, turns the
+ * corner into the new icon, and the icon lands; the label is written in left to right, the
+ * query types itself, the count ticks up and the source chips fan out from behind each
+ * other. A spark keeps running down into the active step and its icon beats as it lands.
+ * Finishing sends one sweep down the whole rail, lighting each icon as it passes, and lands
+ * on the check, which draws itself in. Opening the panel lets the steps rise in turn.
  * Nothing animates on first render, only what arrives afterwards, and reduced motion makes
  * all of it instant.
  */
@@ -50,18 +52,23 @@ function useArrivedLate() {
   return late;
 }
 
-/** True for a moment after `value` changes (never on first render). */
-function useChanged(value: unknown, ms = 700) {
+/** True for a moment after `value` changes (never on first render). `when` limits it to some new values. */
+function useChanged(value: unknown, ms = 700, when: (value: unknown) => boolean = () => true) {
   const [changed, setChanged] = React.useState(false);
   const first = React.useRef(true);
   React.useEffect(() => {
     if (first.current) { first.current = false; return; }
+    if (!when(value)) { setChanged(false); return; }
     setChanged(true);
     const t = setTimeout(() => setChanged(false), ms);
     return () => clearTimeout(t);
-  }, [value, ms]);
+    // only a new value restarts it; `ms` is read at that moment
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [value]);
   return changed;
 }
+
+const reducedMotion = () => typeof window !== 'undefined' && !!window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
 
 /** 6.5 -> "6.5s", 72 -> "1m 12s". */
 function formatElapsed(seconds: number) {
@@ -100,7 +107,8 @@ export const WorkingIndicator: React.FC<WorkingIndicatorProps> = ({
 
   const seconds = elapsed ?? (startedAt != null ? Math.max(0, (now - startedAt) / 1000) : undefined);
   const Icon = working ? Sparkles : CircleCheck;
-  const changed = useChanged(status);
+  // long enough for the finish sweep to reach it
+  const changed = useChanged(status, 2400);
   return (
     <div className={cx(styles.indicator, working ? styles['indicator--working'] : styles['indicator--done'], className)} data-changed={changed || undefined} role="status">
       <Icon className={styles.indicator__icon} size={16} strokeWidth={iconStrokeWidth(16)} aria-hidden="true" />
@@ -175,10 +183,38 @@ export interface ChainOfThoughtStepProps {
   className?: string;
 }
 
-/** The result count: fades in when it arrives after the container is up (a step's results land after the step starts). */
-const StepCount: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+/** The result count. When it arrives after the container is up it fades in and a leading number ticks up to its value ("12 threads"). */
+const StepCount: React.FC<{ children: React.ReactNode; delay: number }> = ({ children, delay }) => {
   const late = useArrivedLate();
-  return <span className={styles.step__count} data-fresh={late || undefined}>{children}</span>;
+  const [ticking, setTicking] = React.useState<string | null>(null);
+  React.useEffect(() => {
+    const match = late && (typeof children === 'string' || typeof children === 'number') ? /^(\d+)(.*)$/s.exec(String(children)) : null;
+    const target = match ? Number(match[1]) : 0;
+    if (!match || target < 2 || reducedMotion()) return;
+    // starts at 2 or more so a plural label never reads "1 results"
+    const rest = match[2], from = Math.max(2, Math.round(target * 0.25)), start = performance.now() + delay, duration = Math.min(900, 380 + target * 30);
+    let raf = 0;
+    const frame = (now: number) => {
+      const t = Math.min(1, Math.max(0, (now - start) / duration));
+      const eased = 1 - Math.pow(1 - t, 3);
+      setTicking(t < 1 ? `${Math.round(from + eased * (target - from))}${rest}` : null);
+      if (t < 1) raf = requestAnimationFrame(frame);
+    };
+    setTicking(`${from}${rest}`);
+    raf = requestAnimationFrame(frame);
+    return () => cancelAnimationFrame(raf);
+    // runs once, at arrival
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  return <span className={styles.step__count} data-fresh={late || undefined}>{ticking ?? children}</span>;
+};
+
+/** The sources row: opens (rather than jumping in) when the sources land after the step. */
+const StepSources: React.FC<{ onClick?: () => void; children: React.ReactNode }> = ({ onClick, children }) => {
+  const late = useArrivedLate();
+  return onClick
+    ? <button type="button" className={cx(styles.step__sources, styles['step__sources--button'])} data-fresh={late || undefined} onClick={onClick}>{children}</button>
+    : <div className={styles.step__sources} data-fresh={late || undefined}>{children}</div>;
 };
 
 const STATUS_TEXT: Record<ChainOfThoughtStepStatus, string> = { pending: 'Pending: ', active: 'In progress: ', done: 'Done: ' };
@@ -189,9 +225,11 @@ export const ChainOfThoughtStep: React.FC<ChainOfThoughtStepProps> = ({
   const Icon = icon ?? Search;
   const late = useArrivedLate();
   const [entering, setEntering] = React.useState(late);
+  // results that come with the step wait for its label; results that land later show at once
+  const [withResults] = React.useState(late && (count != null || sources != null));
   React.useEffect(() => {
     if (!entering) return;
-    const t = setTimeout(() => setEntering(false), 900);
+    const t = setTimeout(() => setEntering(false), 2000);
     return () => clearTimeout(t);
   }, [entering]);
   const sourcesRow = (
@@ -202,22 +240,18 @@ export const ChainOfThoughtStep: React.FC<ChainOfThoughtStepProps> = ({
     </>
   );
   return (
-    <li className={cx(styles.step, styles[`step--${status}`], className)} data-entering={entering || undefined} aria-current={status === 'active' ? 'step' : undefined}>
+    <li className={cx(styles.step, styles[`step--${status}`], className)} data-entering={entering || undefined} data-with-results={(entering && withResults) || undefined} aria-current={status === 'active' ? 'step' : undefined}>
       <div className={styles.step__body}>
       <div className={styles.step__row}>
         <Icon className={styles.step__icon} size={16} strokeWidth={iconStrokeWidth(16)} aria-hidden="true" />
         <span className={styles.step__content}>
           <span className={styles.sr}>{STATUS_TEXT[status]}</span>
           <span className={styles.step__label}>{label}</span>
-          {query && <code className={styles.step__query}>{query}</code>}
+          {query && <code className={styles.step__query} style={{ ['--chars' as string]: Math.max(1, query.length) }}>{query}</code>}
         </span>
-        {count != null && <StepCount>{count}</StepCount>}
+        {count != null && <StepCount delay={entering && withResults ? 760 : 0}>{count}</StepCount>}
       </div>
-      {sources && (
-        onSourcesClick
-          ? <button type="button" className={cx(styles.step__sources, styles['step__sources--button'])} onClick={onSourcesClick}>{sourcesRow}</button>
-          : <div className={styles.step__sources}>{sourcesRow}</div>
-      )}
+      {sources && <StepSources onClick={onSourcesClick}>{sourcesRow}</StepSources>}
       </div>
     </li>
   );
@@ -260,16 +294,36 @@ export const ChainOfThought: React.FC<ChainOfThoughtProps> = ({
     const id = requestAnimationFrame(() => setReady(true));
     return () => cancelAnimationFrame(id);
   }, []);
-  const titleChanged = useChanged(typeof title === 'string' ? title : undefined);
+  const titleChanged = useChanged(typeof title === 'string' ? title : undefined, 600);
   const [inner, setInner] = React.useState(defaultOpen);
   const isOpen = open ?? inner;
+
+  // each step knows its place (--step) and the root its length (--steps): the finish sweep and the
+  // opening rise are staggered by them
+  const stepsRef = React.useRef<HTMLOListElement>(null);
+  const [stepCount, setStepCount] = React.useState(0);
+  // after every render (steps come and go); it only sets state when the count changed, so it settles
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  React.useLayoutEffect(() => {
+    const items = stepsRef.current ? Array.from(stepsRef.current.children) as HTMLElement[] : [];
+    items.forEach((el, i) => el.style.setProperty('--step', String(i)));
+    if (items.length !== stepCount) setStepCount(items.length);
+  });
+  const finishing = useChanged(status, 900 + stepCount * 110, (s) => s === 'done');
+  const opening = useChanged(isOpen, 700 + stepCount * 45, (o) => o === true);
   const toggle = () => {
     const next = !isOpen;
     if (open === undefined) setInner(next);
     onOpenChange?.(next);
   };
   return (
-    <div className={cx(styles.root, className)} data-open={isOpen || undefined}>
+    <div
+      className={cx(styles.root, className)}
+      data-open={isOpen || undefined}
+      data-finishing={finishing || undefined}
+      data-opening={opening || undefined}
+      style={{ ['--steps' as string]: stepCount }}
+    >
       <button type="button" className={styles.header} aria-expanded={isOpen} aria-controls={panelId} onClick={toggle}>
         <Icon className={styles.header__icon} size={16} strokeWidth={iconStrokeWidth(16)} aria-hidden="true" />
         <span className={styles.header__title} data-changed={titleChanged || undefined}>{title}</span>
@@ -278,7 +332,7 @@ export const ChainOfThought: React.FC<ChainOfThoughtProps> = ({
       <div id={panelId} className={styles.panel} aria-hidden={!isOpen || undefined}>
         <div className={styles.panel__inner}>
           <ReadyContext.Provider value={ready}>
-            {children != null && <ol className={styles.steps}>{children}</ol>}
+            {children != null && <ol ref={stepsRef} className={styles.steps}>{children}</ol>}
           </ReadyContext.Provider>
           {status && (
             <div className={styles.working}>
