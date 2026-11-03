@@ -121,6 +121,10 @@ const accessibleNameProp = (n) => /^aria-(label|labelledby)$/.test(n) || /^(alt|
 
 // Hand-written, checked against the code. For files whose header is only maintainer notes, or is shared by several components.
 const SUMMARY_OVERRIDE = {
+  ChainOfThought: "An AI agent's visible work: a header, steps joined by a rail (ChainOfThoughtStep), and a live Working line. `open` / `defaultOpen` toggles it; `status` and `elapsed` or `startedAt` drive the working line.",
+  ChainOfThoughtStep: 'One step of an agent run: an icon, a label, an optional monospace `query`, a `count` and a `sources` row. `status` is pending, active (read in full) or done (muted).',
+  SourceStack: 'Overlapping site-icon chips for a step\'s sources: pass `sources` as { label, icon } (three to five read best).',
+  WorkingIndicator: 'The live status line under an agent\'s steps: a sparkle, "Working" and the elapsed time (`startedAt` ticks on its own), or a check and "Worked for 11s" when done.',
   Map: 'Interactive tile map with pan, zoom and controls. Place MapMarker and MapPopup children by [latitude, longitude]; `tileUrl` swaps the tile provider (OpenStreetMap by default).',
   MapControlButton: 'A 32px icon button for a map overlay (the zoom and locate buttons Map shows). Needs an icon and an aria-label; has hover and disabled states.',
   MapControls: 'The zoom group and optional locate button a Map shows top-right. Map renders it itself; use it to build a custom overlay.',
@@ -443,6 +447,10 @@ const ALIASES = {
   MapPopup: ['map tooltip', 'info window', 'marker popup'],
   MapControlButton: ['map button', 'zoom button', 'map control'],
   MapControls: ['zoom controls', 'map zoom', 'zoom in out', 'locate button'],
+  ChainOfThought: ['thought chain', 'reasoning steps', 'reasoning trace', 'agent steps', 'agent activity', 'agent trace', 'thinking steps', 'tool calls', 'tool call log', 'activity trace', 'ai steps', 'research steps'],
+  ChainOfThoughtStep: ['reasoning step', 'thought step', 'agent step', 'tool call', 'search step', 'task step'],
+  SourceStack: ['sources', 'favicon stack', 'source chips', 'citations', 'citation chips', 'site icons'],
+  WorkingIndicator: ['thinking indicator', 'working status', 'agent status', 'typing status', 'elapsed timer', 'shimmer label'],
   MapClusterLayer: ['marker clustering', 'cluster markers', 'supercluster', 'many markers', 'point clustering', 'heatmap markers'],
   MapGlobe: ['globe', '3d globe', 'world globe', 'earth', 'dotted globe', 'spinning globe', 'world map', 'dot globe'],
   Menu: ['dropdown', 'dropdown menu', 'context menu', 'actions menu', 'kebab menu'],
@@ -511,6 +519,36 @@ for (const name of Object.keys(ALIASES)) if (!listed0.has(name)) { console.error
 
 /* ---- recipes: patterns the types alone do not teach, written by hand and compiled on every build ---- */
 const RECIPES = {
+  ChainOfThought: [{
+    title: 'Stream an agent run: steps arrive, the timer ticks, then it finishes',
+    description: 'ChainOfThought is presentational. Keep the steps in state, append one as your agent starts it, mark the previous one `done`, and pass `status="working"` with `startedAt` so the time counts up on its own. When the run ends switch to `status="done"` with the final `elapsed` (seconds) and change the title. The rail stops at the last step by itself.',
+    code: `import React from 'react';
+import { ChainOfThought, ChainOfThoughtStep, SourceStack } from '@sakaniui/react';
+import { IconBrandReddit } from '@sakaniui/react/icons';
+
+type Step = { id: string; label: string; query?: string; count?: string };
+
+export const Example = ({ steps, finished, startedAt, elapsed }: { steps: Step[]; finished: boolean; startedAt: number; elapsed?: number }) => (
+  <ChainOfThought
+    title={finished ? \`Ran \${steps.length} searches\` : 'Researching'}
+    status={finished ? 'done' : 'working'}
+    startedAt={startedAt}
+    elapsed={elapsed}
+  >
+    {steps.map((s, i) => (
+      <ChainOfThoughtStep
+        key={s.id}
+        status={!finished && i === steps.length - 1 ? 'active' : 'done'}
+        icon={IconBrandReddit}
+        label={s.label}
+        query={s.query}
+        count={s.count}
+        sources={<SourceStack sources={[{ label: 'Reddit', icon: IconBrandReddit }]} />}
+      />
+    ))}
+  </ChainOfThought>
+);`,
+  }],
   Map: [{
     title: 'A live feed: markers that slide to each new position',
     description: 'Keep the positions in state, update them when the feed (WebSocket, server-sent events, polling) delivers, and give each MapMarker `glide` of about the interval between updates so it slides instead of jumping. A MapPopup that points at a moving marker needs the same `glide`.',

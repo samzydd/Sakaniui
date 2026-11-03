@@ -69,6 +69,7 @@ export * from './components/Button';
 export * from './components/Calendar';
 export * from './components/Card';
 export * from './components/CardMetaItem';
+export * from './components/ChainOfThought';
 export * from './components/ChatComposer';
 export * from './components/Checkbox';
 export * from './components/Combobox';

@@ -2,6 +2,24 @@
 
 All notable changes to `@sakaniui/react` are documented here.
 
+## 0.12.0
+
+- **New: `ChainOfThought`**, an AI agent's visible work, built from the new *↳ Chain of Thought* page in Figma.
+  A header, steps joined by a tree rail, and a live "Working" line.
+  - **`ChainOfThought`**: `title`, `icon`, `open` / `defaultOpen` / `onOpenChange` (the header toggles it, with
+    an animated open and close), `status` (`"working"` or `"done"`) with `elapsed` (seconds) or `startedAt`
+    (the time then counts up on its own), and `children`.
+  - **`ChainOfThoughtStep`**: `status` pending, active (read in full) or done (muted), an `icon`, a `label`, an
+    optional monospace `query`, a result `count`, and a `sources` row (add `onSourcesClick` to make it a button
+    with a chevron). The rail stops at the last step by itself; screen readers get each step's status.
+  - **`SourceStack`**: overlapping site-icon chips from `sources` ({ `label`, `icon` }); three to five read best.
+  - **`WorkingIndicator`**: the working line on its own: a sparkle and a shimmering "Working" with the elapsed
+    time, or a check and "Worked for 11.2s". The shimmer stops under reduced motion.
+  - Presentational: you append steps as your agent produces them. Light and dark through the tokens.
+- Agent contract: the four components are in the manifest with a streaming-run recipe and the aliases *chain of
+  thought*, *reasoning steps*, *agent steps*, *tool calls*, *sources*, *favicon stack* and more; the agent guide's
+  "moments an AI product needs" now points at `ChainOfThought`.
+
 ## 0.11.2
 
 - **Agent guide:** `AGENTS.md` gains a Map section (when to use `Map` or `MapGlobe`, latitude first, tile providers,

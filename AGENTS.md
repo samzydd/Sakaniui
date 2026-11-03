@@ -273,9 +273,16 @@ Many Figma-frame blocks have a fixed design width — put them in a container at
 
 ## 6. Moments an AI product needs (compose these today)
 
-The system has no dedicated AI components yet. Until it does, build these moments from existing parts,
-and **tell the user when you are composing** rather than implying a dedicated component exists.
+`ChainOfThought` (with `ChainOfThoughtStep`, `SourceStack` and `WorkingIndicator`) covers showing an agent's
+work. The other moments below have no dedicated component yet: build them from existing parts, and **tell the
+user when you are composing** rather than implying a dedicated component exists.
 
+- **Showing the agent's work.** Use `ChainOfThought`: one `ChainOfThoughtStep` per action (an `icon`, a `label`,
+  the `query` in monospace, a result `count`, and a `SourceStack` as `sources`). Append a step as the agent starts
+  it, mark the active one `status="active"` and finished ones `"done"` (they read muted), and give the container
+  `status="working"` with `startedAt` so the timer ticks on its own; switch to `status="done"` and the final
+  `elapsed` when the run ends. It only displays: you stream the steps in. Do not build this from `Stepper` (a
+  progress bar for a known sequence) or `ActivityFeed` (a log of past events).
 - **The model isn't sure.** State uncertainty in words next to the claim, not hidden in colour. Use an
   `Alert` (`color="info"` or `"warning"`) or a `Badge` ("Low confidence"). Offer the next step: verify,
   rephrase, or ask for more context.

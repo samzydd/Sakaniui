@@ -1,0 +1,187 @@
+/* ChainOfThought — Figma "Chain of Thought" page.
+   Rows are 20px (Geist Medium 14/20), the rail is a 1px border/default line 8px in from the
+   left, steps are indented 24px so the rail sits under the header icon's centre. */
+
+.sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.root {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  font-family: var(--font-sans);
+  color: var(--color-fg-default);
+}
+
+/* ---- header ---- */
+.header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-8);
+  width: 100%;
+  min-height: 20px;
+  padding: 0;
+  border: none;
+  background: none;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 20px;
+  text-align: left;
+  color: var(--color-fg-default);
+  cursor: pointer;
+}
+.header:focus-visible { outline: 2px solid var(--color-border-focus); outline-offset: 2px; border-radius: var(--radius-sm); }
+.header__icon { flex-shrink: 0; }
+.header__title { flex: 1; min-width: 0; }
+.header__chevron { flex-shrink: 0; color: var(--color-fg-subtle); transition: transform 200ms ease; transform: rotate(-90deg); }
+.root[data-open] .header { padding-bottom: var(--space-8); }
+.root[data-open] .header__chevron { transform: none; }
+
+/* ---- panel: grid rows animate 0fr -> 1fr, so it opens to its natural height ---- */
+.panel {
+  position: relative;
+  display: grid;
+  grid-template-rows: 0fr;
+  visibility: hidden;
+  transition: grid-template-rows 220ms ease, visibility 0s linear 220ms;
+}
+.root[data-open] .panel { grid-template-rows: 1fr; visibility: visible; transition: grid-template-rows 220ms ease, visibility 0s; }
+.panel__inner { min-height: 0; overflow: hidden; }
+/* the short rail from the header icon down into the first step */
+.root[data-open] .panel:has(.steps)::before {
+  content: '';
+  position: absolute;
+  left: 8px;
+  top: -10px;
+  width: 1px;
+  height: 10px;
+  background: var(--color-border-default);
+}
+
+.steps { list-style: none; margin: 0; padding: 0; }
+
+/* ---- step ---- */
+.step {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding: 0 0 var(--space-8) var(--space-24);
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 500;
+}
+/* rail: a vertical line through the step, and an elbow into the icon */
+.step::before {
+  content: '';
+  position: absolute;
+  left: 8px;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: var(--color-border-default);
+}
+.step:last-child::before { bottom: auto; height: 11px; }
+.step::after {
+  content: '';
+  position: absolute;
+  left: 8px;
+  top: 10px;
+  width: 12px;
+  height: 1px;
+  background: var(--color-border-default);
+}
+
+.step__row { display: flex; align-items: center; gap: var(--space-8); min-width: 0; }
+.step__icon { flex-shrink: 0; }
+.step__content { display: flex; align-items: center; gap: var(--space-6); flex: 1; min-width: 0; }
+.step__label { min-width: 0; }
+.step__query {
+  min-width: 0;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 400;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.step__count { flex-shrink: 0; font-size: 13px; line-height: 18px; font-variant-numeric: tabular-nums; }
+
+/* status colours: done is muted, active reads in full, pending is faint */
+.step--done .step__icon, .step--done .step__label { color: var(--color-fg-muted); }
+.step--done .step__query, .step--done .step__count { color: var(--color-fg-subtle); }
+.step--active .step__icon, .step--active .step__label { color: var(--color-fg-default); }
+.step--active .step__query, .step--active .step__count { color: var(--color-fg-muted); }
+.step--pending .step__icon, .step--pending .step__label, .step--pending .step__query, .step--pending .step__count { color: var(--color-fg-subtle); }
+
+/* sources row, aligned with the label */
+.step__sources {
+  display: flex;
+  align-items: center;
+  gap: var(--space-8);
+  padding: 0 0 0 var(--space-24);
+  min-height: 20px;
+  border: none;
+  background: none;
+  font: inherit;
+  color: var(--color-fg-muted);
+  text-align: left;
+}
+.step--pending .step__sources { color: var(--color-fg-subtle); }
+.step__sources--button { cursor: pointer; }
+.step__sources--button:hover .step__sourcesLabel { color: var(--color-fg-default); }
+.step__sources--button:focus-visible { outline: 2px solid var(--color-border-focus); outline-offset: 2px; border-radius: var(--radius-sm); }
+.step__sourcesChevron { color: var(--color-fg-subtle); }
+
+/* ---- source stack: 18px chips, each overlapping the last by 6px ---- */
+.stack { display: inline-flex; align-items: center; list-style: none; margin: 0; padding: 0; }
+.chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  box-sizing: border-box;
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-full);
+  background: var(--color-bg-surface);
+  color: var(--color-fg-default);
+}
+.chip + .chip { margin-left: -6px; }
+
+/* ---- working indicator ---- */
+.working { padding-top: var(--space-8); }
+.indicator { display: flex; align-items: center; gap: var(--space-8); font-size: 14px; line-height: 20px; font-weight: 500; font-family: var(--font-sans); }
+.indicator__icon { flex-shrink: 0; color: var(--color-fg-muted); }
+.indicator__label { color: var(--color-fg-muted); }
+.indicator__time { color: var(--color-fg-subtle); font-variant-numeric: tabular-nums; }
+
+@keyframes chain-of-thought-shimmer {
+  from { background-position: 100% 0; }
+  to { background-position: -100% 0; }
+}
+.indicator--working .indicator__label {
+  background: linear-gradient(90deg, var(--color-fg-muted) 40%, var(--color-fg-default) 50%, var(--color-fg-muted) 60%);
+  background-size: 250% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  animation: chain-of-thought-shimmer 1.8s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .header__chevron, .panel, .root[data-open] .panel { transition: none; }
+  .indicator--working .indicator__label { animation: none; background: none; -webkit-text-fill-color: currentColor; color: var(--color-fg-muted); }
+}
