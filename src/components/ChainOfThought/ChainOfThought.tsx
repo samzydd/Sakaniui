@@ -37,7 +37,6 @@
 
 import React from 'react';
 import { IconSearch as Search } from '../../icons/outline/search';
-import { IconSparkles as Sparkles } from '../../icons/outline/sparkles';
 import { IconCircleCheck as CircleCheck } from '../../icons/outline/circle-check';
 import { IconChevronDown as ChevronDown } from '../../icons/outline/chevron-down';
 import { IconWorld as World } from '../../icons/outline/world';
@@ -98,6 +97,23 @@ export interface WorkingIndicatorProps {
   className?: string;
 }
 
+/**
+ * The sparkle beside "Working": the library's sparkles icon with its three stars split apart so each can move on
+ * its own. The big star turns a quarter every cycle (a four-point star looks the same after 90 degrees, so it reads
+ * as a continuous turn) and breathes; the two small ones twinkle in turn, filling in as they peak.
+ */
+const WorkingSpark: React.FC<{ className?: string }> = ({ className }) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg" width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor"
+    strokeWidth={iconStrokeWidth(16)} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" focusable="false"
+    className={cx(styles.spark, className)}
+  >
+    <path className={styles.spark__big} d="M9 18a6 6 0 0 1 6 -6a6 6 0 0 1 -6 -6a6 6 0 0 1 -6 6a6 6 0 0 1 6 6" />
+    <path className={styles.spark__top} d="M16 6a2 2 0 0 1 2 2a2 2 0 0 1 2 -2a2 2 0 0 1 -2 -2a2 2 0 0 1 -2 2" />
+    <path className={styles.spark__bottom} d="M16 18a2 2 0 0 1 2 2a2 2 0 0 1 2 -2a2 2 0 0 1 -2 -2a2 2 0 0 1 -2 2" />
+  </svg>
+);
+
 export const WorkingIndicator: React.FC<WorkingIndicatorProps> = ({
   status = 'working', label, elapsed, startedAt, className,
 }) => {
@@ -111,12 +127,13 @@ export const WorkingIndicator: React.FC<WorkingIndicatorProps> = ({
   }, [working, startedAt, elapsed]);
 
   const seconds = elapsed ?? (startedAt != null ? Math.max(0, (now - startedAt) / 1000) : undefined);
-  const Icon = working ? Sparkles : CircleCheck;
   // long enough for the finish sweep to reach it
   const changed = useChanged(status, 2400);
   return (
     <div className={cx(styles.indicator, working ? styles['indicator--working'] : styles['indicator--done'], className)} data-changed={changed || undefined} role="status">
-      <Icon className={styles.indicator__icon} size={16} strokeWidth={iconStrokeWidth(16)} aria-hidden="true" />
+      {working
+        ? <WorkingSpark className={styles.indicator__icon} />
+        : <CircleCheck className={styles.indicator__icon} size={16} strokeWidth={iconStrokeWidth(16)} aria-hidden="true" />}
       <span className={styles.indicator__label}>{label ?? (working ? 'Working' : 'Worked for')}</span>
       {seconds != null && (
         // the timer changes every 100ms: keep it out of the live region while working

@@ -273,13 +273,22 @@
 .step--active[data-entering]::after { animation: chain-of-thought-rail-across 140ms cubic-bezier(0, 0, 0.4, 1) 320ms both, chain-of-thought-spark-across 2.2s linear 900ms infinite; }
 .step--active[data-entering] .step__icon { animation: chain-of-thought-land 440ms var(--cot-spring) 420ms both, chain-of-thought-beat 2.2s ease-in-out 900ms infinite; }
 
-/* working: the sparkle twinkles in time with the shimmer */
-@keyframes chain-of-thought-twinkle {
-  0%, 100% { transform: none; }
-  45% { transform: scale(1.16) rotate(18deg); }
-  70% { transform: scale(0.96) rotate(-4deg); }
+/* working: the sparkle beside the label. The big star turns a quarter each cycle and breathes; the small ones
+   twinkle in turn, filling in at their peak. One 2.4s cycle, the same as the label's shimmer. */
+@keyframes chain-of-thought-spark-turn {
+  0% { transform: rotate(0deg) scale(1); fill-opacity: 0; }
+  50% { transform: rotate(45deg) scale(1.16); fill-opacity: 0.22; }
+  100% { transform: rotate(90deg) scale(1); fill-opacity: 0; }
 }
-.indicator--working .indicator__icon { animation: chain-of-thought-twinkle 2.4s ease-in-out infinite; }
+@keyframes chain-of-thought-spark-twinkle {
+  0%, 100% { transform: scale(0.5) rotate(0deg); fill-opacity: 0; opacity: 0.5; }
+  42% { transform: scale(1.28) rotate(45deg); fill-opacity: 0.95; opacity: 1; }
+  70% { transform: scale(0.9) rotate(60deg); fill-opacity: 0.2; opacity: 0.9; }
+}
+.spark path { fill: currentColor; fill-opacity: 0; transform-box: fill-box; transform-origin: center; }
+.indicator--working .spark__big { animation: chain-of-thought-spark-turn 2.4s ease-in-out infinite; }
+.indicator--working .spark__top { animation: chain-of-thought-spark-twinkle 2.4s ease-in-out -0.4s infinite; }
+.indicator--working .spark__bottom { animation: chain-of-thought-spark-twinkle 2.4s ease-in-out -1.4s infinite; }
 
 /* finishing: one sweep down the whole rail, lighting each icon as it passes, lands on the check */
 @keyframes chain-of-thought-sweep { from { background-position: 0 -24px, 0 0; } to { background-position: 0 calc(100% + 24px), 0 0; } }
