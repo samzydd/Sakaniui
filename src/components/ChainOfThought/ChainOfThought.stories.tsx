@@ -1,6 +1,7 @@
 import React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { ChainOfThought, ChainOfThoughtStep, SourceStack } from './ChainOfThought';
+import { Switch } from '../Switch';
 import { SourceLogo } from './SourceLogo';
 import { sourceLogo, sourceLogoNames } from './logoIcons';
 import { EmojiLightBulb } from '../../emoji/art/light-bulb';
@@ -137,6 +138,7 @@ function LiveRun() {
     { icon: EmojiPageFacingUp, label: 'Reading the strongest three threads', ms: 2400 },
   ];
   const [run, setRun] = React.useState(0);
+  const [dark, setDark] = React.useState(false);
   const [shown, setShown] = React.useState(0);
   const [landed, setLanded] = React.useState(0);
   const [startedAt, setStartedAt] = React.useState(() => Date.now());
@@ -158,7 +160,8 @@ function LiveRun() {
   }, [run]);
   const done = finishedIn != null;
   return (
-    <div>
+    // the same 24px padding in both modes, so flipping the switch does not move anything
+    <div className={dark ? 'dark' : undefined} style={{ padding: 24, margin: -24, borderRadius: 16, background: dark ? 'var(--color-bg-canvas)' : 'transparent', transition: 'background-color 300ms ease' }}>
       <ChainOfThought title={done ? `Ran ${SCRIPT.filter((s) => s.query).length} searches` : 'Researching'} icon={EmojiMagnifyingGlassTiltedLeft} status={done ? 'done' : 'working'} startedAt={startedAt} elapsed={finishedIn}>
         {SCRIPT.slice(0, shown).map((s, i) => (
           <ChainOfThoughtStep
@@ -173,14 +176,17 @@ function LiveRun() {
           />
         ))}
       </ChainOfThought>
-      <button type="button" onClick={() => setRun((n) => n + 1)} style={{ marginTop: 16, font: '500 13px var(--font-sans)', padding: '6px 12px', border: '1px solid var(--color-border-default)', borderRadius: 8, background: 'var(--color-bg-surface)', color: 'var(--color-fg-default)', cursor: 'pointer' }}>
-        Replay
-      </button>
+      <div style={{ marginTop: 16, display: 'flex', alignItems: 'center', gap: 16 }}>
+        <button type="button" onClick={() => setRun((n) => n + 1)} style={{ font: '500 13px var(--font-sans)', padding: '6px 12px', border: '1px solid var(--color-border-default)', borderRadius: 8, background: 'var(--color-bg-surface)', color: 'var(--color-fg-default)', cursor: 'pointer' }}>
+          Replay
+        </button>
+        <Switch label="Dark mode" checked={dark} onChange={(e) => setDark(e.target.checked)} />
+      </div>
     </div>
   );
 }
 
 export const Live: Story = {
   render: () => <LiveRun />,
-  parameters: { docs: { description: { story: 'A simulated run: each step arrives and works, its results land (the count ticks up, the sources fan out), the next step starts, and finishing sweeps the rail down to the check. Press Replay to watch again.' } } },
+  parameters: { docs: { description: { story: 'A simulated run: each step arrives and works, its results land (the count ticks up, the sources fan out), the next step starts, and finishing sweeps the rail down to the check. Press Replay to watch again, and use the Dark mode switch to see the run on a dark surface.' } } },
 };

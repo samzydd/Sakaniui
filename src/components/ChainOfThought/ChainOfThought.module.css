@@ -285,6 +285,8 @@
   42% { transform: scale(1.28) rotate(45deg); fill-opacity: 0.95; opacity: 1; }
   70% { transform: scale(0.9) rotate(60deg); fill-opacity: 0.2; opacity: 0.9; }
 }
+/* the brand colour (primary/500) while working; the check that replaces it stays muted */
+.indicator--working .spark { color: var(--color-primary-500); }
 .spark path { fill: currentColor; fill-opacity: 0; transform-box: fill-box; transform-origin: center; }
 .indicator--working .spark__big { animation: chain-of-thought-spark-turn 2.4s ease-in-out infinite; }
 .indicator--working .spark__top { animation: chain-of-thought-spark-twinkle 2.4s ease-in-out -0.4s infinite; }

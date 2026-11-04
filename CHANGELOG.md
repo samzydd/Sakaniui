@@ -19,10 +19,10 @@ All notable changes to `@sakaniui/react` are documented here.
     optional monospace `query`, a result `count`, and a `sources` row (add `onSourcesClick` to make it a button
     with a chevron). The rail stops at the last step by itself; screen readers get each step's status.
   - **`SourceStack`**: overlapping site-icon chips from `sources` ({ `label`, `icon` }); three to five read best.
-  - **`WorkingIndicator`**: the working line on its own: a living sparkle and a shimmering "Working" with the
+  - **`WorkingIndicator`**: the working line on its own: a living sparkle (in the brand colour, a 1px line) and a shimmering "Working" with the
     elapsed time, or a check and "Worked for 11.2s". The sparkle's three stars move on their own: the big one turns
     a quarter each cycle and breathes while the two small ones twinkle in turn, filling in at their peak, in time with
-    the shimmer. Both stop under reduced motion.
+    the shimmer. Both stop under reduced motion. The Live story has a Dark mode switch.
   - Presentational: you append steps as your agent produces them. Light and dark through the tokens.
   - **Motion**, from the Figma *Chain of Thought · motion* table, reads as ink running down the rail. An appended
     step opens its row while the previous rail flows down into it, turns the corner and the icon lands; the label

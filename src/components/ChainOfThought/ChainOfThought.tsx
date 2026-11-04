@@ -98,14 +98,14 @@ export interface WorkingIndicatorProps {
 }
 
 /**
- * The sparkle beside "Working": the library's sparkles icon with its three stars split apart so each can move on
- * its own. The big star turns a quarter every cycle (a four-point star looks the same after 90 degrees, so it reads
+ * The sparkle beside "Working", in the brand colour and a 1px line: the library's sparkles icon with its three stars
+ * split apart so each can move on its own. The big star turns a quarter every cycle (a four-point star looks the same after 90 degrees, so it reads
  * as a continuous turn) and breathes; the two small ones twinkle in turn, filling in as they peak.
  */
 const WorkingSpark: React.FC<{ className?: string }> = ({ className }) => (
   <svg
     xmlns="http://www.w3.org/2000/svg" width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor"
-    strokeWidth={iconStrokeWidth(16)} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" focusable="false"
+    strokeWidth={iconStrokeWidth(16, 1)} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" focusable="false"
     className={cx(styles.spark, className)}
   >
     <path className={styles.spark__big} d="M9 18a6 6 0 0 1 6 -6a6 6 0 0 1 -6 -6a6 6 0 0 1 -6 6a6 6 0 0 1 6 6" />
