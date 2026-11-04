@@ -120,6 +120,16 @@ function blockSummary(name, category) {
 const accessibleNameProp = (n) => /^aria-(label|labelledby)$/.test(n) || /^(alt|[a-z]*Alt)$/.test(n);
 
 // Hand-written, checked against the code. For files whose header is only maintainer notes, or is shared by several components.
+/**
+ * Prop defaults the doc tool gets wrong. When one file holds several components that share a prop name, it applies
+ * one component's default to all of them (ChainOfThought.tsx has four `status` props). `null` means "no default".
+ * Keyed "Component.prop".
+ */
+const DEFAULT_OVERRIDE = {
+  'ChainOfThought.status': null,
+  'WorkingIndicator.status': 'working',
+};
+
 const SUMMARY_OVERRIDE = {
   ChainOfThought: "An AI agent's visible work: a header, steps joined by a rail (ChainOfThoughtStep), and a live Working line. `open` / `defaultOpen` toggles it; `status` and `elapsed` or `startedAt` drive the working line.",
   ChainOfThoughtStep: 'One step of an agent run: an icon, a label, an optional monospace `query`, a `count` and a `sources` row. `status` is pending, active (read in full) or done (muted).',
@@ -406,7 +416,9 @@ for (const d of parsed) {
       const { type, values } = typeOf(v);
       const out = { name: k, type, required: !!v.required };
       if (values) out.values = values;
-      const def = defaultOf(v);
+      let def = defaultOf(v);
+      const key = `${name}.${k}`;
+      if (key in DEFAULT_OVERRIDE) def = DEFAULT_OVERRIDE[key] ?? undefined;
       if (def !== undefined) out.default = def;
       const desc = publicText(v.description);
       if (desc && !/^Defaults? to [^.]*\.$/i.test(desc)) out.description = desc;
