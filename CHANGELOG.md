@@ -17,6 +17,8 @@ All notable changes to `@sakaniui/react` are documented here.
   - No results is never a dead end: `emptyTitle`, `suggestions` ("Did you mean…", "Remove the filter") and `fallbackGroups`
     ("Try instead"). `answer` takes an answer card or a Chain of Thought; `renderPreview` adds a detail pane beside the list.
   - `variant="simple"` is the plain version: the field, one group of rows and the key hints.
+- **Changed: `Kbd`** now matches its Figma master: a flat 20px key cap (surface fill, 1px border, 4px radius, 12px text) with no bottom
+  shadow. It was heavier before (subtle fill, 6px radius, a 1px bottom shadow). This applies everywhere `Kbd` is used.
   - Reads the Surface tokens, so it re-skins in Glass and Liquid areas; portals to the body like Modal and keeps the theme
     and surface of where it was opened. Accessible: a dialog with a combobox field, a listbox of options, a live
     region announcing the result count, and reduced motion. Text uses `fg/muted` (the Figma file used `fg/subtle` in a few

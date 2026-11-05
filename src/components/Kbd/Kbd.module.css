@@ -1,20 +1,21 @@
-/* Kbd.module.css */
+/* Kbd.module.css -- the Figma "Kbd" master: bg/surface fill, 1px border/default (inside), radius/xs, label/xs text,
+   padding 2/6, no shadow (a 20px-high flat key cap). */
 
 .kbd {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: var(--space-2) var(--space-6);
+  /* Figma draws the 1px stroke inside the 20px key cap, so the border comes out of the padding */
+  box-sizing: content-box;
+  padding: calc(var(--space-2) - var(--border-width-100)) calc(var(--space-6) - var(--border-width-100));
   font-family: var(--font-sans);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 500;
-  line-height: 1;
+  line-height: 16px;
   color: var(--color-fg-muted);
-  background: var(--color-bg-subtle);
+  background: var(--color-bg-surface);
   border: var(--border-width-100) solid var(--color-border-default);
-  border-radius: var(--radius-sm);
-  /* Key-cap shadow — subtle bottom edge */
-  box-shadow: 0 1px 0 var(--color-border-strong);
+  border-radius: var(--radius-xs);
   white-space: nowrap;
   user-select: none;
 }

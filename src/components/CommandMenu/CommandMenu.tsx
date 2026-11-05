@@ -34,6 +34,7 @@ import { IconAlertTriangle as AlertTriangle } from '../../icons/outline/alert-tr
 import { IconFileText as FileText } from '../../icons/outline/file-text';
 import { IconBolt as Bolt } from '../../icons/outline/bolt';
 import { IconCopy as Copy } from '../../icons/outline/copy';
+import { IconChevronDown as ChevronDown } from '../../icons/outline/chevron-down';
 import { Avatar } from '../Avatar';
 import { Kbd } from '../Kbd';
 import { Skeleton } from '../Skeleton';
@@ -639,7 +640,7 @@ export const CommandMenu: React.FC<CommandMenuProps> = ({
                 )}
 
                 {state === 'error' && (
-                  <div className={styles.message}>
+                  <div className={cx(styles.message, styles['message--error'])}>
                     <span className={styles.message__tile} aria-hidden="true"><AlertTriangle size={22} strokeWidth={iconStrokeWidth(22)} /></span>
                     <div className={styles.message__text}><strong>{errorTitle}</strong><span>{errorDescription}</span></div>
                     {onRetry && <div className={styles.message__actions}><Button variant="secondary" size="sm" onClick={onRetry}>Try again</Button></div>}
@@ -683,7 +684,7 @@ export const CommandMenu: React.FC<CommandMenuProps> = ({
             {/* footer */}
             {!hideFooter && (
               <div className={styles.footer}>
-                {!simple && workspace && <span className={styles.footer__workspace}><span className={styles.footer__dot} aria-hidden="true" />{workspace}</span>}
+                {!simple && workspace && <span className={styles.footer__workspace}><span className={styles.footer__dot} aria-hidden="true" />{workspace}<ChevronDown size={12} strokeWidth={iconStrokeWidth(12)} className={styles.footer__chevron} aria-hidden="true" /></span>}
                 <span className={styles.footer__hints} aria-hidden="true">
                   {hints.map((h) => (
                     <span key={h.label} className={styles.hint}><span className={styles.hint__keys}>{h.keys.map((k) => <Kbd key={k}>{k}</Kbd>)}</span>{h.label}</span>
