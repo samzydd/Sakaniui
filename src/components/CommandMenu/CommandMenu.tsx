@@ -172,6 +172,10 @@ export interface CommandMenuProps {
   errorTitle?: React.ReactNode;
   errorDescription?: React.ReactNode;
   onRetry?: () => void;
+  /** A second, quieter action beside "Try again" in the error state ("Report"). */
+  onReport?: () => void;
+  retryLabel?: React.ReactNode;
+  reportLabel?: React.ReactNode;
 
   /** The workspace switcher in the footer (default variant). */
   workspace?: React.ReactNode;
@@ -303,7 +307,7 @@ export const CommandMenu: React.FC<CommandMenuProps> = ({
   filters: filtersProp, onFiltersChange, filterKeys,
   onAskAI, answer, renderPreview,
   emptyTitle, emptyDescription, suggestions, fallbackGroups,
-  errorTitle = 'Search is unavailable', errorDescription = 'We couldn’t reach the search index. Your recent items still work.', onRetry,
+  errorTitle = 'Search is unavailable', errorDescription = 'We couldn’t reach the search index. Your recent items still work.', onRetry, onReport, retryLabel = 'Try again', reportLabel = 'Report',
   workspace, hideFooter = false, 'aria-label': ariaLabel = 'Command menu', className,
 }) => {
   const simple = variant === 'simple';
@@ -378,6 +382,8 @@ export const CommandMenu: React.FC<CommandMenuProps> = ({
 
   const total = shownGroups.reduce((n, g) => n + g.items.length, 0);
   const searching = Boolean(q) || filters.length > 0;
+  /* Counts say "this many matches": only meaningful for a finished search (not the idle list, loading or an error). */
+  const showCounts = state === 'ready' && searching;
   const empty = state === 'ready' && total === 0 && searching;
   const showFallback = (empty || state === 'error') && fallbackGroups;
   const listGroups = React.useMemo(() => (state === 'loading' ? [] : showFallback ? fallbackGroups! : shownGroups), [state, showFallback, fallbackGroups, shownGroups]);
@@ -609,7 +615,7 @@ export const CommandMenu: React.FC<CommandMenuProps> = ({
                     onClick={() => { setScope(s.value); inputRef.current?.focus(); }}
                   >
                     {s.label}
-                    {scopeCounts[s.value] != null && <span className={styles.scope__count}>{scopeCounts[s.value]}</span>}
+                    {showCounts && scopeCounts[s.value] != null && <span className={styles.scope__count}>{scopeCounts[s.value]}</span>}
                   </button>
                 ))}
                 <span className={styles.scopes__hint} aria-hidden="true">Switch scope <Kbd>tab</Kbd></span>
@@ -643,7 +649,12 @@ export const CommandMenu: React.FC<CommandMenuProps> = ({
                   <div className={cx(styles.message, styles['message--error'])}>
                     <span className={styles.message__tile} aria-hidden="true"><AlertTriangle size={22} strokeWidth={iconStrokeWidth(22)} /></span>
                     <div className={styles.message__text}><strong>{errorTitle}</strong><span>{errorDescription}</span></div>
-                    {onRetry && <div className={styles.message__actions}><Button variant="secondary" size="sm" onClick={onRetry}>Try again</Button></div>}
+                    {(onRetry || onReport) && (
+                      <div className={styles.message__actions}>
+                        {onRetry && <Button variant="secondary" size="sm" onClick={onRetry}>{retryLabel}</Button>}
+                        {onReport && <Button variant="ghost" size="sm" onClick={onReport}>{reportLabel}</Button>}
+                      </div>
+                    )}
                   </div>
                 )}
 

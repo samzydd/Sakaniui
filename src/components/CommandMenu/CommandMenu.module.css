@@ -252,6 +252,8 @@
 .message__text span { font-size: 12px; line-height: 16px; color: var(--color-fg-muted); }
 .message__chips { display: flex; flex-wrap: wrap; justify-content: center; gap: var(--space-8); }
 .message__actions { display: flex; gap: var(--space-8); }
+/* Figma's small Button here is 32px high, 14/20 text (the library's sm Button is still 13px / 27px). */
+.message__actions > button { height: 32px; padding: 0 calc(var(--space-12) - var(--border-width-100)); font-size: 14px; line-height: 20px; }
 .chip {
   display: inline-flex; align-items: center; gap: var(--space-6);
   height: 28px;

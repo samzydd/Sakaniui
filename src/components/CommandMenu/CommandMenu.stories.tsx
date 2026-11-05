@@ -213,8 +213,8 @@ export const Loading: Story = { args: { scopes: SCOPES, defaultQuery: 'q4 rev', 
 
 export const Error: Story = {
   args: {
-    scopes: SCOPES, defaultQuery: 'q4 rev', state: 'error', workspace: 'Acme workspace', onRetry: () => {},
-    fallbackGroups: [GROUPS[0]],
+    scopes: SCOPES, defaultQuery: 'q4 rev', state: 'error', workspace: 'Acme workspace', onRetry: () => {}, onReport: () => {},
+    fallbackGroups: [{ ...GROUPS[0], items: GROUPS[0].items.filter((i) => i.id === 'q4' || i.id === 'billing') }],
   },
 };
 
