@@ -2,6 +2,13 @@
 
 All notable changes to `@sakaniui/react` are documented here.
 
+## Unreleased
+
+- **New spacing tokens `--space-28` and `--space-36`**, matching the Figma Spacing collection (`space/28`, `space/36`), so the
+  28px and 36px gaps used in charts, app shells and page covers now come from the scale instead of raw numbers.
+- Manifest: `ChainOfThought.status` no longer reports a default (there is none: no working line unless you pass it), and
+  `WorkingIndicator.status` reports its real default, `"working"`.
+
 ## 0.12.0
 
 - **New: `ChainOfThought`**, an AI agent's visible work, built from the new *↳ Chain of Thought* page in Figma.
