@@ -11,6 +11,7 @@ import { Badge } from '../Badge';
 import { Button } from '../Button';
 import { IconCreditCard } from '../../icons/outline/credit-card';
 import { IconSettings } from '../../icons/outline/settings';
+import { IconSearch } from '../../icons/outline/search';
 import { IconPlus } from '../../icons/outline/plus';
 import { IconUsers } from '../../icons/outline/users';
 import { IconMoon } from '../../icons/outline/moon';
@@ -79,7 +80,7 @@ const FALLBACK: CommandMenuGroup[] = [
   {
     id: 'try', label: 'Try instead',
     items: [
-      { id: 'everywhere', type: 'action', label: 'Search everywhere for “invoice”', description: '12 results in Pages, Files and Actions', icon: IconSettings },
+      { id: 'everywhere', type: 'action', label: 'Search everywhere for “invoice”', description: '12 results in Pages, Files and Actions', icon: IconSearch },
       { id: 'ai', type: 'ai', label: 'Ask AI “invoce”', description: 'It can look through your docs, data and the web', meta: 'Ask AI', shortcut: ['⌘', '↵'] },
       { id: 'create-file', type: 'action', label: 'Create a file named “invoce”', description: 'In Finance / Reports', icon: IconFilePlus },
     ],
@@ -204,7 +205,7 @@ export const NoResults: Story = {
     scope: 'files', defaultQuery: 'invoce', workspace: 'Acme workspace', onAskAI: () => {},
     filters: [{ id: 'files', label: 'Files', icon: IconFolder }],
     emptyTitle: 'No files match “invoce”', emptyDescription: 'Check the spelling, or search everywhere instead.',
-    suggestions: [{ label: 'Did you mean invoice?', icon: IconTextSpellcheck, onSelect: () => {} }, { label: 'Remove the Files filter', icon: IconX, onSelect: () => {} }],
+    suggestions: [{ label: 'Did you mean invoice?', emphasis: 'invoice', icon: IconTextSpellcheck, onSelect: () => {} }, { label: 'Remove the Files filter', emphasis: 'Files', icon: IconX, iconPosition: 'end', onSelect: () => {} }],
     fallbackGroups: FALLBACK,
   },
 };

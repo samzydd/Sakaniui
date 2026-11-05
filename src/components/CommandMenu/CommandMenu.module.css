@@ -258,14 +258,16 @@
   display: inline-flex; align-items: center; gap: var(--space-6);
   height: 28px;
   padding: 0 var(--space-10) 0 var(--space-8);
-  border: var(--border-width-100) solid var(--surface-border);
+  border: none;
   border-radius: var(--radius-md);
   background: var(--surface-bg-subtle);
   font: inherit; font-size: 12px; line-height: 16px; font-weight: 500;
   color: var(--color-fg-muted);
   cursor: pointer;
+  transition: background-color var(--transition-hover), color var(--transition-hover);
 }
-.chip:hover { color: var(--color-fg-default); border-color: var(--surface-border-strong); }
+.chip:hover { background: var(--surface-bg-subtle-hover); }
+.chip__em { font-weight: 600; color: var(--color-fg-default); }
 
 /* a few faded rows behind a search-off badge */
 .ghost { position: relative; display: block; width: 240px; height: 92px; }

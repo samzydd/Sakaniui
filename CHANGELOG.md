@@ -16,6 +16,7 @@ All notable changes to `@sakaniui/react` are documented here.
     and a space makes a token (`filterKeys`); esc clears the query, then closes. Focus returns to where it was.
   - No results is never a dead end: `emptyTitle`, `suggestions` ("Did you mean…", "Remove the filter") and `fallbackGroups`
     ("Try instead"). `answer` takes an answer card or a Chain of Thought; `renderPreview` adds a detail pane beside the list.
+  - Suggestion chips take `emphasis` (a word set in the strong weight, like "invoice" in "Did you mean invoice?") and `iconPosition="end"`.
   - The error state takes `onRetry` ("Try again") and `onReport` (a quieter "Report" beside it), with `retryLabel` / `reportLabel`.
     Scope counts show only for a finished search, not the idle list, loading or an error.
   - `variant="simple"` is the plain version: the field, one group of rows and the key hints.

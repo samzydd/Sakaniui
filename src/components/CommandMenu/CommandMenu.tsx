@@ -109,6 +109,10 @@ export interface CommandMenuFilter {
 export interface CommandMenuSuggestion {
   label: string;
   icon?: IconComponent;
+  /** Where the icon sits: before the label (default) or after it (e.g. the × on "Remove the Files filter"). */
+  iconPosition?: 'start' | 'end';
+  /** A word inside `label` to set in the strong weight ("invoice" in "Did you mean invoice?"). */
+  emphasis?: string;
   onSelect: () => void;
 }
 
@@ -672,9 +676,15 @@ export const CommandMenu: React.FC<CommandMenuProps> = ({
                       <div className={styles.message__chips}>
                         {suggestions.map((s) => {
                           const SIcon = s.icon;
+                          const at = s.emphasis ? s.label.indexOf(s.emphasis) : -1;
+                          const icon = SIcon && <SIcon size={14} strokeWidth={iconStrokeWidth(14)} aria-hidden="true" />;
                           return (
                             <button key={s.label} type="button" tabIndex={-1} className={styles.chip} onClick={s.onSelect}>
-                              {SIcon && <SIcon size={14} strokeWidth={iconStrokeWidth(14)} aria-hidden="true" />}{s.label}
+                              {s.iconPosition !== 'end' && icon}
+                              <span>
+                                {at < 0 ? s.label : <>{s.label.slice(0, at)}<strong className={styles.chip__em}>{s.emphasis}</strong>{s.label.slice(at + (s.emphasis as string).length)}</>}
+                              </span>
+                              {s.iconPosition === 'end' && icon}
                             </button>
                           );
                         })}
