@@ -402,11 +402,19 @@ export const CommandMenu: React.FC<CommandMenuProps> = ({
 
 
   const hover = useHoverHighlight<HTMLDivElement>();
+  const bodyRef = React.useRef<HTMLDivElement | null>(null);
   const itemEls = React.useRef(new Map<string, HTMLElement>());
   React.useEffect(() => {
     if (!open || !activeItem) return;
     const el = itemEls.current.get(activeItem.id);
-    if (el) { hover.showItem(el); el.scrollIntoView?.({ block: 'nearest' }); }
+    if (el) {
+      hover.showItem(el);
+      /* The first row sits under whatever heads the list (a group label, or the empty/error message), so go to the
+         very top rather than just bringing the row into view, which would scroll that heading out of sight. */
+      const body = bodyRef.current;
+      if (flat[0]?.id === activeItem.id && body) body.scrollTop = 0;
+      else el.scrollIntoView?.({ block: 'nearest' });
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, mounted, activeItem?.id, listKey]);
 
@@ -629,7 +637,7 @@ export const CommandMenu: React.FC<CommandMenuProps> = ({
             {/* body */}
             <div className={styles.split}>
               <div
-                ref={hover.ref}
+                ref={(node) => { bodyRef.current = node; hover.ref(node); }}
                 {...hover.groupProps}
                 onMouseLeave={() => { hover.groupProps.onMouseLeave(); if (activeItem) { const el = itemEls.current.get(activeItem.id); if (el) requestAnimationFrame(() => hover.showItem(el)); } }}
                 className={styles.body}
@@ -665,7 +673,9 @@ export const CommandMenu: React.FC<CommandMenuProps> = ({
                 {empty && (
                   <div className={cx(styles.message, styles['message--empty'])}>
                     <span className={styles.ghost} aria-hidden="true">
-                      <span className={styles.ghost__row} /><span className={styles.ghost__row} /><span className={styles.ghost__row} />
+                      <span className={styles.ghost__track}>
+                        <span className={styles.ghost__row} /><span className={styles.ghost__row} /><span className={styles.ghost__row} /><span className={styles.ghost__row} />
+                      </span>
                       <span className={styles.ghost__badge}><SearchOff size={20} strokeWidth={iconStrokeWidth(20)} /></span>
                     </span>
                     <div className={styles.message__text}>
