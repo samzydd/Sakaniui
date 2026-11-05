@@ -663,7 +663,7 @@ export const CommandMenu: React.FC<CommandMenuProps> = ({
                 )}
 
                 {empty && (
-                  <div className={styles.message}>
+                  <div className={cx(styles.message, styles['message--empty'])}>
                     <span className={styles.ghost} aria-hidden="true">
                       <span className={styles.ghost__row} /><span className={styles.ghost__row} /><span className={styles.ghost__row} />
                       <span className={styles.ghost__badge}><SearchOff size={20} strokeWidth={iconStrokeWidth(20)} /></span>
