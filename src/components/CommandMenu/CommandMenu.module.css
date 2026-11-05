@@ -269,10 +269,10 @@
 .chip:hover { background: var(--surface-bg-subtle-hover); }
 .chip__em { font-weight: 600; color: var(--color-fg-default); }
 
-/* a few faded rows behind a search-off badge */
+/* a feed of faded rows with a magnifying lens over it (the lens shows the same rows, magnified) */
 .ghost { position: relative; display: block; width: 240px; height: 92px; }
 .ghost__track {
-  position: absolute; inset: 0; display: block;
+  position: absolute; left: 0; top: 0; display: block; width: 240px; height: 92px;
   /* rows fade out at the top and fade back in at the bottom */
   -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 20%, #000 80%, transparent 100%);
   mask-image: linear-gradient(to bottom, transparent 0, #000 20%, #000 80%, transparent 100%);
@@ -286,20 +286,53 @@
 }
 .ghost__row::before { content: ''; position: absolute; left: 10px; top: 7px; width: 16px; height: 16px; border-radius: 4px; background: var(--surface-bg-subtle); border: 1px solid var(--surface-border); }
 .ghost__row::after { content: ''; position: absolute; left: 34px; top: 9px; width: 42%; height: 5px; border-radius: 3px; background: var(--color-bg-muted); box-shadow: 0 9px 0 -1px var(--color-bg-muted); }
-/* at rest (and with reduced motion) three rows are stacked back to front; the fourth waits out of sight */
+/* at rest (and with reduced motion) three rows are stacked back to front, 21px apart; the fourth waits below */
 .ghost__row:nth-child(1) { transform: translate(36px, 4px);  width: 168px; opacity: 0.4;  z-index: 2; }
-.ghost__row:nth-child(2) { transform: translate(26px, 24px); width: 188px; opacity: 0.65; z-index: 3; }
+.ghost__row:nth-child(2) { transform: translate(26px, 25px); width: 188px; opacity: 0.65; z-index: 3; }
 .ghost__row:nth-child(3) { transform: translate(16px, 46px); width: 208px; opacity: 1;    z-index: 4; }
-.ghost__row:nth-child(4) { transform: translate(46px, -16px); width: 148px; opacity: 0;   z-index: 1; }
-.ghost__badge {
-  position: absolute; left: 184px; top: 40px;
-  display: inline-flex; align-items: center; justify-content: center;
-  width: 44px; height: 44px;
-  border: var(--border-width-100) solid var(--surface-border-strong);
-  border-radius: var(--radius-full);
-  background: var(--surface-bg-overlay);
-  color: var(--color-fg-muted);
+.ghost__row:nth-child(4) { transform: translate(6px, 67px);  width: 228px; opacity: 0;    z-index: 5; }
+/* The lens: a 48px glass at (--lens-x, --lens-y) with a handle. Inside it a copy of the track is scaled by
+   --lens-zoom around the lens centre, so it magnifies whatever passes under it. --lens-dx/--lens-dy move the lens;
+   the copy moves the other way (times the zoom) so the magnified view stays true. */
+.ghost__lens {
+  --lens-x: 100px; --lens-y: 38px; --lens-r: 26px; --lens-zoom: 1.6;
+  position: absolute; z-index: 6;
+  left: calc(var(--lens-x) - var(--lens-r)); top: calc(var(--lens-y) - var(--lens-r));
+  width: calc(var(--lens-r) * 2); height: calc(var(--lens-r) * 2);
+  translate: var(--lens-dx, 0px) var(--lens-dy, 0px);
+}
+.ghost__lens::before { /* handle */
+  content: ''; position: absolute; left: 50%; top: calc(50% - 3.5px);
+  width: 22px; height: 7px; border-radius: var(--radius-full);
+  background: var(--color-fg-default);
+  transform-origin: 0 50%; transform: rotate(45deg) translateX(calc(var(--lens-r) - 2px));
   box-shadow: var(--shadow-sm);
+}
+.ghost__lens::after { /* rim, drawn over the glass */
+  content: ''; position: absolute; inset: 0; border-radius: var(--radius-full);
+  border: 2.5px solid var(--color-fg-default);
+  box-shadow: var(--shadow-md);
+  pointer-events: none;
+}
+.ghost__glass {
+  position: absolute; inset: 0; display: block; overflow: hidden;
+  border-radius: var(--radius-full); clip-path: circle(50%);
+  background: var(--surface-bg-overlay);
+}
+.ghost__glass::after { /* glint */
+  content: ''; position: absolute; inset: 0; border-radius: inherit;
+  background: radial-gradient(circle at 30% 24%, rgb(255 255 255 / 0.14), rgb(255 255 255 / 0) 40%);
+  pointer-events: none;
+}
+/* under the glass the rows read clearer: full strength, stronger lines */
+.ghost__zoom .ghost__row { opacity: 1; border-color: var(--surface-border-strong); }
+.ghost__zoom .ghost__row:nth-child(4) { opacity: 0; }
+.ghost__zoom .ghost__row::after { background: var(--surface-border-strong); box-shadow: 0 9px 0 -1px var(--surface-border-strong); }
+.ghost__zoom {
+  position: absolute; left: 0; top: 0; display: block; width: 240px; height: 92px;
+  transform-origin: 0 0;
+  transform: translate(calc(var(--lens-r) - var(--lens-zoom) * var(--lens-x)), calc(var(--lens-r) - var(--lens-zoom) * var(--lens-y))) scale(var(--lens-zoom));
+  translate: calc(var(--lens-dx, 0px) * -1 * var(--lens-zoom)) calc(var(--lens-dy, 0px) * -1 * var(--lens-zoom));
 }
 
 .loading { display: flex; flex-direction: column; gap: var(--space-2); }
@@ -409,57 +442,55 @@
 @keyframes sakani-cmd-panel-in { from { opacity: 0; transform: translateY(-6px) scale(0.98); } to { opacity: 1; transform: none; } }
 @keyframes sakani-cmd-panel-out { from { opacity: 1; transform: none; } to { opacity: 0; transform: translateY(-4px) scale(0.985); } }
 
-/* ---- no results: the illustration settles in ----
-   The rows fan in back to front, the badge pops in (its icon straightens up) with one soft ring, then the title, the
-   description and the chips rise in turn. The badge floats very gently afterwards. It plays once, when the empty
-   message appears (typing more while it is still empty does not replay it). */
-/* The rows ride up like a feed: the top one fades out under the mask, a new one fades in at the bottom, forever.
-   Four rows share one 8s loop, offset by a quarter each, so three are always on screen. Each step glides for 1.2s,
-   then holds for 0.8s so the list is readable. */
+/* ---- no results: the feed flows under the lens ----
+   The rows ride up without stopping: four rows share one linear loop, a quarter apart, so three are always on
+   screen; the top one fades out under the mask while the next fades in at the bottom. The lens pops in, then
+   circles slowly over the rows (two eased sways a quarter out of phase), magnifying them as they pass. The title,
+   description and chips rise in once. With reduced motion everything stays still, as in Figma. */
+@property --lens-dx { syntax: '<length>'; inherits: true; initial-value: 0px; }
+@property --lens-dy { syntax: '<length>'; inherits: true; initial-value: 0px; }
 @media (prefers-reduced-motion: no-preference) {
   .message--empty .ghost__track { animation: sakani-cmd-fade 500ms ease-out both; }
-  .message--empty .ghost__row { animation: sakani-cmd-feed 8s linear infinite both; }
-  .message--empty .ghost__row:nth-child(1) { animation-delay: -5.6s; }
-  .message--empty .ghost__row:nth-child(2) { animation-delay: -3.6s; }
+  .message--empty .ghost__row { animation: sakani-cmd-feed 6.4s linear infinite both; }
+  .message--empty .ghost__row:nth-child(1) { animation-delay: -4.8s; }
+  .message--empty .ghost__row:nth-child(2) { animation-delay: -3.2s; }
   .message--empty .ghost__row:nth-child(3) { animation-delay: -1.6s; }
-  .message--empty .ghost__row:nth-child(4) { animation-delay: -7.6s; }
+  .message--empty .ghost__row:nth-child(4) { animation-delay: 0s; }
+  .message--empty .ghost__zoom .ghost__row { animation-name: sakani-cmd-feed-clear; }
+  .message--empty .ghost__lens {
+    animation: sakani-cmd-lens-in 560ms cubic-bezier(0.34, 1.56, 0.64, 1) 280ms both,
+               sakani-cmd-lens-x 2.6s cubic-bezier(0.37, 0, 0.63, 1) -1.3s infinite alternate,
+               sakani-cmd-lens-y 2.6s cubic-bezier(0.37, 0, 0.63, 1) infinite alternate;
+  }
+  .message--empty .message__text { animation: sakani-cmd-rise 380ms cubic-bezier(0.16, 1, 0.3, 1) 420ms both; }
+  .message--empty .message__chips .chip { animation: sakani-cmd-rise 380ms cubic-bezier(0.16, 1, 0.3, 1) 520ms both; }
+  .message--empty .message__chips .chip:nth-child(2) { animation-delay: 580ms; }
+  .message--empty .message__chips .chip:nth-child(3) { animation-delay: 640ms; }
 }
 @keyframes sakani-cmd-fade { from { opacity: 0; } to { opacity: 1; } }
 @keyframes sakani-cmd-feed {
-  0%   { transform: translate(6px, 66px);  width: 228px; opacity: 0;    z-index: 5; animation-timing-function: cubic-bezier(0.65, 0, 0.35, 1); }
-  15%  { transform: translate(16px, 46px); width: 208px; opacity: 1;    z-index: 4; animation-timing-function: linear; }
-  25%  { transform: translate(16px, 46px); width: 208px; opacity: 1;    z-index: 4; animation-timing-function: cubic-bezier(0.65, 0, 0.35, 1); }
-  40%  { transform: translate(26px, 24px); width: 188px; opacity: 0.65; z-index: 3; animation-timing-function: linear; }
-  50%  { transform: translate(26px, 24px); width: 188px; opacity: 0.65; z-index: 3; animation-timing-function: cubic-bezier(0.65, 0, 0.35, 1); }
-  65%  { transform: translate(36px, 4px);  width: 168px; opacity: 0.4;  z-index: 2; animation-timing-function: linear; }
-  75%  { transform: translate(36px, 4px);  width: 168px; opacity: 0.4;  z-index: 2; animation-timing-function: cubic-bezier(0.65, 0, 0.35, 1); }
-  90%  { transform: translate(46px, -16px); width: 148px; opacity: 0;   z-index: 1; animation-timing-function: linear; }
-  100% { transform: translate(46px, -16px); width: 148px; opacity: 0;   z-index: 1; }
+  0%   { transform: translate(6px, 67px);  width: 228px; opacity: 0;    z-index: 5; }
+  25%  { transform: translate(16px, 46px); width: 208px; opacity: 1;    z-index: 4; }
+  50%  { transform: translate(26px, 25px); width: 188px; opacity: 0.65; z-index: 3; }
+  75%  { transform: translate(36px, 4px);  width: 168px; opacity: 0.4;  z-index: 2; }
+  100% { transform: translate(46px, -17px); width: 148px; opacity: 0;   z-index: 1; }
 }
-.message--empty .ghost__badge {
-  animation: sakani-cmd-badge-in 520ms cubic-bezier(0.34, 1.56, 0.64, 1) 320ms both,
-             sakani-cmd-badge-float 3.8s ease-in-out 1100ms infinite;
+/* the same path for the magnified copy, but the rows stay at full strength while they are inside the track */
+@keyframes sakani-cmd-feed-clear {
+  0%   { transform: translate(6px, 67px);  width: 228px; opacity: 0; z-index: 5; }
+  12%  { opacity: 1; }
+  25%  { transform: translate(16px, 46px); width: 208px; z-index: 4; }
+  50%  { transform: translate(26px, 25px); width: 188px; z-index: 3; }
+  75%  { transform: translate(36px, 4px);  width: 168px; z-index: 2; }
+  88%  { opacity: 1; }
+  100% { transform: translate(46px, -17px); width: 148px; opacity: 0; z-index: 1; }
 }
-.message--empty .ghost__badge svg { animation: sakani-cmd-icon-tilt 640ms cubic-bezier(0.34, 1.56, 0.64, 1) 360ms both; }
-.message--empty .ghost__badge::before {
-  content: ''; position: absolute; inset: -1px; border-radius: inherit;
-  border: 1px solid var(--surface-border-strong); pointer-events: none;
-  animation: sakani-cmd-badge-ring 900ms cubic-bezier(0.22, 1, 0.36, 1) 620ms both;
-}
-.message--empty .message__text { animation: sakani-cmd-rise 380ms cubic-bezier(0.16, 1, 0.3, 1) 420ms both; }
-.message--empty .message__chips .chip { animation: sakani-cmd-rise 380ms cubic-bezier(0.16, 1, 0.3, 1) 520ms both; }
-.message--empty .message__chips .chip:nth-child(2) { animation-delay: 580ms; }
-.message--empty .message__chips .chip:nth-child(3) { animation-delay: 640ms; }
-@keyframes sakani-cmd-badge-in { from { opacity: 0; transform: scale(0.5); } to { opacity: 1; transform: none; } }
-@keyframes sakani-cmd-icon-tilt { from { transform: rotate(-28deg); } to { transform: none; } }
-@keyframes sakani-cmd-badge-ring { from { opacity: 0.55; transform: scale(1); } to { opacity: 0; transform: scale(1.9); } }
-@keyframes sakani-cmd-badge-float { 0%, 100% { translate: 0 0; } 50% { translate: 0 -2px; } }
+@keyframes sakani-cmd-lens-in { from { opacity: 0; transform: translate(-6px, 8px) scale(0.6); } to { opacity: 1; transform: none; } }
+@keyframes sakani-cmd-lens-x { from { --lens-dx: -18px; } to { --lens-dx: 18px; } }
+@keyframes sakani-cmd-lens-y { from { --lens-dy: -5px; } to { --lens-dy: 5px; } }
 @keyframes sakani-cmd-rise { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
 @media (prefers-reduced-motion: reduce) {
   .backdrop--in, .backdrop--out, .panel--in, .panel--out { animation: none; }
-  .message--empty .ghost__badge, .message--empty .ghost__badge svg, .message--empty .ghost__badge::before,
-  .message--empty .message__text, .message--empty .message__chips .chip { animation: none; }
-  .message--empty .ghost__badge::before { display: none; }
 }
 @media (max-width: 720px) {
   .backdrop { padding-top: var(--space-16); }

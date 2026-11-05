@@ -26,7 +26,6 @@ import { useHoverHighlight } from '../../lib/useHoverHighlight';
 import { iconStrokeWidth } from '../../lib/iconStrokeWidth';
 import type { IconComponent } from '../../icons/types';
 import { IconSearch as Search } from '../../icons/outline/search';
-import { IconSearchOff as SearchOff } from '../../icons/outline/search-off';
 import { IconCircleX as CircleX } from '../../icons/outline/circle-x';
 import { IconX as X } from '../../icons/outline/x';
 import { IconSparkles as Sparkles } from '../../icons/outline/sparkles';
@@ -201,6 +200,15 @@ const TYPE_ICON: Record<CommandMenuItemType, IconComponent> = { page: FileText, 
 const scopeOf = (item: CommandMenuItem) => item.scope ?? (item.type ? TYPE_SCOPE[item.type] : null);
 
 /** Wraps the part of `text` that matches `query` in <mark>, and leaves the rest as it is. */
+/** The No results feed: four placeholder rows (drawn twice, once under the lens, once magnified inside it). */
+function GhostTrack() {
+  return (
+    <span className={styles.ghost__track}>
+      <span className={styles.ghost__row} /><span className={styles.ghost__row} /><span className={styles.ghost__row} /><span className={styles.ghost__row} />
+    </span>
+  );
+}
+
 function Highlighted({ text, query }: { text: string; query: string }) {
   const q = query.trim();
   const at = q ? text.toLowerCase().indexOf(q.toLowerCase()) : -1;
@@ -673,10 +681,10 @@ export const CommandMenu: React.FC<CommandMenuProps> = ({
                 {empty && (
                   <div className={cx(styles.message, styles['message--empty'])}>
                     <span className={styles.ghost} aria-hidden="true">
-                      <span className={styles.ghost__track}>
-                        <span className={styles.ghost__row} /><span className={styles.ghost__row} /><span className={styles.ghost__row} /><span className={styles.ghost__row} />
+                      <GhostTrack />
+                      <span className={styles.ghost__lens}>
+                        <span className={styles.ghost__glass}><span className={styles.ghost__zoom}><GhostTrack /></span></span>
                       </span>
-                      <span className={styles.ghost__badge}><SearchOff size={20} strokeWidth={iconStrokeWidth(20)} /></span>
                     </span>
                     <div className={styles.message__text}>
                       <strong>{emptyTitle ?? <>No results for “{query.trim() || filters.map((f) => f.label).join(', ')}”</>}</strong>

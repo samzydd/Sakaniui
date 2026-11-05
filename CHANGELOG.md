@@ -16,9 +16,10 @@ All notable changes to `@sakaniui/react` are documented here.
     and a space makes a token (`filterKeys`); esc clears the query, then closes. Focus returns to where it was.
   - No results is never a dead end: `emptyTitle`, `suggestions` ("Did you mean…", "Remove the filter") and `fallbackGroups`
     ("Try instead"). `answer` takes an answer card or a Chain of Thought; `renderPreview` adds a detail pane beside the list.
-  - The No results illustration is alive: the ghost rows ride up like a feed, the top one fading out under a mask while a new one
-    fades in at the bottom, on a calm loop. The badge pops in with a soft ring and floats gently, and the title and chips rise in.
-    `prefers-reduced-motion` shows the still stack.
+  - The No results illustration is alive: the ghost rows flow up without stopping, the top one fading out under a mask while
+    the next fades in at the bottom, and a magnifying lens circles slowly over them, showing the rows magnified and clearer
+    under the glass (CSS only, the lens uses two registered `@property` lengths). The lens pops in and the title and chips
+    rise in. `prefers-reduced-motion` shows the still stack with the lens at rest, as in Figma.
   - The list opens scrolled to the top when its first row is active, so the empty message is never cut off in a short window.
   - Suggestion chips take `emphasis` (a word set in the strong weight, like "invoice" in "Did you mean invoice?") and `iconPosition="end"`.
   - The error state takes `onRetry` ("Try again") and `onReport` (a quieter "Report" beside it), with `retryLabel` / `reportLabel`.
