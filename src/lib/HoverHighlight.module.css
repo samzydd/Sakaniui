@@ -34,3 +34,6 @@
     border-radius 150ms var(--ease-in-out),
     background-color 150ms var(--ease-in-out);
 }
+/* While the highlight follows an item that is moving under it (a collapsible
+   opening above it), it is placed every frame, so no glide. */
+.track { transition: opacity 120ms var(--ease-out); }

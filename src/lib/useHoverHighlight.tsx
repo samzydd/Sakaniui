@@ -19,6 +19,9 @@ import styles from './HoverHighlight.module.css';
 
 interface Box { x: number; y: number; w: number; h: number; radius: string; tone: string }
 
+// Transitions on these properties can move or resize an item.
+const LAYOUT_PROP = /height|width|grid-template|padding|margin|^(top|bottom|left|right|inset)|gap|flex/;
+
 const isOff = (el: HTMLElement) =>
   el.getAttribute('data-hover-item') === 'off' ||
   el.getAttribute('aria-disabled') === 'true' ||
@@ -123,9 +126,53 @@ export function useHoverHighlight<T extends HTMLElement = HTMLDivElement>() {
     const ro = new ResizeObserver(remeasure);
     ro.observe(container);
     container.addEventListener('scroll', remeasure, true);
+
+    // While something inside the group is animating its size (a collapsible
+    // opening above the current item, a row growing), the item moves every
+    // frame but nothing here resizes, so a single measure goes stale and the
+    // highlight is left behind. Follow the item frame by frame for as long as
+    // such a transition or animation runs, with the glide switched off so it
+    // sticks to the item instead of chasing it.
+    let until = 0;
+    let raf = 0;
+    const follow = () => {
+      raf = 0;
+      const item = current.current;
+      const hl = el.current;
+      if (!item || !hl || !shown.current || !container.contains(item)) { hl?.classList.remove(styles.track); return; }
+      const b = measure(item, container);
+      hl.style.transform = `translate(${b.x}px, ${b.y}px)`;
+      hl.style.width = `${b.w}px`;
+      hl.style.height = `${b.h}px`;
+      if (performance.now() < until) { raf = requestAnimationFrame(follow); return; }
+      hl.classList.remove(styles.track);
+      setBox(b);
+    };
+    const ms = (v: string) => Math.max(0, ...v.split(',').map((t) => (t.trim().endsWith('ms') ? parseFloat(t) : parseFloat(t) * 1000) || 0));
+    const arm = (target: Element, time: number) => {
+      if (target === el.current || !shown.current) return;
+      until = Math.max(until, performance.now() + time + 60);
+      if (!raf) { el.current?.classList.add(styles.track); raf = requestAnimationFrame(follow); }
+    };
+    const onTransition = (e: Event) => {
+      const te = e as TransitionEvent;
+      if (!LAYOUT_PROP.test(te.propertyName)) return;
+      const cs = getComputedStyle(te.target as Element);
+      arm(te.target as Element, ms(cs.transitionDuration) + ms(cs.transitionDelay));
+    };
+    const onAnimation = (e: Event) => {
+      const cs = getComputedStyle(e.target as Element);
+      if (cs.animationIterationCount.includes('infinite')) return;
+      arm(e.target as Element, ms(cs.animationDuration) + ms(cs.animationDelay));
+    };
+    container.addEventListener('transitionrun', onTransition);
+    container.addEventListener('animationstart', onAnimation);
     return () => {
       ro.disconnect();
       container.removeEventListener('scroll', remeasure, true);
+      container.removeEventListener('transitionrun', onTransition);
+      container.removeEventListener('animationstart', onAnimation);
+      if (raf) cancelAnimationFrame(raf);
     };
   }, [node, hide]);
 

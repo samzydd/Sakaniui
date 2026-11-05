@@ -21,6 +21,9 @@ All notable changes to `@sakaniui/react` are documented here.
     under the glass (CSS only, the lens uses two registered `@property` lengths). The lens pops in and the title and chips
     rise in. `prefers-reduced-motion` shows the still stack with the lens at rest, as in Figma.
   - The list opens scrolled to the top when its first row is active, so the empty message is never cut off in a short window.
+  - The hover highlight now follows its row while something above it opens or closes (a Chain of Thought in the Ask AI answer),
+    instead of lagging behind and leaving the row without its hover effect. It is placed every frame for the length of the
+    transition, with the glide off (shared `useHoverHighlight`, so every flowing-highlight list gets it).
   - Suggestion chips take `emphasis` (a word set in the strong weight, like "invoice" in "Did you mean invoice?") and `iconPosition="end"`.
   - The error state takes `onRetry` ("Try again") and `onReport` (a quieter "Report" beside it), with `retryLabel` / `reportLabel`.
     Scope counts show only for a finished search, not the idle list, loading or an error.
