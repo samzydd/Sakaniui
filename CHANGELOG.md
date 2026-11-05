@@ -21,6 +21,8 @@ All notable changes to `@sakaniui/react` are documented here.
     under the glass (CSS only, the lens uses two registered `@property` lengths). The lens pops in and the title and chips
     rise in. `prefers-reduced-motion` shows the still stack with the lens at rest, as in Figma.
   - The list opens scrolled to the top when its first row is active, so the empty message is never cut off in a short window.
+  - The Preview layout is narrower: 880px (was 960), with a 300px detail pane (was 320). The Figma Preview state and its
+    Command Preview part are resized to match.
   - A person's row matches the Figma Leading slot: the 24px Avatar centred in the 28px slot, and the 8px status dot at (18, 17)
     with an inside 1.5px ring (it sat 3px too far out and its ring rendered 1px).
   - The scope tabs (All, Pages, People…) share one pill that glides to the chosen tab (150ms, the same as the row highlight),

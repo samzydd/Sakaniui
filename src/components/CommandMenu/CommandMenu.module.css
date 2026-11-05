@@ -43,7 +43,7 @@
   backdrop-filter: var(--surface-blur-overlay);
 }
 .panel--simple { width: 560px; }
-.panel--preview { width: 960px; }
+.panel--preview { width: 880px; }
 
 /* ---- field ---- */
 .field {
@@ -393,8 +393,8 @@
 
 /* ---- preview pane ---- */
 .preview {
-  flex: 0 0 320px;
-  width: 320px;
+  flex: 0 0 300px;
+  width: 300px;
   overflow-y: auto;
   padding: var(--space-20);
   border-left: var(--border-width-100) solid var(--surface-border);
