@@ -259,6 +259,13 @@ lists its other names under `aliases` in `manifest.json`, and `search_components
   colour you want (`theme="dark"` for a dark surface inside a light page); give markers a `label` and
   `onMarkerClick` to make them selectable. Choose Map when people need streets and zoom, MapGlobe when the point
   is global spread.
+- **CommandMenu / CommandMenuTrigger / CommandMenuAnswer** — the ⌘K search and command palette: search pages, people,
+  files and actions in one place. Use it instead of building a modal with an `Input` and a list. Pass `groups` of
+  `items` and handle `onSelect`; it opens on ⌘K by itself and filters as you type (`filter={false}` for server
+  results, with `state="loading"` while you wait). Give every item a `label`, and `shortcut` / `description` / `meta`
+  for context. Add `scopes` for tabs, `onAskAI` for ⌘↵, `answer` for an Ask AI answer card, `variant="simple"` for the
+  plain version. A `Combobox` is for choosing a value in a form, not for navigating an app. Put a
+  `CommandMenuTrigger` in the top bar.
 - **Avatar / AvatarGroup** — Avatar type is inferred: `src` → image, `initials` → initials, else icon.
   Prefer a real image when you have one; initials are the fallback, not the default.
 - **BoardCard / BoardColumn** — kanban pieces. `BoardColumn state="loading"` styles the column; *you* pass

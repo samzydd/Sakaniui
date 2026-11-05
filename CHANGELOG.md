@@ -2,8 +2,26 @@
 
 All notable changes to `@sakaniui/react` are documented here.
 
-## Unreleased
+## 0.13.0
 
+- **New: `CommandMenu`**, a ⌘K search and command palette, built from the new *↳ Command Menu* page in Figma. A search field,
+  scope tabs with counts, grouped results with the matched letters in the strong weight, a footer of key hints, and the
+  states a real search needs. Also **`CommandMenuTrigger`** (the ⌘K pill for a top bar) and **`CommandMenuAnswer`** (an
+  answer card with sources, for the Ask AI state).
+  - You pass `groups` of `items` (`label`, `description`, `type`, `icon`, `avatar`, `meta`, `shortcut`, `keywords`, `tags`) and
+    handle `onSelect`. It filters as you type unless you pass `filter={false}` (server results); `state="loading"` shows
+    skeleton rows and `state="error"` an error with `onRetry`.
+  - Keyboard: ⌘K / Ctrl K opens and closes it; ↑ ↓ Home End move one gliding highlight; ↵ chooses; ⌘↵ asks AI (with
+    `onAskAI`); Tab and Shift Tab switch scope; ⌫ in an empty field removes the last filter token; typing `team:design`
+    and a space makes a token (`filterKeys`); esc clears the query, then closes. Focus returns to where it was.
+  - No results is never a dead end: `emptyTitle`, `suggestions` ("Did you mean…", "Remove the filter") and `fallbackGroups`
+    ("Try instead"). `answer` takes an answer card or a Chain of Thought; `renderPreview` adds a detail pane beside the list.
+  - `variant="simple"` is the plain version: the field, one group of rows and the key hints.
+  - Reads the Surface tokens, so it re-skins in Glass and Liquid areas; portals to the body like Modal and keeps the theme
+    and surface of where it was opened. Accessible: a dialog with a combobox field, a listbox of options, a live
+    region announcing the result count, and reduced motion. Text uses `fg/muted` (the Figma file used `fg/subtle` in a few
+    places, which is 2.5:1 on white).
+- **New spacing tokens `--space-28` and `--space-36`**
 - **New spacing tokens `--space-28` and `--space-36`**, matching the Figma Spacing collection (`space/28`, `space/36`), so the
   28px and 36px gaps used in charts, app shells and page covers now come from the scale instead of raw numbers.
 - Manifest: `ChainOfThought.status` no longer reports a default (there is none: no working line unless you pass it), and

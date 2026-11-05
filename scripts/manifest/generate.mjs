@@ -134,6 +134,9 @@ const SUMMARY_OVERRIDE = {
   ChainOfThought: "An AI agent's visible work: a header, steps joined by a rail (ChainOfThoughtStep), and a live Working line. `open` / `defaultOpen` toggles it; `status` and `elapsed` or `startedAt` drive the working line.",
   ChainOfThoughtStep: 'One step of an agent run: an icon, a label, an optional monospace `query`, a `count` and a `sources` row. `status` is pending, active (read in full) or done (muted).',
   SourceStack: 'Overlapping site-icon chips for a step\'s sources: pass `sources` as { label, icon } (three to five read best).',
+  CommandMenu: 'A ⌘K search and command palette: a field, scope tabs, grouped results (the matched letters in the strong weight), a footer of key hints, and loading, no-results and error states. Pass `groups` of `items` and handle `onSelect`; it filters as you type unless `filter={false}`. ⌘K opens it, ↑ ↓ move, ↵ chooses, ⌘↵ asks AI (with `onAskAI`), Tab switches scope, esc clears then closes. `variant="simple"` is just the field, one group and the key hints.',
+  CommandMenuTrigger: 'The ⌘K pill that opens a CommandMenu, for a top bar or sidebar. A button: give it `onClick`.',
+  CommandMenuAnswer: 'An answer card for the CommandMenu\'s Ask AI state: the answer text, its sources as chips, and a follow-up. Pass it as the menu\'s `answer`.',
   SourceLogo: 'The real logo of a site an agent searched or read, in its brand colour: `<SourceLogo name="reddit" />`, or `sourceLogo(\'reddit\')` for any `icon` prop (a step\'s, a SourceStack chip\'s). Black brands draw in the text colour so they stay visible in dark mode.',
   WorkingIndicator: 'The live status line under an agent\'s steps: a sparkle, "Working" and the elapsed time (`startedAt` ticks on its own), or a check and "Worked for 11s" when done.',
   Map: 'Interactive tile map with pan, zoom and controls. Place MapMarker and MapPopup children by [latitude, longitude]; `tileUrl` swaps the tile provider (OpenStreetMap by default).',
@@ -463,6 +466,9 @@ const ALIASES = {
   ChainOfThought: ['thought chain', 'reasoning steps', 'reasoning trace', 'agent steps', 'agent activity', 'agent trace', 'thinking steps', 'tool calls', 'tool call log', 'activity trace', 'ai steps', 'research steps'],
   ChainOfThoughtStep: ['reasoning step', 'thought step', 'agent step', 'tool call', 'search step', 'task step'],
   SourceStack: ['sources', 'favicon stack', 'source chips', 'citations', 'citation chips', 'site icons'],
+  CommandMenu: ['command palette', 'command bar', 'cmd k', 'cmdk', 'search modal', 'global search', 'spotlight', 'quick actions', 'omnibar', 'search palette', 'advanced search', 'quick switcher', 'command k'],
+  CommandMenuTrigger: ['search button', 'cmd k trigger', 'search pill', 'search trigger', 'command trigger'],
+  CommandMenuAnswer: ['ai answer', 'answer card', 'search answer'],
   SourceLogo: ['brand logo', 'site logo', 'favicon', 'website logo', 'social logo', 'colour logo'],
   WorkingIndicator: ['thinking indicator', 'working status', 'agent status', 'typing status', 'elapsed timer', 'shimmer label'],
   MapClusterLayer: ['marker clustering', 'cluster markers', 'supercluster', 'many markers', 'point clustering', 'heatmap markers'],
@@ -533,6 +539,40 @@ for (const name of Object.keys(ALIASES)) if (!listed0.has(name)) { console.error
 
 /* ---- recipes: patterns the types alone do not teach, written by hand and compiled on every build ---- */
 const RECIPES = {
+  CommandMenu: [{
+    title: 'A ⌘K search over your pages, people and actions',
+    description: 'CommandMenu is controlled by you for what it shows and what happens: pass `groups` of `items`, handle `onSelect`, and give the menu `scopes` for the tabs. It opens on ⌘K by itself (`open` / `onOpenChange` to control it) and filters as you type. For results from a server pass `filter={false}`, set `state="loading"` while you wait, and render the groups you got back. Put a `CommandMenuTrigger` in your top bar. Give every item a `label`; add `shortcut` for key hints and `description` or `meta` for context.',
+    code: `import React from 'react';
+import { CommandMenu, CommandMenuTrigger } from '@sakaniui/react';
+import { IconSettings, IconPlus } from '@sakaniui/react/icons';
+
+const GROUPS = [
+  {
+    id: 'pages', label: 'Pages',
+    items: [{ id: 'settings', type: 'page' as const, label: 'Settings', description: 'Workspace', icon: IconSettings }],
+  },
+  {
+    id: 'actions', label: 'Actions',
+    items: [{ id: 'new', type: 'action' as const, label: 'Create project', icon: IconPlus, shortcut: ['⌘', 'N'] }],
+  },
+];
+
+export const Example = () => {
+  const [open, setOpen] = React.useState(false);
+  return (
+    <>
+      <CommandMenuTrigger onClick={() => setOpen(true)} />
+      <CommandMenu
+        open={open}
+        onOpenChange={setOpen}
+        groups={GROUPS}
+        scopes={[{ value: 'all', label: 'All' }, { value: 'pages', label: 'Pages' }, { value: 'actions', label: 'Actions' }]}
+        onSelect={(item) => console.log(item.id)}
+      />
+    </>
+  );
+};`,
+  }],
   ChainOfThought: [{
     title: 'Stream an agent run: steps arrive, the timer ticks, then it finishes',
     description: 'ChainOfThought is presentational. Keep the steps in state, append one as your agent starts it, mark the previous one `done`, and pass `status="working"` with `startedAt` so the time counts up on its own. When the run ends switch to `status="done"` with the final `elapsed` (seconds) and change the title. The rail stops at the last step by itself.',
