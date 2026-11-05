@@ -4,6 +4,9 @@ import { CommandMenu, CommandMenuTrigger, CommandMenuAnswer } from './CommandMen
 import type { CommandMenuFilter, CommandMenuGroup } from './CommandMenu';
 import { ChainOfThought, ChainOfThoughtStep } from '../ChainOfThought';
 import { Avatar } from '../Avatar';
+import amaraPhoto from '../../assets/avatars/r1-owner-kende-attila.jpg';
+import kamalPhoto from '../../assets/avatars/r2-owner-orosz-boldizsar.jpg';
+import samPhoto from '../../assets/avatars/activity-amara-kalu.jpg';
 import { Badge } from '../Badge';
 import { Button } from '../Button';
 import { IconCreditCard } from '../../icons/outline/credit-card';
@@ -31,7 +34,7 @@ const GROUPS: CommandMenuGroup[] = [
     id: 'recent', label: 'Recent',
     items: [
       { id: 'q4', type: 'file', label: 'Q4 revenue report.pdf', description: 'Finance / Reports', meta: 'Edited 2h ago', tags: ['Files'] },
-      { id: 'amara', type: 'person', label: 'Amara Chen', description: 'Product designer · Design', meta: 'Online', avatar: { initials: 'AC', status: 'online' }, tags: ['team: Design'] },
+      { id: 'amara', type: 'person', label: 'Amara Chen', description: 'Product designer · Design', meta: 'Online', avatar: { src: amaraPhoto, initials: 'AC', status: 'online' }, tags: ['People', 'team: Design'] },
       { id: 'billing', type: 'page', label: 'Billing settings', description: 'Workspace / Settings', meta: 'Page', icon: IconCreditCard },
     ],
   },
@@ -46,8 +49,8 @@ const GROUPS: CommandMenuGroup[] = [
   {
     id: 'people', label: 'People · Design',
     items: [
-      { id: 'kamal', type: 'person', label: 'Kamal Reyes', description: 'Design lead', meta: 'Away', avatar: { initials: 'KR', status: 'away' }, tags: ['team: Design'] },
-      { id: 'sam', type: 'person', label: 'Sam Okoye', description: 'Brand designer', meta: 'Online', avatar: { initials: 'SO', status: 'online' }, tags: ['team: Design'] },
+      { id: 'kamal', type: 'person', label: 'Kamal Reyes', description: 'Design lead', meta: 'Away', avatar: { src: kamalPhoto, initials: 'KR', status: 'away' }, tags: ['People', 'team: Design'] },
+      { id: 'sam', type: 'person', label: 'Sam Okoye', description: 'Brand designer', meta: 'Online', avatar: { src: samPhoto, initials: 'SO', status: 'online' }, tags: ['People', 'team: Design'] },
     ],
   },
   {
@@ -160,7 +163,7 @@ export const Preview: Story = {
     renderPreview: (item) => item.type !== 'person' ? null : (
       <div style={{ display: 'flex', flexDirection: 'column', gap: 16, height: '100%' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <Avatar size="lg" initials={item.avatar?.initials} />
+          <Avatar size="lg" src={item.avatar?.src} alt={item.avatar?.alt ?? item.label} initials={item.avatar?.initials} />
           <div><div style={{ font: '600 16px/22px var(--font-sans)' }}>{item.label}</div><div style={{ font: '500 13px/18px var(--font-sans)', color: 'var(--color-fg-muted)' }}>{item.description}</div></div>
         </div>
         <div style={{ display: 'flex', gap: 6 }}><Badge variant={item.meta === 'Online' ? 'success' : 'neutral'}>{item.meta}</Badge><Badge variant="neutral">Lagos · 14:32</Badge></div>
