@@ -163,7 +163,10 @@
 }
 
 /* ---- body ---- */
-.split { display: flex; flex: 1; min-height: 0; }
+/* A fixed height (444, the Figma No results body) so the panel does not grow and shrink as results come and go while
+   you type; the list scrolls inside it, and it still gives way on a short window. */
+.split { display: flex; flex: 0 1 444px; height: 444px; min-height: 0; }
+.panel--simple .split { flex: 1 1 auto; height: auto; }
 .body {
   position: relative;                 /* the hover highlight lives inside it */
   display: flex;
@@ -392,6 +395,8 @@
 .answer__openInChat { display: inline-flex; align-items: center; gap: var(--space-6); font-size: 12px; line-height: 16px; font-weight: 500; color: var(--color-fg-muted); }
 
 /* ---- preview pane ---- */
+.preview__content { min-height: 100%; }
+.preview__empty { display: flex; min-height: 100%; align-items: center; justify-content: center; padding: 0 var(--space-16); text-align: center; font-size: 13px; line-height: 18px; font-weight: 500; color: var(--color-fg-subtle); }
 .preview {
   flex: 0 0 300px;
   width: 300px;
@@ -477,6 +482,7 @@
                sakani-cmd-lens-x 2.6s cubic-bezier(0.37, 0, 0.63, 1) -1.3s infinite alternate,
                sakani-cmd-lens-y 2.6s cubic-bezier(0.37, 0, 0.63, 1) infinite alternate;
   }
+  .preview__content { animation: sakani-cmd-fade 160ms ease-out both; }
   .message--empty .message__text { animation: sakani-cmd-rise 380ms cubic-bezier(0.16, 1, 0.3, 1) 420ms both; }
   .message--empty .message__chips .chip { animation: sakani-cmd-rise 380ms cubic-bezier(0.16, 1, 0.3, 1) 520ms both; }
   .message--empty .message__chips .chip:nth-child(2) { animation-delay: 580ms; }

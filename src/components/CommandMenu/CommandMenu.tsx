@@ -164,6 +164,8 @@ export interface CommandMenuProps {
   answer?: React.ReactNode;
   /** Shows a preview pane beside the list for the active item. Return null for no pane. */
   renderPreview?: (item: CommandMenuItem) => React.ReactNode;
+  /** Shown in the detail pane when the active row has nothing to preview (`renderPreview` returned nothing). */
+  previewEmpty?: React.ReactNode;
 
   /** The "No results" message. */
   emptyTitle?: React.ReactNode;
@@ -317,7 +319,7 @@ export const CommandMenu: React.FC<CommandMenuProps> = ({
   groups, filter = true, highlightMatches = true, state = 'ready', onSelect, closeOnSelect = true,
   scopes, scope: scopeProp, defaultScope, onScopeChange,
   filters: filtersProp, onFiltersChange, filterKeys,
-  onAskAI, answer, renderPreview,
+  onAskAI, answer, renderPreview, previewEmpty = 'Nothing to preview for this result',
   emptyTitle, emptyDescription, suggestions, fallbackGroups,
   errorTitle = 'Search is unavailable', errorDescription = 'We couldn’t reach the search index. Your recent items still work.', onRetry, onReport, retryLabel = 'Try again', reportLabel = 'Report',
   workspace, hideFooter = false, 'aria-label': ariaLabel = 'Command menu', className,
@@ -431,6 +433,18 @@ export const CommandMenu: React.FC<CommandMenuProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, mounted, activeItem?.id, listKey]);
 
+  /* The detail pane follows the active row after a short rest, so sweeping the pointer or holding an arrow key over
+     the rows does not make it flicker through every one of them. The first row (on open) shows at once. */
+  const [previewId, setPreviewId] = React.useState<string | null>(null);
+  const activeId = activeItem?.id ?? null;
+  React.useEffect(() => {
+    if (!open || !renderPreview) { setPreviewId(null); return undefined; }
+    if (previewId === null) { setPreviewId(activeId); return undefined; }
+    const t = window.setTimeout(() => setPreviewId(activeId), 140);
+    return () => window.clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, activeId, Boolean(renderPreview)]);
+
   /* ---- mount, exit animation, focus, scroll lock ---- */
   const markerRef = React.useRef<HTMLSpanElement>(null);
   const portalTheme = usePortalThemeClass(markerRef, open);
@@ -515,7 +529,10 @@ export const CommandMenu: React.FC<CommandMenuProps> = ({
   /* ---- rendering ---- */
   if (!mounted) return <span ref={markerRef} style={{ display: 'none' }} aria-hidden="true" />;
 
-  const hasPreview = Boolean(renderPreview && activeItem && renderPreview(activeItem));
+  /* the pane is part of the layout whenever `renderPreview` is given, so the panel never changes width as the active row changes */
+  const hasPreview = Boolean(renderPreview) && !simple;
+  const previewItem = (previewId && flat.find((i) => i.id === previewId)) || activeItem;
+  const previewNode = renderPreview && previewItem ? renderPreview(previewItem) : null;
   const announcement = state === 'loading' ? 'Searching' : state === 'error' ? 'Search is unavailable' : empty ? 'No results' : `${total} result${total === 1 ? '' : 's'}`;
 
   const renderItem = (item: CommandMenuItem, highlight = highlightMatches) => {
@@ -741,7 +758,13 @@ export const CommandMenu: React.FC<CommandMenuProps> = ({
                   {listGroups.map((g) => renderGroup(g, highlightMatches && !showFallback))}
                 </div>
               </div>
-              {hasPreview && activeItem && <aside className={styles.preview} aria-label="Preview">{renderPreview!(activeItem)}</aside>}
+              {hasPreview && (
+                <aside className={styles.preview} aria-label="Preview">
+                  <div key={previewNode ? previewItem?.id : 'empty'} className={styles.preview__content}>
+                    {previewNode ?? <div className={styles.preview__empty}>{previewEmpty}</div>}
+                  </div>
+                </aside>
+              )}
             </div>
 
             <div role="status" className={styles.sr}>{announcement}</div>

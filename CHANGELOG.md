@@ -21,6 +21,12 @@ All notable changes to `@sakaniui/react` are documented here.
     under the glass (CSS only, the lens uses two registered `@property` lengths). The lens pops in and the title and chips
     rise in. `prefers-reduced-motion` shows the still stack with the lens at rest, as in Figma.
   - The list opens scrolled to the top when its first row is active, so the empty message is never cut off in a short window.
+  - The panel no longer resizes as you search. The list area has a fixed height (444px, the Figma No results body) and scrolls
+    inside it, so typing, clearing and switching scope never grow or shrink the panel (it still gives way on a short window;
+    `variant="simple"` stays as tall as its rows). With `renderPreview` the detail pane is always part of the layout, so
+    the width stays 880px whichever row is active; the pane follows the active row after a 140ms rest (so sweeping the
+    pointer or holding an arrow key does not flicker through every row), cross-fades, and shows `previewEmpty` when a row
+    has nothing to preview.
   - The Preview layout is narrower: 880px (was 960), with a 300px detail pane (was 320). The Figma Preview state and its
     Command Preview part are resized to match.
   - A person's row matches the Figma Leading slot: the 24px Avatar centred in the 28px slot, and the 8px status dot at (18, 17)
