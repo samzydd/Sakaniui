@@ -223,10 +223,12 @@
 .item__lead--ai { border-color: transparent; background: var(--color-primary-500); color: var(--color-fg-on-accent); }
 .item__lead--person { border: none; background: none; border-radius: var(--radius-full); }
 .item__status {
-  position: absolute; right: -1px; bottom: -1px;
+  /* Figma Leading: a 24px avatar centred in the 28px slot, with the 8px Online dot at (18, 17) inside it */
+  position: absolute; right: 2px; bottom: 3px;
   width: 8px; height: 8px;
   border-radius: var(--radius-full);
-  border: 1.5px solid var(--surface-bg-overlay);
+  /* an inside 1.5px ring like Figma's stroke (browsers round a 1.5px border down to 1px, an inset shadow keeps it) */
+  box-shadow: inset 0 0 0 1.5px var(--surface-bg-overlay);
   background: var(--color-fg-subtle);
 }
 .item__status--online { background: var(--color-success-solid); }
