@@ -411,6 +411,11 @@ export const CommandMenu: React.FC<CommandMenuProps> = ({
 
   const hover = useHoverHighlight<HTMLDivElement>();
   const bodyRef = React.useRef<HTMLDivElement | null>(null);
+  /* the active scope's pill glides between tabs: one indicator, placed from the tab's offsets */
+  const scopesRef = React.useRef<HTMLDivElement | null>(null);
+  const scopeEls = React.useRef(new Map<string, HTMLButtonElement>());
+  const [scopeBox, setScopeBox] = React.useState<{ x: number; w: number } | null>(null);
+  const [scopeGlide, setScopeGlide] = React.useState(false);
   const itemEls = React.useRef(new Map<string, HTMLElement>());
   React.useEffect(() => {
     if (!open || !activeItem) return;
@@ -491,6 +496,21 @@ export const CommandMenu: React.FC<CommandMenuProps> = ({
       }
     }
   };
+
+  React.useLayoutEffect(() => {
+    const row = scopesRef.current;
+    if (!open || !mounted || !row || !scopes || simple) { setScopeBox(null); setScopeGlide(false); return undefined; }
+    const place = () => {
+      const el = scopeEls.current.get(scope);
+      setScopeBox(el ? { x: el.offsetLeft, w: el.offsetWidth } : null);
+    };
+    place();
+    // switch the glide on a frame after the first placement so the pill appears in place instead of sliding in
+    const raf = requestAnimationFrame(() => setScopeGlide(true));
+    const ro = new ResizeObserver(place); // counts appearing or a late font change the tabs' widths
+    scopeEls.current.forEach((el) => ro.observe(el));
+    return () => { cancelAnimationFrame(raf); ro.disconnect(); };
+  }, [open, mounted, scope, scopes, simple, showCounts]);
 
   /* ---- rendering ---- */
   if (!mounted) return <span ref={markerRef} style={{ display: 'none' }} aria-hidden="true" />;
@@ -623,10 +643,16 @@ export const CommandMenu: React.FC<CommandMenuProps> = ({
 
             {/* scopes */}
             {scopes && !simple && (
-              <div className={styles.scopes} role="tablist" aria-label="Scope">
+              <div ref={scopesRef} className={styles.scopes} role="tablist" aria-label="Scope">
+                <span
+                  className={cx(styles.scopes__pill, scopeGlide && styles['scopes__pill--glide'])}
+                  aria-hidden="true"
+                  style={scopeBox ? { transform: `translateX(${scopeBox.x}px)`, width: scopeBox.w, opacity: 1 } : undefined}
+                />
                 {scopes.map((s) => (
                   <button
                     key={s.value}
+                    ref={(n) => { if (n) scopeEls.current.set(s.value, n); else scopeEls.current.delete(s.value); }}
                     type="button"
                     role="tab"
                     tabIndex={-1}

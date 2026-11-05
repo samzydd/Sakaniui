@@ -111,8 +111,21 @@
   flex-shrink: 0;
   padding: var(--space-8) var(--space-12);
   border-bottom: var(--border-width-100) solid var(--surface-border);
+  position: relative;
+}
+/* the active tab's pill: one element that glides to the chosen tab (same 150ms as the row highlight) */
+.scopes__pill {
+  position: absolute; left: 0; top: var(--space-8);
+  height: 28px; width: 0;
+  border-radius: var(--radius-md);
+  background: var(--surface-bg-subtle);
+  opacity: 0; pointer-events: none;
+}
+.scopes__pill--glide {
+  transition: transform 150ms var(--ease-in-out), width 150ms var(--ease-in-out), opacity 120ms var(--ease-out);
 }
 .scope {
+  position: relative;
   display: inline-flex;
   align-items: center;
   gap: var(--space-6);
@@ -130,7 +143,7 @@
   transition: background-color var(--transition-hover), color var(--transition-hover);
 }
 .scope:hover { color: var(--color-fg-default); }
-.scope--active { background: var(--surface-bg-subtle); color: var(--color-fg-default); }
+.scope--active { color: var(--color-fg-default); }
 .scope__count {
   display: inline-flex; align-items: center;
   height: 16px;
@@ -491,6 +504,7 @@
 @keyframes sakani-cmd-rise { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
 @media (prefers-reduced-motion: reduce) {
   .backdrop--in, .backdrop--out, .panel--in, .panel--out { animation: none; }
+  .scopes__pill--glide { transition: none; }
 }
 @media (max-width: 720px) {
   .backdrop { padding-top: var(--space-16); }

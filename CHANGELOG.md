@@ -21,6 +21,9 @@ All notable changes to `@sakaniui/react` are documented here.
     under the glass (CSS only, the lens uses two registered `@property` lengths). The lens pops in and the title and chips
     rise in. `prefers-reduced-motion` shows the still stack with the lens at rest, as in Figma.
   - The list opens scrolled to the top when its first row is active, so the empty message is never cut off in a short window.
+  - The scope tabs (All, Pages, People…) share one pill that glides to the chosen tab (150ms, the same as the row highlight),
+    for a click and for Tab / Shift Tab. It opens in place without sliding in, follows tabs that resize when counts appear, and
+    stays still with `prefers-reduced-motion`.
   - The hover highlight now follows its row while something above it opens or closes (a Chain of Thought in the Ask AI answer),
     instead of lagging behind and leaving the row without its hover effect. It is placed every frame for the length of the
     transition, with the glide off (shared `useHoverHighlight`, so every flowing-highlight list gets it).
