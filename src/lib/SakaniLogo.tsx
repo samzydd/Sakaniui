@@ -23,7 +23,8 @@ export const SAKANI_MARK_PATHS = [
   'M32 0C49.6731 0 64 14.3269 64 32C64 44.5026 56.8286 55.3282 46.376 60.5938C44.7132 37.6274 26.3718 19.2853 3.40527 17.623C8.6709 7.17063 19.4975 0 32 0Z',
 ];
 
-export const SakaniLogo: React.FC<{ size?: number }> = ({ size }) => (
+/** `color` overrides the fill (pass "currentColor" to sit on a tile that sets its own colour). Defaults to fg/default. */
+export const SakaniLogo: React.FC<{ size?: number; color?: string }> = ({ size, color }) => (
   <svg
     width={size ?? '100%'}
     height={size ?? '100%'}
@@ -33,7 +34,7 @@ export const SakaniLogo: React.FC<{ size?: number }> = ({ size }) => (
     aria-hidden="true"
     data-sakani-logo=""
   >
-    {SAKANI_MARK_PATHS.map((d) => <path key={d} d={d} fill="var(--color-fg-default)" />)}
+    {SAKANI_MARK_PATHS.map((d) => <path key={d} d={d} fill={color ?? 'var(--color-fg-default)'} />)}
   </svg>
 );
 

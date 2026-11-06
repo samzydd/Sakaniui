@@ -36,7 +36,7 @@ const SCOPES = [
   { value: 'files', label: 'Files' }, { value: 'actions', label: 'Actions' },
 ];
 
-const GROUPS: CommandMenuGroup[] = [
+export const GROUPS: CommandMenuGroup[] = [
   {
     id: 'recent', label: 'Recent',
     items: [
@@ -142,10 +142,106 @@ function PersonPreview({ item }: { item: CommandMenuItem }) {
   );
 }
 
+
+/* ------------------------------------------------------------------ */
+/* The Ask AI run: a Chain of Thought thinks, then the answer arrives   */
+/* ------------------------------------------------------------------ */
+const ASK_STEPS = [
+  { icon: IconSearch, label: 'Searched the docs for', query: 'dark mode', count: '3 pages', ms: 750 },
+  { icon: IconFileText, label: 'Read Theming', ms: 600 },
+  { icon: IconFileText, label: 'Read Tokens', ms: 600 },
+  { icon: IconMessageCircle, label: 'Writing the answer', ms: 500 },
+];
+
+/** Plays one run on the timeline above: each step arrives and works, its result lands, the sweep finishes the rail, the
+ *  Chain of Thought folds shut and the answer arrives. `runKey` starts it (a new key replays); null resets it. */
+export function useAskRun(runKey: number | string | null) {
+  const [shown, setShown] = React.useState(0);
+  const [landed, setLanded] = React.useState(0);
+  const [startedAt, setStartedAt] = React.useState(() => Date.now());
+  const [finishedIn, setFinishedIn] = React.useState<number | undefined>();
+  const [answered, setAnswered] = React.useState(false);
+  React.useEffect(() => {
+    setShown(0); setLanded(0); setFinishedIn(undefined); setAnswered(false);
+    if (runKey == null) return;
+    const start = Date.now();
+    setStartedAt(start);
+    const timers: ReturnType<typeof setTimeout>[] = [];
+    let at = 250;
+    ASK_STEPS.forEach((st, i) => {
+      timers.push(setTimeout(() => setShown(i + 1), at));
+      at += st.ms;
+      timers.push(setTimeout(() => setLanded(i + 1), at));
+      at += 200;
+    });
+    timers.push(setTimeout(() => setFinishedIn((Date.now() - start) / 1000), at));
+    // the finish sweep runs down the rail first; then it folds shut and the answer rises in
+    timers.push(setTimeout(() => setAnswered(true), at + 1000));
+    return () => timers.forEach(clearTimeout);
+  }, [runKey]);
+  return { running: runKey != null, shown, landed, startedAt, finishedIn, answered };
+}
+export type AskRun = ReturnType<typeof useAskRun>;
+
+/** The menu's `answer` slot for a run: the live Chain of Thought, then (once `answered`) the answer card under it. */
+export function AskAnswer({ run }: { run: AskRun }) {
+  const done = run.finishedIn != null;
+  const [open, setOpen] = React.useState(true);
+  React.useEffect(() => { setOpen(!run.answered); }, [run.answered]);
+  return (
+    <div style={{ display: 'grid', gap: 10 }}>
+      <ChainOfThought title={done ? 'Read 3 docs pages' : 'Thinking'} open={open} onOpenChange={setOpen} status={done ? 'done' : 'working'} startedAt={run.startedAt} elapsed={run.finishedIn}>
+        {ASK_STEPS.slice(0, run.shown).map((st, i) => (
+          <ChainOfThoughtStep
+            key={st.label}
+            status={!done && i === run.shown - 1 && run.landed < run.shown ? 'active' : 'done'}
+            icon={st.icon} label={st.label} query={st.query} count={i < run.landed ? st.count : undefined}
+          />
+        ))}
+      </ChainOfThought>
+      {run.answered && (
+        <CommandMenuAnswer status={`Answered in ${(run.finishedIn ?? 0).toFixed(1)}s`} onCopy={() => {}} onFollowUp={() => {}} onOpenInChat={() => {}} sources={[{ label: 'Theming' }, { label: 'Tokens' }, { label: 'Installation' }]}>
+          Wrap your app in the theme provider and toggle the dark class on &lt;html&gt;. Every component reads the semantic tokens, so nothing else changes.
+        </CommandMenuAnswer>
+      )}
+    </div>
+  );
+}
+
+const AI_SCOPES = [{ value: 'all', label: 'All', count: null }, { value: 'ai', label: 'Ask AI', count: null }, { value: 'docs', label: 'Docs', count: 3 }];
+const RELATED: CommandMenuGroup[] = [{ id: 'related', label: 'Related', items: [
+  { id: 'theming', type: 'page', label: 'Theming', description: 'Docs / Getting started', meta: 'Docs', icon: IconFileText },
+  { id: 'tokens', type: 'page', label: 'Tokens', description: 'Docs / Getting started', meta: 'Docs', icon: IconFileText },
+] }];
+
+/** The whole flow in one controlled menu: type, ⌘↵ (or choose "Ask AI"), watch it think, read the answer. */
+export function LiveAskAI({ open, onOpenChange, groups = GROUPS, defaultAsk }: { open: boolean; onOpenChange: (o: boolean) => void; groups?: CommandMenuGroup[]; defaultAsk?: string }) {
+  const [query, setQuery] = React.useState(defaultAsk ?? '');
+  const [scope, setScope] = React.useState(defaultAsk ? 'ai' : 'all');
+  const [runKey, setRunKey] = React.useState<number | null>(defaultAsk ? 1 : null);
+  const run = useAskRun(runKey);
+  const ask = () => { setScope('ai'); setRunKey((n) => (n ?? 0) + 1); };
+  React.useEffect(() => { if (!open && !defaultAsk) { setRunKey(null); setScope('all'); setQuery(''); } }, [open, defaultAsk]);
+  const inAI = scope === 'ai' && run.running;
+  const list: CommandMenuGroup[] = inAI
+    ? (run.answered ? RELATED : [])
+    : [...groups, { id: 'ask', label: 'Ask', items: [{ id: 'askai', type: 'ai', label: query ? `Ask AI “${query}”` : 'Ask AI a question', description: 'It can look through your docs, data and the web', meta: 'Ask AI', shortcut: ['⌘', '↵'] }] }];
+  return (
+    <CommandMenu
+      open={open} onOpenChange={onOpenChange} groups={list} scopes={AI_SCOPES} scope={scope}
+      onScopeChange={(sc) => { setScope(sc); if (sc !== 'ai') setRunKey(null); }}
+      query={query} onQueryChange={setQuery} filter={!inAI} workspace="Acme workspace"
+      onSelect={(i) => { if (i.type === 'ai') ask(); }} closeOnSelect={false} onAskAI={ask}
+      answer={inAI ? <AskAnswer run={run} /> : undefined}
+    />
+  );
+}
+
 const meta = {
   title: 'Composite/Command Menu',
   component: CommandMenu,
   tags: ['autodocs'],
+  excludeStories: ['useAskRun', 'AskAnswer', 'LiveAskAI', 'GROUPS'],
   parameters: {
     layout: 'fullscreen',
     docs: {
@@ -245,6 +341,43 @@ export const AskAI: Story = {
       </div>
     ),
   },
+};
+
+function LiveAskAIDemo() {
+  const [open, setOpen] = React.useState(false);
+  return (
+    <div style={{ padding: 32, display: 'flex', flexDirection: 'column', gap: 16, alignItems: 'flex-start', fontFamily: 'var(--font-sans)', color: 'var(--color-fg-default)' }}>
+      <CommandMenuTrigger onClick={() => setOpen(true)} />
+      <p style={{ margin: 0, fontSize: 13, color: 'var(--color-fg-muted)' }}>Press ⌘K, type a question, then press ⌘↵ (Ctrl ↵).</p>
+      <LiveAskAI open={open} onOpenChange={setOpen} />
+    </div>
+  );
+}
+
+/** Type a question and press ⌘↵: the Chain of Thought thinks (steps arrive, the rail runs, the timer counts), folds shut, and the answer rises in. */
+export const LiveAskAIStory: Story = {
+  name: 'Live Ask AI',
+  parameters: { docs: { story: { inline: false, iframeHeight: 720 } } },
+  render: () => <LiveAskAIDemo />,
+};
+
+function AskAIThinkingDemo() {
+  const [n, setN] = React.useState(1);
+  const [open, setOpen] = React.useState(true);
+  return (
+    <>
+      <button type="button" onClick={() => { setN((k) => k + 1); setOpen(true); }} style={{ position: 'fixed', top: 16, left: 16, zIndex: 2000, font: '500 13px var(--font-sans)', padding: '6px 12px', border: '1px solid var(--color-border-default)', borderRadius: 8, background: 'var(--color-bg-surface)', color: 'var(--color-fg-default)', cursor: 'pointer' }}>
+        Replay
+      </button>
+      <LiveAskAI key={n} open={open} onOpenChange={setOpen} defaultAsk="how do I add dark mode?" />
+    </>
+  );
+}
+
+/** The run on its own, already asked. Press Replay to watch the thinking and the answer again. */
+export const AskAIThinking: Story = {
+  name: 'Ask AI thinking',
+  render: () => <AskAIThinkingDemo />,
 };
 
 /** A typo inside a filter: it suggests the fix, offers to remove the filter, and never leaves a dead end. */

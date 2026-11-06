@@ -28,7 +28,7 @@ import type { IconComponent } from '../../icons/types';
 import { IconSearch as Search } from '../../icons/outline/search';
 import { IconCircleX as CircleX } from '../../icons/outline/circle-x';
 import { IconX as X } from '../../icons/outline/x';
-import { IconSparkles as Sparkles } from '../../icons/outline/sparkles';
+import { SakaniLogo } from '../../lib/SakaniLogo';
 import { IconAlertTriangle as AlertTriangle } from '../../icons/outline/alert-triangle';
 import { IconFileText as FileText } from '../../icons/outline/file-text';
 import { IconBolt as Bolt } from '../../icons/outline/bolt';
@@ -200,7 +200,11 @@ export interface CommandMenuProps {
 /* ------------------------------------------------------------------ */
 
 const TYPE_SCOPE: Record<CommandMenuItemType, string | null> = { page: 'pages', person: 'people', file: 'files', action: 'actions', ai: null };
-const TYPE_ICON: Record<CommandMenuItemType, IconComponent> = { page: FileText, action: Bolt, file: FileText, person: FileText, ai: Sparkles };
+/** The SakaniUI arc mark, painted in the colour of the tile it sits on (the brand tile sets fg/on-accent). */
+const AIMark: IconComponent = ({ size = 16, className, style }) => (
+  <span className={className} style={{ display: 'inline-flex', ...style }}><SakaniLogo size={Number(size)} color="currentColor" /></span>
+);
+const TYPE_ICON: Record<CommandMenuItemType, IconComponent> = { page: FileText, action: Bolt, file: FileText, person: FileText, ai: AIMark };
 
 const scopeOf = (item: CommandMenuItem) => item.scope ?? (item.type ? TYPE_SCOPE[item.type] : null);
 
@@ -279,7 +283,7 @@ export const CommandMenuAnswer: React.FC<CommandMenuAnswerProps> = ({
 }) => (
   <section className={cx(styles.answer, className)} aria-label={title}>
     <header className={styles.answer__header}>
-      <span className={styles.answer__mark} aria-hidden="true"><Sparkles size={14} strokeWidth={iconStrokeWidth(14)} /></span>
+      <span className={styles.answer__mark} aria-hidden="true"><SakaniLogo size={14} color="currentColor" /></span>
       <span className={styles.answer__title}>{title}</span>
       {status && <span className={styles.answer__status}>{status}</span>}
       {onCopy && (
@@ -292,10 +296,10 @@ export const CommandMenuAnswer: React.FC<CommandMenuAnswerProps> = ({
     {sources && sources.length > 0 && (
       <div className={styles.answer__sources}>
         <span className={styles.answer__sourcesLabel}>Sources</span>
-        {sources.map((s) => {
+        {sources.map((s, i) => {
           const Icon = s.icon ?? FileText;
           return (
-            <span key={s.label} className={styles.answer__source}>
+            <span key={s.label} className={styles.answer__source} style={{ ['--i' as string]: i }}>
               <Icon size={12} strokeWidth={iconStrokeWidth(12)} aria-hidden="true" />{s.label}
             </span>
           );
@@ -401,7 +405,8 @@ export const CommandMenu: React.FC<CommandMenuProps> = ({
   const searching = Boolean(q) || filters.length > 0;
   /* Counts say "this many matches": only meaningful for a finished search (not the idle list, loading or an error). */
   const showCounts = state === 'ready' && searching;
-  const empty = state === 'ready' && total === 0 && searching;
+  /* an answer (a thinking run, a finished answer) fills the list area on its own, so no rows is not "No results" */
+  const empty = state === 'ready' && total === 0 && searching && !answer;
   const showFallback = (empty || state === 'error') && fallbackGroups;
   const listGroups = React.useMemo(() => (state === 'loading' ? [] : showFallback ? fallbackGroups! : shownGroups), [state, showFallback, fallbackGroups, shownGroups]);
   const flat = React.useMemo(() => listGroups.flatMap((g) => g.items).filter((i) => !i.disabled), [listGroups]);
