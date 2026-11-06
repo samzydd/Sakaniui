@@ -42,6 +42,11 @@
   -webkit-backdrop-filter: var(--surface-blur-overlay);
   backdrop-filter: var(--surface-blur-overlay);
 }
+/* Figma paints the answer card, detail pane and footer with surface/bg-chrome, which in the Solid mode is bg/canvas. The
+   library's Solid --surface-bg-chrome is transparent (Sidebar relies on that), so the menu maps it itself and leaves Glass
+   and Liquid to the token. */
+.panel { --cmd-chrome: var(--color-bg-canvas); }
+[data-surface='glass'] .panel, [data-surface='liquid'] .panel { --cmd-chrome: var(--surface-bg-chrome); }
 .panel--simple { width: 560px; }
 .panel--preview { width: 880px; }
 
@@ -366,7 +371,7 @@
   padding: var(--space-16);
   border: var(--border-width-100) solid var(--surface-border);
   border-radius: var(--radius-lg);
-  background: var(--surface-bg-chrome);
+  background: var(--cmd-chrome);
 }
 .answer__header { display: flex; align-items: center; gap: var(--space-10); }
 .answer__mark {
@@ -405,7 +410,7 @@
   overflow-y: auto;
   padding: var(--space-20);
   border-left: var(--border-width-100) solid var(--surface-border);
-  background: var(--surface-bg-chrome);
+  background: var(--cmd-chrome);
 }
 
 /* ---- footer ---- */
@@ -418,7 +423,7 @@
   min-height: 44px;
   padding: 0 var(--space-16);
   border-top: var(--border-width-100) solid var(--surface-border);
-  background: var(--surface-bg-chrome);
+  background: var(--cmd-chrome);
 }
 .footer__workspace { display: inline-flex; align-items: center; gap: var(--space-6); font-size: 11px; line-height: 16px; font-weight: 500; color: var(--color-fg-muted); }
 .footer__dot { width: 8px; height: 8px; border-radius: var(--radius-full); background: var(--color-primary-500); }

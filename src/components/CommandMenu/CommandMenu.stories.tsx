@@ -1,7 +1,9 @@
 import React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { CommandMenu, CommandMenuTrigger, CommandMenuAnswer } from './CommandMenu';
-import type { CommandMenuFilter, CommandMenuGroup } from './CommandMenu';
+import type { CommandMenuFilter, CommandMenuGroup, CommandMenuItem } from './CommandMenu';
+import type { IconComponent } from '../../icons/types';
+import { iconStrokeWidth } from '../../lib/iconStrokeWidth';
 import { ChainOfThought, ChainOfThoughtStep } from '../ChainOfThought';
 import { Avatar } from '../Avatar';
 import amaraPhoto from '../../assets/avatars/r1-owner-kende-attila.jpg';
@@ -23,6 +25,10 @@ import { IconFileText } from '../../icons/outline/file-text';
 import { IconFolder } from '../../icons/outline/folder';
 import { IconTextSpellcheck } from '../../icons/outline/text-spellcheck';
 import { IconX } from '../../icons/outline/x';
+import { IconMail } from '../../icons/outline/mail';
+import { IconUsersGroup } from '../../icons/outline/users-group';
+import { IconClock } from '../../icons/outline/clock';
+import { IconMessageCircle } from '../../icons/outline/message-circle';
 import { IconLayoutDashboard } from '../../icons/outline/layout-dashboard';
 
 const SCOPES = [
@@ -86,6 +92,59 @@ const FALLBACK: CommandMenuGroup[] = [
     ],
   },
 ];
+
+/* The detail pane from Figma "Command Preview": who, tags, a divider, details, recent activity, and two actions pinned to the bottom. */
+const previewText = { font: '500 12px/16px var(--font-sans)', color: 'var(--color-fg-muted)' } as const;
+const previewButton = { flex: 1, height: 32, padding: '0 12px', fontSize: 14, lineHeight: '20px' } as const; // Figma's small Button is 32px high
+function PersonPreview({ item }: { item: CommandMenuItem }) {
+  const first = item.label.split(' ')[0].toLowerCase();
+  const detail = (Icon: IconComponent, text: string) => (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+      <Icon size={14} strokeWidth={iconStrokeWidth(14)} style={{ flexShrink: 0, color: 'var(--color-fg-subtle)' }} aria-hidden="true" />
+      <span style={previewText}>{text}</span>
+    </div>
+  );
+  const activity = (Icon: IconComponent, text: string, ago: string) => (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+      <Icon size={14} strokeWidth={iconStrokeWidth(14)} style={{ flexShrink: 0, color: 'var(--color-fg-subtle)' }} aria-hidden="true" />
+      <span style={{ ...previewText, color: 'var(--color-fg-default)' }}>{text}</span>
+      <span style={previewText}>{ago}</span>
+    </div>
+  );
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: 16, minHeight: '100%' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <Avatar size="lg" src={item.avatar?.src} alt={item.avatar?.alt ?? item.label} initials={item.avatar?.initials} />
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+            <span style={{ font: '500 16px/22px var(--font-sans)', color: 'var(--color-fg-default)' }}>{item.label}</span>
+            <span style={previewText}>{item.description}</span>
+          </div>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+          {/* Figma's Badge is 20px high (a 16px line); the library's is 16px, so the label carries its own line height here */}
+          <Badge variant={item.meta === 'Online' ? 'success' : 'neutral'}><span style={{ lineHeight: '16px' }}>{item.meta}</span></Badge>
+          <Badge variant="neutral"><span style={{ lineHeight: '16px' }}>Lagos · 14:32</span></Badge>
+        </div>
+        <div style={{ height: 1, background: 'var(--color-border-subtle)' }} />
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+          {detail(IconMail, `${first}@acme.com`)}
+          {detail(IconUsersGroup, 'Design team · 6 people')}
+          {detail(IconClock, 'Usually replies in 1 hour')}
+        </div>
+        <span style={{ font: '600 11px/16px var(--font-sans)', color: 'var(--color-fg-muted)' }}>Recent</span>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          {activity(IconFileText, 'Edited Checkout redesign', '2h')}
+          {activity(IconMessageCircle, 'Commented on Q4 roadmap', '5h')}
+        </div>
+      </div>
+      <div style={{ display: 'flex', gap: 8 }}>
+        <Button size="sm" style={previewButton}>Message</Button>
+        <Button size="sm" variant="secondary" style={previewButton}>View profile</Button>
+      </div>
+    </div>
+  );
+}
 
 const meta = {
   title: 'Composite/Command Menu',
@@ -161,19 +220,7 @@ export const Filtered: Story = {
 export const Preview: Story = {
   args: {
     scopes: SCOPES, defaultScope: 'people', defaultQuery: 'am', workspace: 'Acme workspace',
-    renderPreview: (item) => item.type !== 'person' ? null : (
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 16, height: '100%' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <Avatar size="lg" src={item.avatar?.src} alt={item.avatar?.alt ?? item.label} initials={item.avatar?.initials} />
-          <div><div style={{ font: '600 16px/22px var(--font-sans)' }}>{item.label}</div><div style={{ font: '500 13px/18px var(--font-sans)', color: 'var(--color-fg-muted)' }}>{item.description}</div></div>
-        </div>
-        <div style={{ display: 'flex', gap: 6 }}><Badge variant={item.meta === 'Online' ? 'success' : 'neutral'}>{item.meta}</Badge><Badge variant="neutral">Lagos · 14:32</Badge></div>
-        <div style={{ font: '500 13px/18px var(--font-sans)', color: 'var(--color-fg-muted)', display: 'grid', gap: 8 }}>
-          <span>{item.label.split(' ')[0].toLowerCase()}@acme.com</span><span>Design team · 6 people</span><span>Usually replies in 1 hour</span>
-        </div>
-        <div style={{ marginTop: 'auto', display: 'flex', gap: 8 }}><Button size="sm">Message</Button><Button size="sm" variant="secondary">View profile</Button></div>
-      </div>
-    ),
+    renderPreview: (item) => (item.type === 'person' ? <PersonPreview item={item} /> : null),
   },
 };
 
