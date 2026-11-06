@@ -403,8 +403,6 @@
 .preview__stack { position: relative; display: flex; flex-direction: column; flex: 1 0 auto; min-height: 100%; }
 .preview__layer { display: flex; flex-direction: column; flex: 1 0 auto; min-height: 100%; }
 .preview__layer > * { flex: 1 1 auto; }
-/* the leaving layer sits over the new one while it fades out */
-.preview__layer--out { position: absolute; inset: 0; min-height: 0; pointer-events: none; }
 .preview__empty { display: flex; min-height: 100%; align-items: center; justify-content: center; padding: 0 var(--space-16); text-align: center; font-size: 13px; line-height: 18px; font-weight: 500; color: var(--color-fg-subtle); }
 .preview__scroll { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; overflow-y: auto; padding: var(--space-20) var(--space-20) 0; }
 .preview__actions { flex: 0 0 auto; display: flex; gap: var(--space-8); padding: var(--space-16) var(--space-20) var(--space-20); }
@@ -493,8 +491,6 @@
                sakani-cmd-lens-x 2.6s cubic-bezier(0.37, 0, 0.63, 1) -1.3s infinite alternate,
                sakani-cmd-lens-y 2.6s cubic-bezier(0.37, 0, 0.63, 1) infinite alternate;
   }
-  .preview__layer--in { animation: sakani-cmd-pane-in 220ms ease-out 80ms both; }
-  .preview__layer--out { animation: sakani-cmd-pane-out 140ms ease-in both; }
   .message--empty .message__text { animation: sakani-cmd-rise 380ms cubic-bezier(0.16, 1, 0.3, 1) 420ms both; }
   .message--empty .message__chips .chip { animation: sakani-cmd-rise 380ms cubic-bezier(0.16, 1, 0.3, 1) 520ms both; }
   .message--empty .message__chips .chip:nth-child(2) { animation-delay: 580ms; }
@@ -521,13 +517,10 @@
 @keyframes sakani-cmd-lens-in { from { opacity: 0; transform: translate(-6px, 8px) scale(0.6); } to { opacity: 1; transform: none; } }
 @keyframes sakani-cmd-lens-x { from { --lens-dx: -18px; } to { --lens-dx: 18px; } }
 @keyframes sakani-cmd-lens-y { from { --lens-dy: -5px; } to { --lens-dy: 5px; } }
-@keyframes sakani-cmd-pane-in { from { opacity: 0; } to { opacity: 1; } }
-@keyframes sakani-cmd-pane-out { from { opacity: 1; } to { opacity: 0; } }
 @keyframes sakani-cmd-rise { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
 @media (prefers-reduced-motion: reduce) {
   .backdrop--in, .backdrop--out, .panel--in, .panel--out { animation: none; }
   .scopes__pill--glide { transition: none; }
-  .preview__layer--out { display: none; }
 }
 @media (max-width: 720px) {
   .backdrop { padding-top: var(--space-16); }

@@ -452,21 +452,6 @@ export const CommandMenu: React.FC<CommandMenuProps> = ({
 
   const previewItem = (previewId && flat.find((i) => i.id === previewId)) || activeItem;
   const previewNode = renderPreview && previewItem ? renderPreview(previewItem) : null;
-  /* When the pane changes, the previous content stays for a moment and fades out under the new one fading in, so the
-     pane never blanks or jumps between two rows. */
-  const previewKey = previewNode ? (previewItem?.id ?? 'item') : 'empty';
-  const previewLast = React.useRef<{ key: string; node: React.ReactNode } | null>(null);
-  const [previewLeaving, setPreviewLeaving] = React.useState<{ key: string; node: React.ReactNode } | null>(null);
-  React.useLayoutEffect(() => {
-    const prev = previewLast.current;
-    previewLast.current = { key: previewKey, node: previewNode ?? null };
-    if (!prev || prev.key === previewKey) return undefined;
-    setPreviewLeaving(prev);
-    const t = window.setTimeout(() => setPreviewLeaving(null), 220);
-    return () => window.clearTimeout(t);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [previewKey]);
-
   /* ---- mount, exit animation, focus, scroll lock ---- */
   const markerRef = React.useRef<HTMLSpanElement>(null);
   const portalTheme = usePortalThemeClass(markerRef, open);
@@ -782,12 +767,7 @@ export const CommandMenu: React.FC<CommandMenuProps> = ({
                 <aside className={styles.preview} aria-label="Preview">
                   <div className={styles.preview__scroll}>
                     <div className={styles.preview__stack}>
-                      {previewLeaving && (
-                        <div key={`out-${previewLeaving.key}`} className={cx(styles.preview__layer, styles['preview__layer--out'])} aria-hidden="true">
-                          {previewLeaving.node ?? <div className={styles.preview__empty}>{previewEmpty}</div>}
-                        </div>
-                      )}
-                      <div key={previewKey} className={cx(styles.preview__layer, styles['preview__layer--in'])}>
+                      <div className={styles.preview__layer}>
                         {previewNode ?? <div className={styles.preview__empty}>{previewEmpty}</div>}
                       </div>
                     </div>
