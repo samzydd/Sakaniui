@@ -524,7 +524,14 @@
 @keyframes sakani-cmd-answer-mark { from { opacity: 0; transform: scale(0.5); } to { opacity: 1; transform: none; } }
 @keyframes sakani-cmd-answer-text { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
 @keyframes sakani-cmd-answer-fan { from { opacity: 0; transform: translateX(-8px) scale(0.92); } to { opacity: 1; transform: none; } }
+@keyframes sakani-cmd-word-in { from { opacity: 0; filter: blur(3px); } to { opacity: 1; filter: none; } }
 @media (prefers-reduced-motion: no-preference) {
+  /* streamed: each word fades in as it is written; the sources and the follow-up arrive after the text, so they skip the card's delays */
+  .answer__word { animation: sakani-cmd-word-in 320ms ease-out both; }
+  .answer--stream .answer__body { animation: none; }
+  .answer--stream .answer__sourcesLabel { animation-delay: 0ms; }
+  .answer--stream .answer__source { animation-delay: calc(80ms + var(--i, 0) * 70ms); }
+  .answer--stream .answer__footer { animation-delay: 260ms; }
   .answer { animation: sakani-cmd-answer-in 460ms cubic-bezier(0.16, 1, 0.3, 1) both; }
   .answer__mark { animation: sakani-cmd-answer-mark 420ms cubic-bezier(0.34, 1.56, 0.64, 1) 120ms both; }
   .answer__body { animation: sakani-cmd-answer-text 440ms cubic-bezier(0.16, 1, 0.3, 1) 180ms both; }

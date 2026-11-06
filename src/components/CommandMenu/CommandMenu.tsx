@@ -263,10 +263,15 @@ export const CommandMenuTrigger = React.forwardRef<HTMLButtonElement, CommandMen
 export interface CommandMenuAnswerProps {
   /** Defaults to "SakaniUI AI". */
   title?: string;
-  /** e.g. "Answered in 2.4s". */
+  /** e.g. "Thought for 2.4s". With `stream` it appears once the text has been written. */
   status?: string;
   /** The answer text. */
   children: React.ReactNode;
+  /** Writes the answer in word by word, the way a chat reply arrives, and brings in the sources and the follow-up once it is
+   *  written. Needs `children` to be a plain string; reduced motion shows it at once. */
+  stream?: boolean;
+  /** Called once when the text has been written (or at once when it is not streamed). */
+  onStreamEnd?: () => void;
   /** Sources as chips under the answer. */
   sources?: { label: string; icon?: IconComponent }[];
   /** Adds an "Ask a follow-up" button. */
@@ -277,43 +282,74 @@ export interface CommandMenuAnswerProps {
   className?: string;
 }
 
+const prefersReducedMotion = () => typeof window !== 'undefined' && !!window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+
 /** An answer card for the Ask AI state: the answer, its sources and a follow-up. Pass it as the menu's `answer`. */
 export const CommandMenuAnswer: React.FC<CommandMenuAnswerProps> = ({
-  title = 'SakaniUI AI', status, children, sources, onFollowUp, onOpenInChat, onCopy, className,
-}) => (
-  <section className={cx(styles.answer, className)} aria-label={title}>
-    <header className={styles.answer__header}>
-      <span className={styles.answer__mark} aria-hidden="true"><SakaniLogo size={14} color="currentColor" /></span>
-      <span className={styles.answer__title}>{title}</span>
-      {status && <span className={styles.answer__status}>{status}</span>}
-      {onCopy && (
-        <button type="button" className={styles.answer__copy} onClick={onCopy} aria-label="Copy the answer">
-          <Copy size={16} strokeWidth={iconStrokeWidth(16)} aria-hidden="true" />
-        </button>
-      )}
-    </header>
-    <div className={styles.answer__body}>{children}</div>
-    {sources && sources.length > 0 && (
-      <div className={styles.answer__sources}>
-        <span className={styles.answer__sourcesLabel}>Sources</span>
-        {sources.map((s, i) => {
-          const Icon = s.icon ?? FileText;
-          return (
-            <span key={s.label} className={styles.answer__source} style={{ ['--i' as string]: i }}>
-              <Icon size={12} strokeWidth={iconStrokeWidth(12)} aria-hidden="true" />{s.label}
-            </span>
-          );
-        })}
+  title = 'SakaniUI AI', status, children, stream, onStreamEnd, sources, onFollowUp, onOpenInChat, onCopy, className,
+}) => {
+  const text = typeof children === 'string' ? children : null;
+  const streaming = Boolean(stream && text) && !prefersReducedMotion();
+  // words and the spaces between them, so the text wraps exactly as the finished answer does
+  const tokens = React.useMemo(() => (text ? text.split(/(\s+)/) : []), [text]);
+  const [shown, setShown] = React.useState(streaming ? 0 : tokens.length);
+  const [done, setDone] = React.useState(!streaming);
+  const endRef = React.useRef(onStreamEnd);
+  endRef.current = onStreamEnd;
+  React.useEffect(() => {
+    if (!streaming) { setShown(tokens.length); setDone(true); endRef.current?.(); return; }
+    let i = 0;
+    let timer: ReturnType<typeof setTimeout>;
+    // a word every ~34ms, a breath at the end of a clause and a longer one at the end of a sentence
+    const step = () => {
+      i = Math.min(tokens.length, i + 2);   // a word and the space after it
+      setShown(i);
+      if (i >= tokens.length) { setDone(true); endRef.current?.(); return; }
+      const last = tokens[i - 2] ?? '';
+      timer = setTimeout(step, 34 + Math.round(Math.random() * 22) + (/[.!?]$/.test(last) ? 260 : /[,;:]$/.test(last) ? 110 : 0));
+    };
+    timer = setTimeout(step, 380);   // after the card has landed
+    return () => clearTimeout(timer);
+  }, [streaming, tokens]);
+  return (
+    <section className={cx(styles.answer, streaming && styles['answer--stream'], className)} aria-label={title} aria-busy={!done || undefined}>
+      <header className={styles.answer__header}>
+        <span className={styles.answer__mark} aria-hidden="true"><SakaniLogo size={14} color="currentColor" /></span>
+        <span className={styles.answer__title}>{title}</span>
+        {status && done && <span className={styles.answer__status}>{status}</span>}
+        {onCopy && done && (
+          <button type="button" className={styles.answer__copy} onClick={onCopy} aria-label="Copy the answer">
+            <Copy size={16} strokeWidth={iconStrokeWidth(16)} aria-hidden="true" />
+          </button>
+        )}
+      </header>
+      <div className={styles.answer__body}>
+        {streaming
+          ? tokens.slice(0, shown).map((t, i) => (/^\s+$/.test(t) ? t : <span key={i} className={styles.answer__word}>{t}</span>))
+          : children}
       </div>
-    )}
-    {(onFollowUp || onOpenInChat) && (
-      <footer className={styles.answer__footer}>
-        {onFollowUp && <Button variant="secondary" size="sm" onClick={onFollowUp}>Ask a follow-up</Button>}
-        {onOpenInChat && <span className={styles.answer__openInChat}>Open in chat <Kbd>⌘</Kbd><Kbd>↵</Kbd></span>}
-      </footer>
-    )}
-  </section>
-);
+      {done && sources && sources.length > 0 && (
+        <div className={styles.answer__sources}>
+          <span className={styles.answer__sourcesLabel}>Sources</span>
+          {sources.map((s, i) => {
+            const Icon = s.icon ?? FileText;
+            return (
+              <span key={s.label} className={styles.answer__source} style={{ ['--i' as string]: i }}>
+                <Icon size={12} strokeWidth={iconStrokeWidth(12)} aria-hidden="true" />{s.label}
+              </span>
+            );
+          })}
+        </div>
+      )}
+      {done && (onFollowUp || onOpenInChat) && (
+        <footer className={styles.answer__footer}>
+          {onFollowUp && <Button variant="secondary" size="sm" onClick={onFollowUp}>Ask a follow-up</Button>}
+          {onOpenInChat && <span className={styles.answer__openInChat}>Open in chat <Kbd>⌘</Kbd><Kbd>↵</Kbd></span>}
+        </footer>
+      )}
+    </section>
+  );
+};
 CommandMenuAnswer.displayName = 'CommandMenuAnswer';
 
 /* ------------------------------------------------------------------ */

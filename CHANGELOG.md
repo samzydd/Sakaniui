@@ -35,10 +35,13 @@ All notable changes to `@sakaniui/react` are documented here.
     their own), where they were transparent.
   - The detail pane swaps its content in place when the active row changes (no fade or movement), after a 100ms rest on the
     row so sweeping the pointer or holding an arrow key does not flicker through every row.
-  - **Ask AI thinks before it answers.** The answer slot takes a live Chain of Thought: its steps stream in, the working line
-    shimmers, and finishing sweeps the rail. When it folds shut the answer card rises in (the brand mark lands, then the text,
-    the source chips fan out in turn, the footer last). With an `answer` set, an empty list is no longer the "No results" state,
-    so a thinking run does not flash it. The *Live Ask AI* and *Ask AI thinking* stories play the whole run.
+  - **Ask AI waits to be asked, thinks, then writes the answer.** In the Ask AI scope an empty field shows suggested questions and
+    no answer; the answer slot only fills when a question is submitted (↵ on what you typed or on a suggestion, ⌘↵ anywhere).
+    It then plays a live Chain of Thought (steps stream in, the working line shimmers, finishing sweeps the rail), which folds
+    shut, and the answer card writes itself in word by word. `CommandMenuAnswer` takes `stream` (plain-string children) and
+    `onStreamEnd`; its sources and follow-up arrive once the text is written. With an `answer` set, an empty list is no longer
+    the "No results" state. The *Live Ask AI* and *Ask AI empty* stories show the whole flow, and Figma has `State=AI empty`
+    and `State=AI thinking`.
   - **The AI mark is the SakaniUI arc mark**, in the brand tile (primary/500, fg/on-accent), on the answer card and on the
     "Ask AI" row, replacing the sparkles icon. `SakaniLogo` takes a `color` for tiles that set their own.
   - New `previewActions`: buttons pinned to the bottom of the detail pane that stay put while the content above (from
