@@ -294,6 +294,16 @@ export const CommandMenuAnswer: React.FC<CommandMenuAnswerProps> = ({
   const tokens = React.useMemo(() => (text ? text.split(/(\s+)/) : []), [text]);
   const [shown, setShown] = React.useState(streaming ? 0 : tokens.length);
   const [done, setDone] = React.useState(!streaming);
+  // the light around the card stays on until everything has arrived (the text, then the sources and the follow-up), then fades while still moving
+  const [glow, setGlow] = React.useState<'on' | 'fade' | 'off'>(streaming ? 'on' : 'off');
+  React.useEffect(() => {
+    if (!streaming) { setGlow('off'); return; }
+    setGlow('on');
+    if (!done) return;
+    const fade = setTimeout(() => setGlow('fade'), 1000);
+    const off = setTimeout(() => setGlow('off'), 1000 + 700);
+    return () => { clearTimeout(fade); clearTimeout(off); };
+  }, [streaming, done]);
   const endRef = React.useRef(onStreamEnd);
   endRef.current = onStreamEnd;
   React.useEffect(() => {
@@ -312,7 +322,7 @@ export const CommandMenuAnswer: React.FC<CommandMenuAnswerProps> = ({
     return () => clearTimeout(timer);
   }, [streaming, tokens]);
   return (
-    <section className={cx(styles.answer, streaming && styles['answer--stream'], streaming && !done && styles['answer--writing'], className)} aria-label={title} aria-busy={!done || undefined}>
+    <section className={cx(styles.answer, streaming && styles['answer--stream'], glow !== 'off' && styles['answer--glow'], glow === 'fade' && styles['answer--glowFade'], className)} aria-label={title} aria-busy={!done || undefined}>
       <header className={styles.answer__header}>
         <span className={styles.answer__mark} aria-hidden="true"><SakaniLogo size={24} color="currentColor" /></span>
         <span className={styles.answer__title}>{title}</span>

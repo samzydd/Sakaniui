@@ -373,20 +373,21 @@
   border-radius: var(--radius-lg);
   background: var(--cmd-chrome);
 }
-/* While the answer is being written, a soft light runs once around the card's border (a comet on the 1px edge) and fades when the text is done. */
+/* While the answer is being written, a soft light runs once around the card's border (a comet on the 1px edge) and fades once everything has arrived. */
 @property --cmd-light-angle { syntax: '<angle>'; inherits: false; initial-value: 0deg; }
 .answer { position: relative; }
 .answer::before {
   content: ''; position: absolute; inset: -1px; padding: 1px; border-radius: inherit; pointer-events: none;
   background: conic-gradient(from var(--cmd-light-angle), transparent 0deg, transparent 260deg,
-    color-mix(in srgb, var(--color-primary-500) 45%, transparent) 325deg, color-mix(in srgb, var(--color-primary-500) 40%, white) 350deg, transparent 360deg);
+    color-mix(in srgb, var(--color-primary-500) 38%, transparent) 325deg, color-mix(in srgb, var(--color-primary-500) 34%, white) 350deg, transparent 360deg);
   -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor;
   mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
   opacity: 0; transition: opacity 500ms ease-out;
 }
 @keyframes sakani-cmd-card-light { to { --cmd-light-angle: 360deg; } }
 @media (prefers-reduced-motion: no-preference) {
-  .answer--writing::before { opacity: 0.9; animation: sakani-cmd-card-light 2.4s linear infinite; }
+  .answer--glow::before { opacity: 0.6; animation: sakani-cmd-card-light 2.4s linear infinite; }
+  .answer--glowFade::before { opacity: 0; transition-duration: 700ms; }   /* still moving while it fades */
 }
 .answer__header { display: flex; align-items: center; gap: var(--space-10); }
 .answer__mark {

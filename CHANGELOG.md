@@ -43,7 +43,8 @@ All notable changes to `@sakaniui/react` are documented here.
     the "No results" state. The *Live Ask AI* and *Ask AI empty* stories show the whole flow, and Figma has `State=AI empty`
     and `State=AI thinking`.
   - **A soft light runs around the answer card while it is written.** On the card's 1px border, in the brand colour, from the first
-    word until the last, then it fades out. Reduced motion shows none.
+    word until the response has fully arrived (the text, then the sources and the follow-up), then it fades out while still moving.
+    Reduced motion shows none.
   - **The AI mark is the SakaniUI arc mark on its own**, a circle with no tile, painted in the text colour (white in dark mode,
     near-black in light), on the answer card and on the "Ask AI" rows, replacing the sparkles icon. `SakaniLogo` takes a `color`.
   - New `previewActions`: buttons pinned to the bottom of the detail pane that stay put while the content above (from
