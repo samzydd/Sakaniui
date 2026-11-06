@@ -228,7 +228,7 @@
   color: var(--color-fg-muted);
 }
 .item[data-type='file'] .item__lead { color: var(--color-primary-500); }
-.item__lead--ai { border-color: transparent; background: var(--color-primary-500); color: var(--color-fg-on-accent); }
+.item__lead--ai { border: none; background: none; color: var(--color-fg-default); }   /* the arc mark alone, like an avatar: white in dark, near-black in light */
 .item__lead--person { border: none; background: none; border-radius: var(--radius-full); }
 .item__status {
   /* Figma Leading: a 24px avatar centred in the 28px slot, with the 8px Online dot at (18, 17) inside it */
@@ -377,9 +377,7 @@
 .answer__mark {
   display: inline-flex; align-items: center; justify-content: center;
   width: 24px; height: 24px;
-  border-radius: var(--radius-sm);
-  background: var(--color-primary-500);
-  color: var(--color-fg-on-accent);
+  color: var(--color-fg-default);   /* the arc mark on its own, no tile: it takes the text colour, so it is white in dark mode */
 }
 .answer__title { font-size: 14px; line-height: 20px; font-weight: 500; color: var(--color-fg-default); }
 .answer__status { font-size: 12px; line-height: 16px; font-weight: 500; color: var(--color-fg-muted); }

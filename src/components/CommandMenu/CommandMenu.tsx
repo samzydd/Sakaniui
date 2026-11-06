@@ -200,9 +200,9 @@ export interface CommandMenuProps {
 /* ------------------------------------------------------------------ */
 
 const TYPE_SCOPE: Record<CommandMenuItemType, string | null> = { page: 'pages', person: 'people', file: 'files', action: 'actions', ai: null };
-/** The SakaniUI arc mark, painted in the colour of the tile it sits on (the brand tile sets fg/on-accent). */
-const AIMark: IconComponent = ({ size = 16, className, style }) => (
-  <span className={className} style={{ display: 'inline-flex', ...style }}><SakaniLogo size={Number(size)} color="currentColor" /></span>
+/** The SakaniUI arc mark on its own (no tile), painted in the text colour: white in dark mode. It fills the 28px lead the way an avatar does, so it ignores the 16px icon size. */
+const AIMark: IconComponent = ({ className, style }) => (
+  <span className={className} style={{ display: 'inline-flex', ...style }}><SakaniLogo size={24} color="currentColor" /></span>
 );
 const TYPE_ICON: Record<CommandMenuItemType, IconComponent> = { page: FileText, action: Bolt, file: FileText, person: FileText, ai: AIMark };
 
@@ -314,7 +314,7 @@ export const CommandMenuAnswer: React.FC<CommandMenuAnswerProps> = ({
   return (
     <section className={cx(styles.answer, streaming && styles['answer--stream'], className)} aria-label={title} aria-busy={!done || undefined}>
       <header className={styles.answer__header}>
-        <span className={styles.answer__mark} aria-hidden="true"><SakaniLogo size={14} color="currentColor" /></span>
+        <span className={styles.answer__mark} aria-hidden="true"><SakaniLogo size={24} color="currentColor" /></span>
         <span className={styles.answer__title}>{title}</span>
         {status && done && <span className={styles.answer__status}>{status}</span>}
         {onCopy && done && (

@@ -42,8 +42,8 @@ All notable changes to `@sakaniui/react` are documented here.
     `onStreamEnd`; its sources and follow-up arrive once the text is written. With an `answer` set, an empty list is no longer
     the "No results" state. The *Live Ask AI* and *Ask AI empty* stories show the whole flow, and Figma has `State=AI empty`
     and `State=AI thinking`.
-  - **The AI mark is the SakaniUI arc mark**, in the brand tile (primary/500, fg/on-accent), on the answer card and on the
-    "Ask AI" row, replacing the sparkles icon. `SakaniLogo` takes a `color` for tiles that set their own.
+  - **The AI mark is the SakaniUI arc mark on its own**, a circle with no tile, painted in the text colour (white in dark mode,
+    near-black in light), on the answer card and on the "Ask AI" rows, replacing the sparkles icon. `SakaniLogo` takes a `color`.
   - New `previewActions`: buttons pinned to the bottom of the detail pane that stay put while the content above (from
     `renderPreview`) changes from row to row. Pass a node, or a function that reads the previewed row.
   - The Preview layout is narrower: 880px (was 960), with a 300px detail pane (was 320). The Figma Preview state and its
