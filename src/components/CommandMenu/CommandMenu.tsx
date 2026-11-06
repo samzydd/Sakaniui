@@ -442,10 +442,27 @@ export const CommandMenu: React.FC<CommandMenuProps> = ({
   React.useEffect(() => {
     if (!open || !renderPreview) { setPreviewId(null); return undefined; }
     if (previewId === null) { setPreviewId(activeId); return undefined; }
-    const t = window.setTimeout(() => setPreviewId(activeId), 140);
+    const t = window.setTimeout(() => setPreviewId(activeId), 100);
     return () => window.clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, activeId, Boolean(renderPreview)]);
+
+  const previewItem = (previewId && flat.find((i) => i.id === previewId)) || activeItem;
+  const previewNode = renderPreview && previewItem ? renderPreview(previewItem) : null;
+  /* When the pane changes, the previous content stays for a moment and fades out under the new one fading in, so the
+     pane never blanks or jumps between two rows. */
+  const previewKey = previewNode ? (previewItem?.id ?? 'item') : 'empty';
+  const previewLast = React.useRef<{ key: string; node: React.ReactNode } | null>(null);
+  const [previewLeaving, setPreviewLeaving] = React.useState<{ key: string; node: React.ReactNode } | null>(null);
+  React.useLayoutEffect(() => {
+    const prev = previewLast.current;
+    previewLast.current = { key: previewKey, node: previewNode ?? null };
+    if (!prev || prev.key === previewKey) return undefined;
+    setPreviewLeaving(prev);
+    const t = window.setTimeout(() => setPreviewLeaving(null), 220);
+    return () => window.clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [previewKey]);
 
   /* ---- mount, exit animation, focus, scroll lock ---- */
   const markerRef = React.useRef<HTMLSpanElement>(null);
@@ -533,8 +550,6 @@ export const CommandMenu: React.FC<CommandMenuProps> = ({
 
   /* the pane is part of the layout whenever `renderPreview` is given, so the panel never changes width as the active row changes */
   const hasPreview = Boolean(renderPreview) && !simple;
-  const previewItem = (previewId && flat.find((i) => i.id === previewId)) || activeItem;
-  const previewNode = renderPreview && previewItem ? renderPreview(previewItem) : null;
   const announcement = state === 'loading' ? 'Searching' : state === 'error' ? 'Search is unavailable' : empty ? 'No results' : `${total} result${total === 1 ? '' : 's'}`;
 
   const renderItem = (item: CommandMenuItem, highlight = highlightMatches) => {
@@ -762,8 +777,15 @@ export const CommandMenu: React.FC<CommandMenuProps> = ({
               </div>
               {hasPreview && (
                 <aside className={styles.preview} aria-label="Preview">
-                  <div key={previewNode ? previewItem?.id : 'empty'} className={styles.preview__content}>
-                    {previewNode ?? <div className={styles.preview__empty}>{previewEmpty}</div>}
+                  <div className={styles.preview__stack}>
+                    {previewLeaving && (
+                      <div key={`out-${previewLeaving.key}`} className={cx(styles.preview__layer, styles['preview__layer--out'])} aria-hidden="true">
+                        {previewLeaving.node ?? <div className={styles.preview__empty}>{previewEmpty}</div>}
+                      </div>
+                    )}
+                    <div key={previewKey} className={cx(styles.preview__layer, styles['preview__layer--in'])}>
+                      {previewNode ?? <div className={styles.preview__empty}>{previewEmpty}</div>}
+                    </div>
                   </div>
                 </aside>
               )}

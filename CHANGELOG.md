@@ -33,6 +33,9 @@ All notable changes to `@sakaniui/react` are documented here.
     location badges, a divider, three icon details, a Recent section with times, and two full-width actions pinned to the
     bottom. The answer card, detail pane and footer take Figma's surface/bg-chrome (bg/canvas in Solid; Glass and Liquid keep
     their own), where they were transparent.
+  - The detail pane changes smoothly: the previous row's content fades out and lifts away a little (140ms) while the new
+    content fades in from a soft focus and settles up into place (380ms), instead of blanking and popping. It waits a 100ms
+    rest on the row first. With `prefers-reduced-motion` it swaps without animation.
   - The Preview layout is narrower: 880px (was 960), with a 300px detail pane (was 320). The Figma Preview state and its
     Command Preview part are resized to match.
   - A person's row matches the Figma Leading slot: the 24px Avatar centred in the 28px slot, and the 8px status dot at (18, 17)
