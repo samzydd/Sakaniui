@@ -42,9 +42,8 @@ All notable changes to `@sakaniui/react` are documented here.
     `onStreamEnd`; its sources and follow-up arrive once the text is written. With an `answer` set, an empty list is no longer
     the "No results" state. The *Live Ask AI* and *Ask AI empty* stories show the whole flow, and Figma has `State=AI empty`
     and `State=AI thinking`.
-  - **A light travels along the search field while the AI works.** New `busy` prop: a soft wash over the field and a bright point on
-    its bottom edge sweep across in the brand colour while the AI thinks and writes, and fade out when it is done (the live
-    stories set it from asking until the text is written). Reduced motion keeps a steady glow on the edge instead.
+  - **A soft light runs around the answer card while it is written.** On the card's 1px border, in the brand colour, from the first
+    word until the last, then it fades out. Reduced motion shows none.
   - **The AI mark is the SakaniUI arc mark on its own**, a circle with no tile, painted in the text colour (white in dark mode,
     near-black in light), on the answer card and on the "Ask AI" rows, replacing the sparkles icon. `SakaniLogo` takes a `color`.
   - New `previewActions`: buttons pinned to the bottom of the detail pane that stay put while the content above (from

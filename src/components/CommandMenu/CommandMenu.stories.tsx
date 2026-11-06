@@ -252,7 +252,6 @@ export function LiveAskAI({ open, onOpenChange, groups = GROUPS, defaultScope = 
       filter={!inAI} workspace="Acme workspace" placeholder={inAI ? 'Ask anything about SakaniUI…' : undefined}
       onSelect={(i) => { if (i.type === 'ai') ask(i.id.startsWith('sq:') ? i.label : query); }}
       closeOnSelect={false} onAskAI={ask}
-      busy={answering && !run.streamed}
       answer={answering ? <AskAnswer run={run} question={asked ?? ''} /> : undefined}
     />
   );

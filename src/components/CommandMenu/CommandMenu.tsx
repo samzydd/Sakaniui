@@ -189,8 +189,6 @@ export interface CommandMenuProps {
   workspace?: React.ReactNode;
   /** Hide the footer of key hints. */
   hideFooter?: boolean;
-  /** The AI is working (thinking or writing): a light travels along the search field until it is false. */
-  busy?: boolean;
 
   /** Accessible name of the dialog. Defaults to "Command menu". */
   'aria-label'?: string;
@@ -314,7 +312,7 @@ export const CommandMenuAnswer: React.FC<CommandMenuAnswerProps> = ({
     return () => clearTimeout(timer);
   }, [streaming, tokens]);
   return (
-    <section className={cx(styles.answer, streaming && styles['answer--stream'], className)} aria-label={title} aria-busy={!done || undefined}>
+    <section className={cx(styles.answer, streaming && styles['answer--stream'], streaming && !done && styles['answer--writing'], className)} aria-label={title} aria-busy={!done || undefined}>
       <header className={styles.answer__header}>
         <span className={styles.answer__mark} aria-hidden="true"><SakaniLogo size={24} color="currentColor" /></span>
         <span className={styles.answer__title}>{title}</span>
@@ -367,7 +365,7 @@ export const CommandMenu: React.FC<CommandMenuProps> = ({
   onAskAI, answer, renderPreview, previewActions, previewEmpty = 'Nothing to preview for this result',
   emptyTitle, emptyDescription, suggestions, fallbackGroups,
   errorTitle = 'Search is unavailable', errorDescription = 'We couldn’t reach the search index. Your recent items still work.', onRetry, onReport, retryLabel = 'Try again', reportLabel = 'Report',
-  workspace, hideFooter = false, busy = false, 'aria-label': ariaLabel = 'Command menu', className,
+  workspace, hideFooter = false, 'aria-label': ariaLabel = 'Command menu', className,
 }) => {
   const simple = variant === 'simple';
   const reactId = React.useId();
@@ -663,8 +661,7 @@ export const CommandMenu: React.FC<CommandMenuProps> = ({
             className={cx(styles.panel, simple && styles['panel--simple'], hasPreview && styles['panel--preview'], open ? styles['panel--in'] : styles['panel--out'], className)}
           >
             {/* field */}
-            <div className={cx(styles.field, busy && styles['field--busy'])}>
-              <span className={styles.field__light} aria-hidden="true" />
+            <div className={styles.field}>
               <Search size={20} strokeWidth={iconStrokeWidth(20)} className={styles.field__icon} aria-hidden="true" />
               <div className={styles.field__content}>
                 {filters.map((f) => {
