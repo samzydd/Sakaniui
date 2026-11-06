@@ -420,7 +420,9 @@ export const CommandMenu: React.FC<CommandMenuProps> = ({
   const [scopeGlide, setScopeGlide] = React.useState(false);
   const itemEls = React.useRef(new Map<string, HTMLElement>());
   React.useEffect(() => {
-    if (!open || !activeItem) return;
+    if (!open) return;
+    /* nothing to highlight (no results, an error, loading): drop the bar instead of leaving it where the last row was */
+    if (!activeItem) { hover.showItem(null); return; }
     const el = itemEls.current.get(activeItem.id);
     if (el) {
       hover.showItem(el);
