@@ -52,6 +52,7 @@
 
 /* ---- field ---- */
 .field {
+  position: relative;
   display: flex;
   align-items: center;
   gap: var(--space-10);
@@ -59,6 +60,28 @@
   min-height: 56px;
   padding: 0 var(--space-16);
   border-bottom: var(--border-width-100) solid var(--surface-border);
+}
+/* While the AI works, a light travels along the field: a soft wash over the whole field and a bright point on its bottom edge.
+   It fades in and out with `busy`, and the field's own content sits above it. */
+.field__light { --w: 40%; position: absolute; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; opacity: 0; transition: opacity 400ms ease-out; }
+.field__light::before, .field__light::after { content: ''; position: absolute; width: var(--w); transform: translateX(-100%); }
+.field__light::before {
+  top: 0; bottom: 0; left: 0;
+  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--color-primary-500) 18%, transparent) 55%, color-mix(in srgb, var(--color-primary-500) 6%, transparent) 80%, transparent);
+}
+.field__light::after {
+  left: 0; bottom: 0; height: 2px;
+  background: linear-gradient(90deg, transparent, var(--color-primary-500) 45%, color-mix(in srgb, var(--color-primary-500) 55%, white) 70%, transparent);
+  filter: drop-shadow(0 0 5px var(--color-primary-500));
+}
+.field--busy .field__light { opacity: 1; }
+.field > :not(.field__light) { position: relative; z-index: 1; }
+@keyframes sakani-cmd-light { from { transform: translateX(-100%); } to { transform: translateX(250%); } }
+@media (prefers-reduced-motion: no-preference) {
+  .field--busy .field__light::before, .field--busy .field__light::after { animation: sakani-cmd-light 1.9s cubic-bezier(0.45, 0, 0.55, 1) infinite; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .field--busy .field__light::after { transform: none; width: 100%; opacity: 0.55; }
 }
 .field__icon { flex-shrink: 0; color: var(--color-fg-muted); }
 .field__content { display: flex; align-items: center; flex: 1; flex-wrap: wrap; gap: var(--space-6); min-width: 0; padding: var(--space-8) 0; }
