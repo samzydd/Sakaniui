@@ -492,8 +492,8 @@
                sakani-cmd-lens-x 2.6s cubic-bezier(0.37, 0, 0.63, 1) -1.3s infinite alternate,
                sakani-cmd-lens-y 2.6s cubic-bezier(0.37, 0, 0.63, 1) infinite alternate;
   }
-  .preview__layer--in { animation: sakani-cmd-pane-in 380ms cubic-bezier(0.16, 1, 0.3, 1) 90ms both; }
-  .preview__layer--out { animation: sakani-cmd-pane-out 140ms cubic-bezier(0.3, 0, 0.8, 0.6) both; }
+  .preview__layer--in { animation: sakani-cmd-pane-in 220ms ease-out 80ms both; }
+  .preview__layer--out { animation: sakani-cmd-pane-out 140ms ease-in both; }
   .message--empty .message__text { animation: sakani-cmd-rise 380ms cubic-bezier(0.16, 1, 0.3, 1) 420ms both; }
   .message--empty .message__chips .chip { animation: sakani-cmd-rise 380ms cubic-bezier(0.16, 1, 0.3, 1) 520ms both; }
   .message--empty .message__chips .chip:nth-child(2) { animation-delay: 580ms; }
@@ -520,8 +520,8 @@
 @keyframes sakani-cmd-lens-in { from { opacity: 0; transform: translate(-6px, 8px) scale(0.6); } to { opacity: 1; transform: none; } }
 @keyframes sakani-cmd-lens-x { from { --lens-dx: -18px; } to { --lens-dx: 18px; } }
 @keyframes sakani-cmd-lens-y { from { --lens-dy: -5px; } to { --lens-dy: 5px; } }
-@keyframes sakani-cmd-pane-in { from { opacity: 0; transform: translateY(8px); filter: blur(3px); } to { opacity: 1; transform: none; filter: none; } }
-@keyframes sakani-cmd-pane-out { from { opacity: 1; transform: none; } to { opacity: 0; transform: translateY(-4px); } }
+@keyframes sakani-cmd-pane-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes sakani-cmd-pane-out { from { opacity: 1; } to { opacity: 0; } }
 @keyframes sakani-cmd-rise { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
 @media (prefers-reduced-motion: reduce) {
   .backdrop--in, .backdrop--out, .panel--in, .panel--out { animation: none; }
