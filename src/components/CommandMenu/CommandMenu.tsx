@@ -164,6 +164,9 @@ export interface CommandMenuProps {
   answer?: React.ReactNode;
   /** Shows a preview pane beside the list for the active item. Return null for no pane. */
   renderPreview?: (item: CommandMenuItem) => React.ReactNode;
+  /** Buttons or links pinned to the bottom of the detail pane. They stay put while the content above changes from row to row
+   *  (only `renderPreview`'s content cross-fades); pass a function to read the previewed row. Hidden when a row has no preview. */
+  previewActions?: React.ReactNode | ((item: CommandMenuItem) => React.ReactNode);
   /** Shown in the detail pane when the active row has nothing to preview (`renderPreview` returned nothing). */
   previewEmpty?: React.ReactNode;
 
@@ -319,7 +322,7 @@ export const CommandMenu: React.FC<CommandMenuProps> = ({
   groups, filter = true, highlightMatches = true, state = 'ready', onSelect, closeOnSelect = true,
   scopes, scope: scopeProp, defaultScope, onScopeChange,
   filters: filtersProp, onFiltersChange, filterKeys,
-  onAskAI, answer, renderPreview, previewEmpty = 'Nothing to preview for this result',
+  onAskAI, answer, renderPreview, previewActions, previewEmpty = 'Nothing to preview for this result',
   emptyTitle, emptyDescription, suggestions, fallbackGroups,
   errorTitle = 'Search is unavailable', errorDescription = 'We couldn’t reach the search index. Your recent items still work.', onRetry, onReport, retryLabel = 'Try again', reportLabel = 'Report',
   workspace, hideFooter = false, 'aria-label': ariaLabel = 'Command menu', className,
@@ -777,16 +780,21 @@ export const CommandMenu: React.FC<CommandMenuProps> = ({
               </div>
               {hasPreview && (
                 <aside className={styles.preview} aria-label="Preview">
-                  <div className={styles.preview__stack}>
-                    {previewLeaving && (
-                      <div key={`out-${previewLeaving.key}`} className={cx(styles.preview__layer, styles['preview__layer--out'])} aria-hidden="true">
-                        {previewLeaving.node ?? <div className={styles.preview__empty}>{previewEmpty}</div>}
+                  <div className={styles.preview__scroll}>
+                    <div className={styles.preview__stack}>
+                      {previewLeaving && (
+                        <div key={`out-${previewLeaving.key}`} className={cx(styles.preview__layer, styles['preview__layer--out'])} aria-hidden="true">
+                          {previewLeaving.node ?? <div className={styles.preview__empty}>{previewEmpty}</div>}
+                        </div>
+                      )}
+                      <div key={previewKey} className={cx(styles.preview__layer, styles['preview__layer--in'])}>
+                        {previewNode ?? <div className={styles.preview__empty}>{previewEmpty}</div>}
                       </div>
-                    )}
-                    <div key={previewKey} className={cx(styles.preview__layer, styles['preview__layer--in'])}>
-                      {previewNode ?? <div className={styles.preview__empty}>{previewEmpty}</div>}
                     </div>
                   </div>
+                  {previewNode && previewActions && previewItem && (
+                    <div className={styles.preview__actions}>{typeof previewActions === 'function' ? previewActions(previewItem) : previewActions}</div>
+                  )}
                 </aside>
               )}
             </div>

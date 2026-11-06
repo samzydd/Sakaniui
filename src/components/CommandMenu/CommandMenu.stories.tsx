@@ -138,10 +138,6 @@ function PersonPreview({ item }: { item: CommandMenuItem }) {
           {activity(IconMessageCircle, 'Commented on Q4 roadmap', '5h')}
         </div>
       </div>
-      <div style={{ display: 'flex', gap: 8 }}>
-        <Button size="sm" style={previewButton}>Message</Button>
-        <Button size="sm" variant="secondary" style={previewButton}>View profile</Button>
-      </div>
     </div>
   );
 }
@@ -221,6 +217,13 @@ export const Preview: Story = {
   args: {
     scopes: SCOPES, defaultScope: 'people', defaultQuery: 'am', workspace: 'Acme workspace',
     renderPreview: (item) => (item.type === 'person' ? <PersonPreview item={item} /> : null),
+    // the actions are not part of the cross-fade: they stay where they are while the person above changes
+    previewActions: () => (
+      <>
+        <Button size="sm" style={previewButton}>Message</Button>
+        <Button size="sm" variant="secondary" style={previewButton}>View profile</Button>
+      </>
+    ),
   },
 };
 
