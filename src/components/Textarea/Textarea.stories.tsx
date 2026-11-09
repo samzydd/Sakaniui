@@ -50,8 +50,8 @@ export const DarkMode: Story = {
 const addPill = <IconButton icon={IconPlus} variant="secondary" size="sm" aria-label="Add" style={{ width: 36, height: 36, borderRadius: 999, boxShadow: 'none', background: 'var(--color-bg-muted)', borderColor: 'transparent' }} />;
 
 /** The "Ask anything" box from an AI product: the field on top, a "+" on the left and a mic on the right underneath. The mic becomes a send button once there is text. */
-function PromptTextarea(props: Partial<React.ComponentProps<typeof Textarea>>) {
-  const [value, setValue] = React.useState('');
+function PromptTextarea({ initial = '', ...props }: Partial<React.ComponentProps<typeof Textarea>> & { initial?: string }) {
+  const [value, setValue] = React.useState(initial);
   const hasText = value.trim().length > 0;
   return (
     <div style={{ width: 720, maxWidth: '100%' }}>
@@ -114,4 +114,24 @@ export const AIError: Story = {
       <PromptTextarea disabled placeholder="Ask anything (disabled)" />
     </div>
   ),
+};
+
+/** Every state on a dark surface. The prompt box reads the same tokens as the rest of SakaniUI, so it follows the theme with nothing dark-specific:
+ *  the box, the "+" and the send button flip, and the ember light and the gradient focus border show on it. */
+export const AIDarkStates: Story = {
+  name: 'AI dark states',
+  render: () => (
+    <div className="dark" style={{ padding: 40, display: 'grid', gap: 24, justifyItems: 'center', background: 'var(--color-bg-canvas)' }}>
+      <PromptTextarea label="Default" />
+      <PromptTextarea label="Filled" initial={'Plan a three day trip to Lisbon.\nI like food markets and old trams.\nKeep the budget modest, and tell me what to book ahead.'} />
+      <PromptTextarea label="Error" error="That prompt is too long." />
+      <PromptTextarea label="Disabled" disabled />
+    </div>
+  ),
+};
+
+/** Dark, and focused: the border becomes the ember gradient. autoFocus so the state shows without a click. */
+export const AIDarkFocus: Story = {
+  name: 'AI dark focus',
+  render: () => <div className="dark" style={{ padding: 40, display: 'grid', placeItems: 'center', background: 'var(--color-bg-canvas)', minHeight: 260 }}><PromptTextarea autoFocus glow="off" /></div>,
 };

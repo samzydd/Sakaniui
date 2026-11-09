@@ -58,8 +58,8 @@ const addPill = (size: keyof typeof ACTION) => (
 );
 
 /** A prompt box wired the way an AI product does it: a "+" on the left, a mic on the right that becomes a send button once there is text. */
-function PromptInput({ size = 'md', ...props }: Partial<React.ComponentProps<typeof Input>>) {
-  const [value, setValue] = React.useState('');
+function PromptInput({ size = 'md', initial = '', ...props }: Partial<React.ComponentProps<typeof Input>> & { initial?: string }) {
+  const [value, setValue] = React.useState(initial);
   const hasText = value.trim().length > 0;
   const px = ACTION[size];
   return (
@@ -125,4 +125,24 @@ export const AIError: Story = {
       <PromptInput disabled placeholder="Ask anything (disabled)" />
     </div>
   ),
+};
+
+/** Every state on a dark surface. The prompt box reads the same tokens as the rest of SakaniUI, so it follows the theme with nothing dark-specific:
+ *  the box, the "+" and the send button flip, and the ember light and the gradient focus border show on it. */
+export const AIDarkStates: Story = {
+  name: 'AI dark states',
+  render: () => (
+    <div className="dark" style={{ padding: 40, display: 'grid', gap: 24, justifyItems: 'center', background: 'var(--color-bg-canvas)' }}>
+      <PromptInput label="Default" />
+      <PromptInput label="Filled" initial="Plan a three day trip to Lisbon" />
+      <PromptInput label="Error" error="That prompt is too long." />
+      <PromptInput label="Disabled" disabled />
+    </div>
+  ),
+};
+
+/** Dark, and focused: autoFocus so the state shows without a click. */
+export const AIDarkFocus: Story = {
+  name: 'AI dark focus',
+  render: () => <div className="dark" style={{ padding: 40, display: 'grid', placeItems: 'center', background: 'var(--color-bg-canvas)', minHeight: 220 }}><PromptInput autoFocus glow="off" /></div>,
 };
