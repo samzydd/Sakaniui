@@ -29,18 +29,18 @@
    shadow at 60%, bloom blur 12 and an indigo shadow at 40%; CSS blur() takes half the Figma radius). */
 .glow__line,
 .glow__bloom { position: absolute; border-radius: inherit; }
-.glow__line  { inset: 0; opacity: 0.9; filter: blur(3px) drop-shadow(0 0 8px color-mix(in srgb, var(--color-blue-700) 60%, transparent)); }
-.glow__bloom { inset: -5px; border-radius: calc(var(--ai-radius, 28px) + 6px); opacity: 0.45; filter: blur(6px) drop-shadow(0 0 12px color-mix(in srgb, var(--color-blue-700) 40%, transparent)); }
+.glow__line  { inset: 0; opacity: 0.7; filter: blur(0.75px) drop-shadow(0 0 4px color-mix(in srgb, var(--color-blue-700) 30%, transparent)); }
+.glow__bloom { inset: -3px; border-radius: calc(var(--ai-radius, 28px) + 4px); opacity: 0.22; filter: blur(4px) drop-shadow(0 0 6px color-mix(in srgb, var(--color-blue-700) 20%, transparent)); }
 
 .glow__ring {
   position: absolute; inset: 0; border-radius: inherit;
-  padding: 2px;
+  padding: 1.5px;
   -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor;
   mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
   /* the path the lights follow is this ring's own border box, rounded like the frame */
   --path-r: calc(var(--ai-radius, 28px) + 1px);
 }
-.glow__bloom > .glow__ring { padding: 10px; --path-r: calc(var(--ai-radius, 28px) + 6px); }
+.glow__bloom > .glow__ring { padding: 6px; --path-r: calc(var(--ai-radius, 28px) + 4px); }
 
 /* The focus border (Textarea): a static 1.5px gradient, left to right, in place of the plain strong border. */
 .ring {
