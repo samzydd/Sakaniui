@@ -127,3 +127,22 @@
   background: transparent;
   box-shadow: none;
 }
+
+
+/* ─── variant="ai": the prompt box ── a pill, a 16px field, action slots and the light around the border.
+   --ai-radius is half the height, so the glow's path follows the pill. */
+.input--ai {
+  position: relative;
+  gap: var(--space-8);
+  padding: 0 var(--space-8) 0 var(--space-20);
+  background: var(--surface-bg-subtle);
+  border-radius: var(--ai-radius);
+}
+.input--ai.input--sm { --ai-radius: 22px; min-height: 44px; }
+.input--ai.input--md { --ai-radius: 28px; min-height: 56px; }
+.input--ai.input--lg { --ai-radius: 32px; min-height: 64px; }
+.input--ai .input__control { font-size: 16px; line-height: 24px; font-weight: 400; padding: var(--space-8) 0; }
+.input--ai .input__control::placeholder { font-weight: 400; }
+/* with a leading action the field starts after it, not after the pill's own padding */
+.input--aiLeading { padding-left: var(--space-8); }
+.input__actions { display: inline-flex; align-items: center; gap: var(--space-4); flex-shrink: 0; }

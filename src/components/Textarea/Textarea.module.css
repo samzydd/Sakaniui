@@ -56,3 +56,45 @@
   opacity: var(--opacity-60);
   resize: none;
 }
+
+/* ─── variant="ai": the prompt box ── a 28px-radius box: the field on top, an actions row under it, and the light around
+   the border. --ai-radius is what the glow's path follows. */
+.ai {
+  --ai-radius: 28px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  padding: var(--space-14) var(--space-20) var(--space-8);
+  background: var(--surface-bg-subtle);
+  border: var(--border-width-100) solid var(--surface-border);
+  border-radius: var(--ai-radius);
+  -webkit-backdrop-filter: var(--surface-blur);
+  backdrop-filter: var(--surface-blur);
+  transition: border-color var(--transition-base);
+}
+.ai:focus-within { border-color: var(--color-border-strong); }
+.ai--error, .ai--error:focus-within { border-color: var(--color-danger-solid); }
+.ai--disabled { opacity: var(--opacity-60); cursor: not-allowed; }
+
+.ai__control {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0;
+  border: none;
+  outline: none;
+  resize: none;
+  background: transparent;
+  font-family: inherit;
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 400;
+  color: var(--color-fg-default);
+}
+.ai__control::placeholder { color: var(--color-fg-subtle); font-weight: 400; }
+.ai__control:focus-visible { outline: none; box-shadow: none; }
+.ai__control:disabled { cursor: not-allowed; }
+
+.ai__actions { display: flex; align-items: center; justify-content: space-between; gap: var(--space-8); margin-top: var(--space-10); margin-left: calc(var(--space-12) * -1); margin-right: calc(var(--space-12) * -1); }
+.ai__side { display: inline-flex; align-items: center; gap: var(--space-4); }

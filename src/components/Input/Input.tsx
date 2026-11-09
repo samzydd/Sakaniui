@@ -14,10 +14,14 @@
  *   - Description: body/xs -> 13px / fg/muted
  *   - Icons: 16px, fg/muted stroke
  *   - Focus: border/focus 1.5px · Error: danger/solid 1.5px · Disabled: bg/subtle
+ *
+ * variant="ai": the prompt box of an AI product. A pill with a larger 16px field, room for action buttons on either side
+ * (`leading`, `trailing`: an attach button, a mic, a send button) and a light that sweeps around the border (`glow`).
  */
 
 import React from 'react';
 import { iconStrokeWidth } from '../../lib/iconStrokeWidth';
+import { AiGlow, type AiGlowMode } from '../../lib/AiGlow';
 import styles from './Input.module.css';
 
 const ICON_PX = 16;
@@ -31,6 +35,8 @@ const renderInputIcon = (icon: React.ReactNode) =>
     : icon;
 
 export type InputSize = 'sm' | 'md' | 'lg';
+export type InputVariant = 'default' | 'ai';
+export type InputGlow = AiGlowMode;
 
 export interface InputProps
   extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'size'> {
@@ -47,14 +53,25 @@ export interface InputProps
   unstyled?: boolean;
   leadingIcon?: React.ReactNode;
   trailingIcon?: React.ReactNode;
+  /** "ai" is the prompt box of an AI product: a pill with a 16px field, action slots and a light around the border. Defaults to "default". */
+  variant?: InputVariant;
+  /** variant="ai": the light that sweeps clockwise around the border. "pulse" (default) sweeps every 2.5s while idle and once each time
+   *  the field takes focus; "focus" sweeps only on focus; "off" draws none. Reduced motion draws none. */
+  glow?: AiGlowMode;
+  /** variant="ai": actions before the field, such as an attach button. Interactive content is fine here (unlike `leadingIcon`). */
+  leading?: React.ReactNode;
+  /** variant="ai": actions after the field, such as a mic and a send button. */
+  trailing?: React.ReactNode;
 }
 
 export const Input = React.forwardRef<HTMLInputElement, InputProps>(
   ({ label, description, error, size = 'md',
-    unstyled, leadingIcon, trailingIcon, disabled, id, className, ...rest }, ref) => {
+    unstyled, leadingIcon, trailingIcon, variant = 'default', glow = 'pulse', leading, trailing,
+    disabled, id, className, ...rest }, ref) => {
     const reactId = React.useId();
     const inputId = id ?? reactId;
     const hasError = Boolean(error);
+    const ai = variant === 'ai';
 
     return (
       <div className={[styles.field, className ?? ''].filter(Boolean).join(' ')}>
@@ -68,10 +85,14 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
           className={[
             styles.input,
             styles[`input--${size}`],
+            ai ? styles['input--ai'] : '',
+            ai && leading ? styles['input--aiLeading'] : '',
             hasError ? styles['input--error'] : '',
             disabled ? styles['input--disabled'] : '',
           ].filter(Boolean).join(' ')}
         >
+          {ai && <AiGlow mode={disabled ? 'off' : glow} />}
+          {ai && leading && <span className={styles.input__actions}>{leading}</span>}
           {leadingIcon && <span className={styles.input__icon} aria-hidden="true">{renderInputIcon(leadingIcon)}</span>}
           <input
             ref={ref}
@@ -83,6 +104,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
             {...rest}
           />
           {trailingIcon && <span className={styles.input__icon} aria-hidden="true">{renderInputIcon(trailingIcon)}</span>}
+          {ai && trailing && <span className={styles.input__actions}>{trailing}</span>}
         </div>
 
         {/* Description (Figma) or error message */}

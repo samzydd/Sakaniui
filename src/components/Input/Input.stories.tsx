@@ -1,5 +1,10 @@
+import React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { Input } from './Input';
+import { IconButton } from '../IconButton';
+import { IconPlus } from '../../icons/outline/plus';
+import { IconMicrophone } from '../../icons/outline/microphone';
+import { IconArrowUp } from '../../icons/outline/arrow-up';
 
 const meta = {
   title: 'Forms/Input',
@@ -41,4 +46,78 @@ export const DarkMode: Story = {
       <S />
     </div>
   )],
+};
+
+
+/* ---- variant="ai": the prompt box ------------------------------------------------------------------------------ */
+
+/** The "+" in the reference is a pill: wider than it is tall, quiet fill. */
+const addPill = <IconButton icon={IconPlus} variant="secondary" size="sm" aria-label="Add" style={{ width: 44, height: 36, borderRadius: 999, boxShadow: 'none', background: 'var(--color-bg-muted)', borderColor: 'transparent' }} />;
+
+/** A prompt box wired the way an AI product does it: a "+" on the left, a mic on the right that becomes a send button once there is text. */
+function PromptInput(props: Partial<React.ComponentProps<typeof Input>>) {
+  const [value, setValue] = React.useState('');
+  const hasText = value.trim().length > 0;
+  return (
+    <div style={{ width: 640, maxWidth: '100%' }}>
+      <Input
+        variant="ai"
+        placeholder="Ask anything"
+        aria-label="Ask anything"
+        value={value}
+        onChange={(e) => setValue(e.target.value)}
+        leading={addPill}
+        trailing={hasText
+          ? <IconButton icon={IconArrowUp} variant="primary" size="sm" aria-label="Send" style={{ borderRadius: 999 }} />
+          : <IconButton icon={IconMicrophone} variant="ghost" size="sm" aria-label="Use the microphone" style={{ borderRadius: 999, boxShadow: 'none' }} />}
+        {...props}
+      />
+    </div>
+  );
+}
+
+/** The prompt box of an AI product. A light sweeps once around the border every 2.5s while it is idle (and once each time you click in);
+ *  type and the mic becomes a send button. `glow="focus"` sweeps only on focus and `glow="off"` draws none. Reduced motion draws none. */
+export const AI: Story = {
+  name: 'AI',
+  parameters: { layout: 'padded' },
+  render: () => <div style={{ padding: 40, display: 'grid', placeItems: 'center' }}><PromptInput /></div>,
+};
+
+export const AISizes: Story = {
+  name: 'AI sizes',
+  render: () => (
+    <div style={{ padding: 40, display: 'grid', gap: 20, justifyItems: 'center' }}>
+      <PromptInput size="sm" />
+      <PromptInput size="md" />
+      <PromptInput size="lg" />
+    </div>
+  ),
+};
+
+export const AIDark: Story = {
+  name: 'AI dark',
+  render: () => <div className="dark" style={{ padding: 40, display: 'grid', placeItems: 'center', background: 'var(--color-bg-canvas)', minHeight: 220 }}><PromptInput /></div>,
+};
+
+/** `glow="focus"` is quiet until you click in; `glow="off"` has no light at all. */
+export const AIGlowModes: Story = {
+  name: 'AI glow modes',
+  render: () => (
+    <div style={{ padding: 40, display: 'grid', gap: 20, justifyItems: 'center' }}>
+      <PromptInput glow="pulse" placeholder="glow=pulse (default)" />
+      <PromptInput glow="focus" placeholder="glow=focus" />
+      <PromptInput glow="off" placeholder="glow=off" />
+    </div>
+  ),
+};
+
+export const AIError: Story = {
+  name: 'AI error and disabled',
+  render: () => (
+    <div style={{ padding: 40, display: 'grid', gap: 20, justifyItems: 'center' }}>
+      <PromptInput error="That prompt is too long." defaultValue="" />
+      <PromptInput disabled placeholder="Ask anything (disabled)" />
+    </div>
+  ),
 };

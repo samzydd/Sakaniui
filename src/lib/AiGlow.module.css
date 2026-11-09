@@ -1,0 +1,89 @@
+/* AiGlow: see AiGlow.tsx. The frame it sits in sets --ai-radius. */
+
+.glow {
+  position: absolute;
+  inset: -1px;                       /* over the frame's own 1px border */
+  border-radius: calc(var(--ai-radius, 28px) + 1px);
+  pointer-events: none;
+  display: none;                     /* shown below, only where it can move */
+
+  /* Tail to head: purple, red, orange, amber, lime, green, teal, azure, blue (blue leads: the delay below runs the other way). All mixed from the palette tokens. */
+  --g0: color-mix(in srgb, var(--color-danger-500) 45%, var(--color-info-500));
+  --g1: var(--color-danger-500);
+  --g2: color-mix(in srgb, var(--color-danger-500) 40%, var(--color-warning-500));
+  --g3: var(--color-warning-500);
+  --g4: color-mix(in srgb, var(--color-warning-500) 50%, var(--color-success-500));
+  --g5: var(--color-success-500);
+  --g6: color-mix(in srgb, var(--color-success-500) 50%, var(--color-info-500));
+  --g7: color-mix(in srgb, var(--color-success-500) 15%, var(--color-info-500));
+  --g8: var(--color-info-500);
+}
+
+/* The ring clips the lights to a thin band along the border. The mask is on the ring and the blur on its parent: a blur
+   on the masked element itself would be cut back to the band again. */
+.glow__line,
+.glow__bloom { position: absolute; border-radius: inherit; }
+.glow__line  { inset: 0; opacity: 0.8; }
+.glow__bloom { inset: -5px; border-radius: calc(var(--ai-radius, 28px) + 6px); filter: blur(5px); opacity: 0.45; }
+
+.glow__ring {
+  position: absolute; inset: 0; border-radius: inherit;
+  padding: 2px;
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+  /* the path the lights follow is this ring's own border box, rounded like the frame */
+  --path-r: calc(var(--ai-radius, 28px) + 1px);
+}
+.glow__bloom > .glow__ring { padding: 10px; --path-r: calc(var(--ai-radius, 28px) + 6px); }
+
+.glow__light {
+  position: absolute; left: 0; top: 0;
+  width: 56px; height: 56px; border-radius: 50%;
+  background: radial-gradient(closest-side, var(--lc), transparent);
+  offset-path: inset(0 round var(--path-r));
+  offset-anchor: 50% 50%;
+  offset-rotate: 0deg;
+  offset-distance: 0%;
+  opacity: 0;
+  --lc: var(--g0);
+}
+.glow__light:nth-child(2) { --lc: var(--g1); }
+.glow__light:nth-child(3) { --lc: var(--g2); }
+.glow__light:nth-child(4) { --lc: var(--g3); }
+.glow__light:nth-child(5) { --lc: var(--g4); }
+.glow__light:nth-child(6) { --lc: var(--g5); }
+.glow__light:nth-child(7) { --lc: var(--g6); }
+.glow__light:nth-child(8) { --lc: var(--g7); }
+.glow__light:nth-child(9) { --lc: var(--g8); }
+
+/* One lap at an even speed, so the lights keep their spacing and stay one gradient: they fade in as they leave the top-left,
+   hold, and fade out past the bottom. */
+@keyframes ai-glow-once {
+  0%   { offset-distance: 0%;   opacity: 0; }
+  6%   { opacity: 1; }
+  64%  { opacity: 1; }
+  100% { offset-distance: 100%; opacity: 0; }
+}
+/* The same lap, then a rest, so it repeats every 2.5s. */
+@keyframes ai-glow-pulse {
+  0%   { offset-distance: 0%;   opacity: 0;  animation-timing-function: linear; }
+  3%   { opacity: 1; }
+  33%  { opacity: 1; }
+  52%  { offset-distance: 100%; opacity: 0; }
+  100% { offset-distance: 100%; opacity: 0; }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  @supports (offset-path: inset(0 round 8px)) {
+    .glow { display: block; }
+    .glow__light { animation-delay: calc((8 - var(--i)) * 22ms); animation-fill-mode: both; }
+
+    .glow--pulse .glow__light { animation: ai-glow-pulse 2.5s infinite; animation-delay: calc((8 - var(--i)) * 22ms); }
+    /* focus takes over: one lap each time the field gains focus, then it rests until focus leaves */
+    :focus-within > .glow--pulse .glow__light,
+    :focus-within > .glow--focus .glow__light {
+      animation: ai-glow-once 1.3s linear both;
+      animation-delay: calc((8 - var(--i)) * 22ms);
+    }
+  }
+}
