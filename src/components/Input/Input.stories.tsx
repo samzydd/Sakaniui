@@ -51,10 +51,10 @@ export const DarkMode: Story = {
 
 /* ---- variant="ai": the prompt box ------------------------------------------------------------------------------ */
 
-/** Action button sizes from Figma "Input AI": the button is 32 / 36 / 44 high for sm / md / lg and the "+" pill is 8px wider. */
+/** Action button sizes from Figma "Input AI": every button is a round 32 / 36 / 44 for sm / md / lg, the "+" included. */
 const ACTION = { sm: 32, md: 36, lg: 44 } as const;
 const addPill = (size: keyof typeof ACTION) => (
-  <IconButton icon={IconPlus} variant="secondary" size="sm" aria-label="Add" style={{ width: ACTION[size] + 8, height: ACTION[size], borderRadius: 999, boxShadow: 'none', background: 'var(--color-bg-muted)', borderColor: 'transparent' }} />
+  <IconButton icon={IconPlus} variant="secondary" size="sm" aria-label="Add" style={{ width: ACTION[size], height: ACTION[size], borderRadius: 999, boxShadow: 'none', background: 'var(--color-bg-muted)', borderColor: 'transparent' }} />
 );
 
 /** A prompt box wired the way an AI product does it: a "+" on the left, a mic on the right that becomes a send button once there is text. */

@@ -46,8 +46,8 @@ export const DarkMode: Story = {
 
 /* ---- variant="ai": the prompt box ------------------------------------------------------------------------------ */
 
-/** Action buttons from Figma "Textarea AI": 36px high, and the "+" pill is 44 wide. */
-const addPill = <IconButton icon={IconPlus} variant="secondary" size="sm" aria-label="Add" style={{ width: 44, height: 36, borderRadius: 999, boxShadow: 'none', background: 'var(--color-bg-muted)', borderColor: 'transparent' }} />;
+/** Action buttons from Figma "Textarea AI": every button is a 36px circle, the "+" included. */
+const addPill = <IconButton icon={IconPlus} variant="secondary" size="sm" aria-label="Add" style={{ width: 36, height: 36, borderRadius: 999, boxShadow: 'none', background: 'var(--color-bg-muted)', borderColor: 'transparent' }} />;
 
 /** The "Ask anything" box from an AI product: the field on top, a "+" on the left and a mic on the right underneath. The mic becomes a send button once there is text. */
 function PromptTextarea(props: Partial<React.ComponentProps<typeof Textarea>>) {
