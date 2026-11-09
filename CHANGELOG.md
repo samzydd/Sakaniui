@@ -2,6 +2,24 @@
 
 All notable changes to `@sakaniui/react` are documented here.
 
+## 0.14.0
+
+- **New: `variant="ai"` on `Input` and `Textarea`**, the prompt box of an AI product, built from the new *Input AI* and *Textarea AI* sets in
+  Figma. Pass `variant="ai"` and the field becomes the "Ask anything" box: a larger 16px field, room for action buttons, and a light that
+  sweeps round its border.
+  - **Input:** a pill (44 / 56 / 64px for `sm` / `md` / `lg`) with `leading` and `trailing` slots for action buttons, such as an attach
+    button, a mic and a send button. Unlike `leadingIcon`, these slots take interactive content.
+  - **Textarea:** a 16px-radius box with the field on top and an actions row underneath (`leading` on the left, `trailing` on the
+    right). The field grows with what you type, up to `maxRows` lines (8 by default), then scrolls. Focus swaps the border for a static
+    1.5px ember gradient, left to right (not for `error` or `disabled`, which keep their own borders).
+  - **`glow`:** `"pulse"` (default) sweeps the light every 2.5s while idle and once each time the field takes focus; `"focus"` sweeps
+    only on focus; `"off"` draws none. The light is a thin line in an ember gradient (indigo, violet, magenta, red, brand orange,
+    amber, pale gold: a cool tail and a hot head) with a faint haze, one lap in about 1.3s, clockwise from the top-left. It follows the
+    border's own path at an even speed (CSS `offset-path`), so it works on any box, wide or square. It is hidden under
+    `prefers-reduced-motion` and where `offset-path: inset()` is not supported.
+  - Light, dark and glass surfaces come from the tokens, with nothing extra to set. The text is `body/md` (16px, weight 500).
+  - New tokens: `--color-blue-700` and `--color-violet-500`, the two Figma primitives the ember gradient needs.
+
 ## 0.13.0
 
 - **New: `CommandMenu`**, a ⌘K search and command palette, built from the new *↳ Command Menu* page in Figma. A search field,

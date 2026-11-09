@@ -213,6 +213,13 @@ lists its other names under `aliases` in `manifest.json`, and `search_components
   (it is a custom listbox, not native `<select>`, so the open state matches the design). Combobox: search a
   long list or pick several (multi, with chips). *Why:* choosing the lightest control that fits keeps forms
   fast; don't use a Combobox for four options.
+- **Input / Textarea `variant="ai"`** — The prompt box of an AI product ("Ask anything"): use `Input` for one line and
+  `Textarea` when the prompt can run long (it grows with the text up to `maxRows`). Put the buttons in `leading` and
+  `trailing` (an attach "+", a mic, a send button that replaces the mic once there is text); they take interactive
+  content, unlike `leadingIcon`. A thin ember light sweeps round the border while it is idle and on focus (`glow`:
+  `"pulse"` default, `"focus"`, `"off"`); under reduced motion it draws none. *Why:* it reads as the place to talk to the AI,
+  not as another form field. *Not for* ordinary forms: use the default variant there, and still give it a label
+  (`aria-label` if the design has none).
 - **Checkbox / Radio / Switch** — Checkbox: independent yes/no, or multiple choices. Radio: exactly one of a
   few (give them a shared `name`). Switch: an immediate on/off that takes effect now; a checkbox is for
   things applied on submit.
