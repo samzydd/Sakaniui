@@ -51,25 +51,30 @@ export const DarkMode: Story = {
 
 /* ---- variant="ai": the prompt box ------------------------------------------------------------------------------ */
 
-/** The "+" in the reference is a pill: wider than it is tall, quiet fill. */
-const addPill = <IconButton icon={IconPlus} variant="secondary" size="sm" aria-label="Add" style={{ width: 44, height: 36, borderRadius: 999, boxShadow: 'none', background: 'var(--color-bg-muted)', borderColor: 'transparent' }} />;
+/** Action button sizes from Figma "Input AI": the button is 32 / 36 / 44 high for sm / md / lg and the "+" pill is 8px wider. */
+const ACTION = { sm: 32, md: 36, lg: 44 } as const;
+const addPill = (size: keyof typeof ACTION) => (
+  <IconButton icon={IconPlus} variant="secondary" size="sm" aria-label="Add" style={{ width: ACTION[size] + 8, height: ACTION[size], borderRadius: 999, boxShadow: 'none', background: 'var(--color-bg-muted)', borderColor: 'transparent' }} />
+);
 
 /** A prompt box wired the way an AI product does it: a "+" on the left, a mic on the right that becomes a send button once there is text. */
-function PromptInput(props: Partial<React.ComponentProps<typeof Input>>) {
+function PromptInput({ size = 'md', ...props }: Partial<React.ComponentProps<typeof Input>>) {
   const [value, setValue] = React.useState('');
   const hasText = value.trim().length > 0;
+  const px = ACTION[size];
   return (
     <div style={{ width: 640, maxWidth: '100%' }}>
       <Input
         variant="ai"
+        size={size}
         placeholder="Ask anything"
         aria-label="Ask anything"
         value={value}
         onChange={(e) => setValue(e.target.value)}
-        leading={addPill}
+        leading={addPill(size)}
         trailing={hasText
-          ? <IconButton icon={IconArrowUp} variant="primary" size="sm" aria-label="Send" style={{ borderRadius: 999 }} />
-          : <IconButton icon={IconMicrophone} variant="ghost" size="sm" aria-label="Use the microphone" style={{ borderRadius: 999, boxShadow: 'none' }} />}
+          ? <IconButton icon={IconArrowUp} variant="primary" size="sm" aria-label="Send" style={{ width: px, height: px, borderRadius: 999 }} />
+          : <IconButton icon={IconMicrophone} variant="ghost" size="sm" aria-label="Use the microphone" style={{ width: px, height: px, borderRadius: 999, boxShadow: 'none' }} />}
         {...props}
       />
     </div>

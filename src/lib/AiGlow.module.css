@@ -1,30 +1,36 @@
 /* AiGlow: see AiGlow.tsx. The frame it sits in sets --ai-radius. */
 
+/* The ember palette, tail to head: indigo, violet, magenta, red, brand orange, amber, pale gold. Cool tail, hot head, drawn
+   from the palette tokens (the magenta and the two in-betweens are mixes). The glow's lights use all nine; the focus ring
+   takes the seven that are in the Figma gradient (g0, g2, g3, g4, g5, g7, g8). */
+.glow,
+.ring {
+  --g0: var(--color-blue-700);
+  --g1: color-mix(in srgb, var(--color-violet-500) 50%, var(--color-blue-700));
+  --g2: var(--color-violet-500);
+  --g3: color-mix(in srgb, var(--color-danger-500) 55%, var(--color-violet-500));
+  --g4: var(--color-danger-500);
+  --g5: var(--color-primary-500);
+  --g6: color-mix(in srgb, var(--color-warning-500) 50%, var(--color-primary-500));
+  --g7: var(--color-warning-500);
+  --g8: var(--color-warning-300);
+}
+
 .glow {
   position: absolute;
   inset: -1px;                       /* over the frame's own 1px border */
   border-radius: calc(var(--ai-radius, 28px) + 1px);
   pointer-events: none;
   display: none;                     /* shown below, only where it can move */
-
-  /* Tail to head: purple, red, orange, amber, lime, green, teal, azure, blue (blue leads: the delay below runs the other way). All mixed from the palette tokens. */
-  --g0: color-mix(in srgb, var(--color-danger-500) 45%, var(--color-info-500));
-  --g1: var(--color-danger-500);
-  --g2: color-mix(in srgb, var(--color-danger-500) 40%, var(--color-warning-500));
-  --g3: var(--color-warning-500);
-  --g4: color-mix(in srgb, var(--color-warning-500) 50%, var(--color-success-500));
-  --g5: var(--color-success-500);
-  --g6: color-mix(in srgb, var(--color-success-500) 50%, var(--color-info-500));
-  --g7: color-mix(in srgb, var(--color-success-500) 15%, var(--color-info-500));
-  --g8: var(--color-info-500);
 }
 
 /* The ring clips the lights to a thin band along the border. The mask is on the ring and the blur on its parent: a blur
-   on the masked element itself would be cut back to the band again. */
+   on the masked element itself would be cut back to the band again. Both layers are soft (Figma: line blur 6 and an indigo
+   shadow at 60%, bloom blur 12 and an indigo shadow at 40%; CSS blur() takes half the Figma radius). */
 .glow__line,
 .glow__bloom { position: absolute; border-radius: inherit; }
-.glow__line  { inset: 0; opacity: 0.8; }
-.glow__bloom { inset: -5px; border-radius: calc(var(--ai-radius, 28px) + 6px); filter: blur(5px); opacity: 0.45; }
+.glow__line  { inset: 0; opacity: 0.9; filter: blur(3px) drop-shadow(0 0 8px color-mix(in srgb, var(--color-blue-700) 60%, transparent)); }
+.glow__bloom { inset: -5px; border-radius: calc(var(--ai-radius, 28px) + 6px); opacity: 0.45; filter: blur(6px) drop-shadow(0 0 12px color-mix(in srgb, var(--color-blue-700) 40%, transparent)); }
 
 .glow__ring {
   position: absolute; inset: 0; border-radius: inherit;
@@ -35,6 +41,23 @@
   --path-r: calc(var(--ai-radius, 28px) + 1px);
 }
 .glow__bloom > .glow__ring { padding: 10px; --path-r: calc(var(--ai-radius, 28px) + 6px); }
+
+/* The focus border (Textarea): a static 1.5px gradient, left to right, in place of the plain strong border. */
+.ring {
+  position: absolute;
+  inset: -1px;
+  border-radius: calc(var(--ai-radius, 28px) + 1px);
+  padding: 1.5px;
+  pointer-events: none;
+  opacity: 0;
+  background: linear-gradient(90deg, var(--g0), var(--g2), var(--g3), var(--g4), var(--g5), var(--g7), var(--g8));
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+}
+:focus-within > .ring { opacity: 1; }
+@media (prefers-reduced-motion: no-preference) {
+  .ring { transition: opacity 160ms ease-out; }
+}
 
 .glow__light {
   position: absolute; left: 0; top: 0;

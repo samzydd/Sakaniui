@@ -46,6 +46,7 @@ export const DarkMode: Story = {
 
 /* ---- variant="ai": the prompt box ------------------------------------------------------------------------------ */
 
+/** Action buttons from Figma "Textarea AI": 36px high, and the "+" pill is 44 wide. */
 const addPill = <IconButton icon={IconPlus} variant="secondary" size="sm" aria-label="Add" style={{ width: 44, height: 36, borderRadius: 999, boxShadow: 'none', background: 'var(--color-bg-muted)', borderColor: 'transparent' }} />;
 
 /** The "Ask anything" box from an AI product: the field on top, a "+" on the left and a mic on the right underneath. The mic becomes a send button once there is text. */
@@ -62,8 +63,8 @@ function PromptTextarea(props: Partial<React.ComponentProps<typeof Textarea>>) {
         onChange={(e) => setValue(e.target.value)}
         leading={addPill}
         trailing={hasText
-          ? <IconButton icon={IconArrowUp} variant="primary" size="sm" aria-label="Send" style={{ borderRadius: 999 }} />
-          : <IconButton icon={IconMicrophone} variant="ghost" size="sm" aria-label="Use the microphone" style={{ borderRadius: 999, boxShadow: 'none' }} />}
+          ? <IconButton icon={IconArrowUp} variant="primary" size="sm" aria-label="Send" style={{ width: 36, height: 36, borderRadius: 999 }} />
+          : <IconButton icon={IconMicrophone} variant="ghost" size="sm" aria-label="Use the microphone" style={{ width: 36, height: 36, borderRadius: 999, boxShadow: 'none' }} />}
         {...props}
       />
     </div>
@@ -76,6 +77,12 @@ export const AI: Story = {
   name: 'AI',
   parameters: { layout: 'padded' },
   render: () => <div style={{ padding: 40, display: 'grid', placeItems: 'center' }}><PromptTextarea /></div>,
+};
+
+/** Focus swaps the border for a static 1.5px ember gradient (left to right). autoFocus so the state shows without a click. */
+export const AIFocus: Story = {
+  name: 'AI focus',
+  render: () => <div style={{ padding: 40, display: 'grid', placeItems: 'center' }}><PromptTextarea autoFocus glow="off" /></div>,
 };
 
 export const AIDark: Story = {

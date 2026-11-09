@@ -57,10 +57,10 @@
   resize: none;
 }
 
-/* ─── variant="ai": the prompt box ── a 28px-radius box: the field on top, an actions row under it, and the light around
+/* ─── variant="ai": the prompt box ── a 16px-radius box (radius/xl): the field on top, an actions row under it, and the light around
    the border. --ai-radius is what the glow's path follows. */
 .ai {
-  --ai-radius: 28px;
+  --ai-radius: var(--radius-xl);
   position: relative;
   display: flex;
   flex-direction: column;
@@ -73,7 +73,7 @@
   backdrop-filter: var(--surface-blur);
   transition: border-color var(--transition-base);
 }
-.ai:focus-within { border-color: var(--color-border-strong); }
+.ai:focus-within { border-color: transparent; }   /* the gradient ring (AiFocusRing) is the focus border; Figma: 1.5px ember gradient */
 .ai--error, .ai--error:focus-within { border-color: var(--color-danger-solid); }
 .ai--disabled { opacity: var(--opacity-60); cursor: not-allowed; }
 
@@ -89,10 +89,10 @@
   font-family: inherit;
   font-size: 16px;
   line-height: 24px;
-  font-weight: 400;
+  font-weight: 500;
   color: var(--color-fg-default);
 }
-.ai__control::placeholder { color: var(--color-fg-subtle); font-weight: 400; }
+.ai__control::placeholder { color: var(--color-fg-subtle); font-weight: 500; }
 .ai__control:focus-visible { outline: none; box-shadow: none; }
 .ai__control:disabled { cursor: not-allowed; }
 

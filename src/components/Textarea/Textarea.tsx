@@ -15,13 +15,13 @@
  *   - Error: danger/solid 1.5px, unaffected by focus
  *   - Disabled: bg/subtle, border/subtle, 60% opacity
  *
- * variant="ai": the prompt box of an AI product. A rounded 28px box with the field on top (16px, growing with the text up
+ * variant="ai": the prompt box of an AI product. A rounded 16px box with the field on top (16px, growing with the text up
  * to `maxRows`), an actions row underneath (`leading` on the left, `trailing` on the right: an attach button, a mic, a send
- * button) and a light that sweeps around the border (`glow`).
+ * button) and a light that sweeps around the border (`glow`). Focus swaps the border for a static ember gradient.
  */
 
 import React from 'react';
-import { AiGlow, type AiGlowMode } from '../../lib/AiGlow';
+import { AiGlow, AiFocusRing, type AiGlowMode } from '../../lib/AiGlow';
 import styles from './Textarea.module.css';
 
 export type TextareaVariant = 'default' | 'ai';
@@ -32,7 +32,7 @@ export interface TextareaProps
   label?: string;
   description?: string;
   error?: string;
-  /** "ai" is the prompt box of an AI product: a rounded box, a 16px field that grows with the text, an actions row and a light
+  /** "ai" is the prompt box of an AI product: a 16px-radius box, a 16px field that grows with the text, an actions row and a light
    *  around the border. Defaults to "default". */
   variant?: TextareaVariant;
   /** variant="ai": the light that sweeps clockwise around the border. "pulse" (default) sweeps every 2.5s while idle and once each
@@ -98,6 +98,7 @@ export const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
         {ai ? (
           <div className={[styles.ai, hasError ? styles['ai--error'] : '', disabled ? styles['ai--disabled'] : ''].filter(Boolean).join(' ')}>
             <AiGlow mode={disabled ? 'off' : glow} />
+            {!hasError && !disabled && <AiFocusRing />}
             {field}
             {(leading || trailing) && (
               <div className={styles.ai__actions}>

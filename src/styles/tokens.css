@@ -89,6 +89,9 @@
   --color-chart-purple: #9179D6;
   --color-chart-gold: #DCA84F;
   --color-chart-green: #12B76A;
+  /* Cool end of the AI prompt box's light (Figma Primitives color/blue/700 and color/violet/500). */
+  --color-blue-700: #33619F;
+  --color-violet-500: #9179D6;
   /* Code syntax-highlight primitives (Figma "Code Snippet") -- a fixed
      highlighting palette, not app UI, so it isn't drawn from the semantic
      bg/fg/border ramps or reused from chart/status colors that happen to
