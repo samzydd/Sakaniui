@@ -1,10 +1,25 @@
 /* AiGlow: see AiGlow.tsx. The frame it sits in sets --ai-radius. */
 
-/* The metal palette, tail to head: graphite, slate blue, silver, platinum, champagne, pale champagne (--ai-metal-0..6, see
-   tokens.css). The glow's lights use all nine (the in-betweens are mixes); the focus ring takes the seven that are in the
-   Figma gradient (g0, g2, g3, g4, g5, g7, g8). Light and dark follow the tokens. */
+/* The ember palette, tail to head: indigo, violet, magenta, red, brand orange, amber, pale gold. Cool tail, hot head, drawn
+   from the palette tokens (the magenta and the two in-betweens are mixes). The glow's lights use all nine; the focus ring
+   takes the seven that are in the Figma gradient (g0, g2, g3, g4, g5, g7, g8). */
 .glow,
 .ring {
+  --g0: var(--color-blue-700);
+  --g1: color-mix(in srgb, var(--color-violet-500) 50%, var(--color-blue-700));
+  --g2: var(--color-violet-500);
+  --g3: color-mix(in srgb, var(--color-danger-500) 55%, var(--color-violet-500));
+  --g4: var(--color-danger-500);
+  --g5: var(--color-primary-500);
+  --g6: color-mix(in srgb, var(--color-warning-500) 50%, var(--color-primary-500));
+  --g7: var(--color-warning-500);
+  --g8: var(--color-warning-300);
+  --g-shadow: var(--color-blue-700);
+}
+
+/* The metal palette (--ai-metal-0..6, see tokens.css): graphite, slate, silver, platinum, champagne. For the AI parts that
+   are not Input or Textarea, such as PromptComposer (palette="metal"). Same nine lights, same seven ring stops. */
+.metal {
   --g0: var(--ai-metal-0);
   --g1: var(--ai-metal-1);
   --g2: color-mix(in srgb, var(--ai-metal-1) 50%, var(--ai-metal-2));
@@ -14,6 +29,7 @@
   --g6: color-mix(in srgb, var(--ai-metal-4) 50%, var(--ai-metal-5));
   --g7: var(--ai-metal-5);
   --g8: var(--ai-metal-6);
+  --g-shadow: var(--ai-metal-1);
 }
 
 .glow {
@@ -25,12 +41,12 @@
 }
 
 /* The ring clips the lights to a thin band along the border. The mask is on the ring and the blur on its parent: a blur
-   on the masked element itself would be cut back to the band again. Both layers are soft (Figma: line blur 6 and a slate
-   shadow at 60%, bloom blur 12 and a slate shadow at 40%; CSS blur() takes half the Figma radius). */
+   on the masked element itself would be cut back to the band again. Both layers are soft (Figma: line blur 6 and an indigo
+   shadow at 60%, bloom blur 12 and an indigo shadow at 40%; CSS blur() takes half the Figma radius). */
 .glow__line,
 .glow__bloom { position: absolute; border-radius: inherit; }
-.glow__line  { inset: 0; opacity: 0.55; filter: blur(0.5px) drop-shadow(0 0 3px color-mix(in srgb, var(--ai-metal-1) 18%, transparent)); }
-.glow__bloom { inset: -2px; border-radius: calc(var(--ai-radius, 28px) + 3px); opacity: 0.12; filter: blur(3px) drop-shadow(0 0 4px color-mix(in srgb, var(--ai-metal-1) 10%, transparent)); }
+.glow__line  { inset: 0; opacity: 0.55; filter: blur(0.5px) drop-shadow(0 0 3px color-mix(in srgb, var(--g-shadow) 18%, transparent)); }
+.glow__bloom { inset: -2px; border-radius: calc(var(--ai-radius, 28px) + 3px); opacity: 0.12; filter: blur(3px) drop-shadow(0 0 4px color-mix(in srgb, var(--g-shadow) 10%, transparent)); }
 
 .glow__ring {
   position: absolute; inset: 0; border-radius: inherit;

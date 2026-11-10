@@ -125,7 +125,7 @@ export const PromptComposer = React.forwardRef<HTMLTextAreaElement, PromptCompos
             </button>
           </div>
         </div>
-        <AiFocusRing />
+        <AiFocusRing palette="metal" />
       </div>
     );
   },

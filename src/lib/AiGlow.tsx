@@ -1,8 +1,8 @@
 /**
  * AiGlow
  *
- * The light that sweeps once around the border of an "ai" Input or Textarea, from the top-left, clockwise, in a metal gradient
- * (graphite, slate, silver, platinum, champagne: a dark tail and a pale head), as a soft line of about 2px with a
+ * The light that sweeps once around the border of an "ai" Input or Textarea, from the top-left, clockwise, in an ember gradient
+ * (indigo, violet, magenta, red, brand orange, amber, pale gold: a cool tail and a hot head), as a soft line of about 2px with a
  * hazy bloom, one lap in about 1.3s, repeating every 2.5s while idle.
  *
  * It is a string of small lights that follow the border's own path (`offset-path: inset(0 round r)`), each one colour
@@ -20,6 +20,9 @@ import styles from './AiGlow.module.css';
 /** `pulse` sweeps every 2.5s while idle, and once each time the field takes focus; `focus` sweeps only on focus; `off` draws nothing. */
 export type AiGlowMode = 'pulse' | 'focus' | 'off';
 
+/** `ember` (default): indigo, violet, magenta, red, brand orange, amber, pale gold: Input and Textarea. `metal`: graphite to champagne: the other AI parts. */
+export type AiGlowPalette = 'ember' | 'metal';
+
 /** Tail to head. Each light is one colour; the order is the gradient. */
 const LIGHTS = [0, 1, 2, 3, 4, 5, 6, 7, 8];
 
@@ -33,15 +36,17 @@ function Lights() {
   );
 }
 
-export const AiGlow: React.FC<{ mode: AiGlowMode }> = ({ mode }) => {
+export const AiGlow: React.FC<{ mode: AiGlowMode; palette?: AiGlowPalette }> = ({ mode, palette = 'ember' }) => {
   if (mode === 'off') return null;
   return (
-    <span className={`${styles.glow} ${styles[`glow--${mode}`]}`} aria-hidden="true">
+    <span className={[styles.glow, styles[`glow--${mode}`], palette === 'metal' ? styles.metal : ''].filter(Boolean).join(' ')} aria-hidden="true">
       <span className={styles.glow__bloom}><span className={styles.glow__ring}><Lights /></span></span>
       <span className={styles.glow__line}><span className={styles.glow__ring}><Lights /></span></span>
     </span>
   );
 };
 
-/** The Textarea's focus border: a static 1.5px metal gradient, left to right, that replaces the plain strong border while the box has focus. */
-export const AiFocusRing: React.FC = () => <span className={styles.ring} aria-hidden="true" />;
+/** The Textarea's focus border: a static 1.5px ember gradient, left to right, that replaces the plain strong border while the box has focus. */
+export const AiFocusRing: React.FC<{ palette?: AiGlowPalette }> = ({ palette = 'ember' }) => (
+  <span className={[styles.ring, palette === 'metal' ? styles.metal : ''].filter(Boolean).join(' ')} aria-hidden="true" />
+);

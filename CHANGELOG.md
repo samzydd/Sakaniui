@@ -20,8 +20,6 @@ All notable changes to `@sakaniui/react` are documented here.
   block is live: send a message and it plays a reply (thinking, a tool call, then text arriving) so the streaming states show.
 - **New tokens: `--ai-metal-0` to `--ai-metal-6` and `--ai-metal-gradient`** (light and dark): graphite and silver steel with a hint of
   slate blue and champagne, the look of anything AI.
-- **Changed: the AI glow and focus border on `Input` and `Textarea` (`variant="ai"`) are now metal**, not the ember gradient of
-  0.14: a dark graphite tail and a pale champagne head, from the new tokens. No prop changes.
 
 ## 0.14.1
 

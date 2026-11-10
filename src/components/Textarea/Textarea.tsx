@@ -17,7 +17,7 @@
  *
  * variant="ai": the prompt box of an AI product. A rounded 16px box with the field on top (16px, growing with the text up
  * to `maxRows`), an actions row underneath (`leading` on the left, `trailing` on the right: an attach button, a mic, a send
- * button) and a light that sweeps around the border (`glow`). Focus swaps the border for a static metal gradient.
+ * button) and a light that sweeps around the border (`glow`). Focus swaps the border for a static ember gradient.
  */
 
 import React from 'react';
