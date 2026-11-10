@@ -9,7 +9,7 @@ const meta = {
   tags: ['autodocs'],
   parameters: { docs: { description: { component: `The prompt box of an AI product. Matches the Figma "AI Prompt Composer" set: Empty, Typing, Streaming, Attached.
 
-The field grows with the text up to \`maxRows\` (8). Enter sends, Shift+Enter breaks the line. While \`status="streaming"\` send becomes Stop. A metal border draws in on focus. Chips go in \`attachments\`; the model picker and other controls go in \`actions\` or in a row under the box.` } } },
+The field grows with the text up to \`maxRows\` (8). Enter sends, Shift+Enter breaks the line. While \`status="streaming"\` send becomes Stop. An ember border draws in on focus, the same as Textarea variant=\"ai\". Chips go in \`attachments\`; the model picker and other controls go in \`actions\` or in a row under the box.` } } },
   decorators: [(S) => <div style={{ width: 520, maxWidth: '100%', padding: 24, boxSizing: 'border-box' }}><S /></div>],
   args: { onAttach: () => {}, onVoice: () => {} },
 } satisfies Meta<typeof PromptComposer>;

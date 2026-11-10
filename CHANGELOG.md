@@ -14,7 +14,7 @@ All notable changes to `@sakaniui/react` are documented here.
     and Input and Output panels when open.
   - **`SuggestionChip`**: a suggested prompt, `variant="starter"` (a card with a hint, for the empty screen) or `"follow-up"` (a pill under a reply).
   - **`PromptComposer`**: the prompt box. It grows with the text up to `maxRows`, Enter sends, send becomes Stop while
-    `status="streaming"`, and a metal border draws in on focus. The model picker is not inside it: put it in `actions` or in a row under the box.
+    `status="streaming"`, and the ember border of `Textarea variant="ai"` draws in on focus. The model picker is not inside it: put it in `actions` or in a row under the box.
   - **`AttachmentChip`**: a file, an image, an upload in progress (a metal progress line) or an error.
 - **New blocks: `AiChatBlock` and `AiWelcomeBlock`**, composition examples built from the Sidebar parts plus the components above. The chat
   block is live: send a message and it plays a reply (thinking, a tool call, then text arriving) so the streaming states show.

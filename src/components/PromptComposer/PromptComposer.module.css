@@ -1,6 +1,6 @@
 /* PromptComposer: Figma "AI Prompt Composer". A 16px-radius box on surface/bg-subtle with a 1px surface/border; padding
-   16/12/12/20 and a 24px gap (16 with chips); the field is body/md 16/24; the action row is 32px controls. The metal focus
-   border (AiFocusRing, 1.5px) replaces the plain one while the box has focus. */
+   16/12/12/20 and a 24px gap (16 with chips); the field is body/md 16/24; the action row is 32px controls. The ember focus
+   border (AiFocusRing, 1.5px, the Textarea's) replaces the plain one while the box has focus. */
 .root {
   --ai-radius: var(--radius-xl);
   position: relative;

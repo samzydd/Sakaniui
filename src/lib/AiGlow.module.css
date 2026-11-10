@@ -14,22 +14,6 @@
   --g6: color-mix(in srgb, var(--color-warning-500) 50%, var(--color-primary-500));
   --g7: var(--color-warning-500);
   --g8: var(--color-warning-300);
-  --g-shadow: var(--color-blue-700);
-}
-
-/* The metal palette (--ai-metal-0..6, see tokens.css): graphite, slate, silver, platinum, champagne. For the AI parts that
-   are not Input or Textarea, such as PromptComposer (palette="metal"). Same nine lights, same seven ring stops. */
-.metal {
-  --g0: var(--ai-metal-0);
-  --g1: var(--ai-metal-1);
-  --g2: color-mix(in srgb, var(--ai-metal-1) 50%, var(--ai-metal-2));
-  --g3: var(--ai-metal-2);
-  --g4: var(--ai-metal-3);
-  --g5: var(--ai-metal-4);
-  --g6: color-mix(in srgb, var(--ai-metal-4) 50%, var(--ai-metal-5));
-  --g7: var(--ai-metal-5);
-  --g8: var(--ai-metal-6);
-  --g-shadow: var(--ai-metal-1);
 }
 
 .glow {
@@ -45,8 +29,8 @@
    shadow at 60%, bloom blur 12 and an indigo shadow at 40%; CSS blur() takes half the Figma radius). */
 .glow__line,
 .glow__bloom { position: absolute; border-radius: inherit; }
-.glow__line  { inset: 0; opacity: 0.55; filter: blur(0.5px) drop-shadow(0 0 3px color-mix(in srgb, var(--g-shadow) 18%, transparent)); }
-.glow__bloom { inset: -2px; border-radius: calc(var(--ai-radius, 28px) + 3px); opacity: 0.12; filter: blur(3px) drop-shadow(0 0 4px color-mix(in srgb, var(--g-shadow) 10%, transparent)); }
+.glow__line  { inset: 0; opacity: 0.55; filter: blur(0.5px) drop-shadow(0 0 3px color-mix(in srgb, var(--color-blue-700) 18%, transparent)); }
+.glow__bloom { inset: -2px; border-radius: calc(var(--ai-radius, 28px) + 3px); opacity: 0.12; filter: blur(3px) drop-shadow(0 0 4px color-mix(in srgb, var(--color-blue-700) 10%, transparent)); }
 
 .glow__ring {
   position: absolute; inset: 0; border-radius: inherit;

@@ -4,14 +4,14 @@
  * The prompt box of an AI product. Matches Figma "AI Prompt Composer": State Empty | Typing | Streaming | Attached.
  *
  *   empty      the send button is off
- *   typing     a metal focus border draws in, send is on
+ *   typing     an ember focus border draws in (the same ring as Textarea variant="ai"), send is on
  *   streaming  `status="streaming"`: send becomes Stop (`onStop`)
  *   attached   pass chips (AttachmentChip) as `attachments` and they sit above the field
  *
  * The field is a textarea that grows with the text up to `maxRows` lines (8), then scrolls. Enter sends and Shift+Enter breaks
  * the line. `value` / `onValueChange` control it, or leave them and `defaultValue` is the start. It owns no model, files or
  * voice: the + button calls `onAttach`, the mic `onVoice`, and the model picker and the like go beside it, in `actions`
- * (left, after the +) or in a row under the box. Focus draws the metal border in over 160ms; send and stop morph over 180ms.
+ * (left, after the +) or in a row under the box. Focus draws the ember border in over 160ms; send and stop morph over 180ms.
  */
 
 import React from 'react';
@@ -125,7 +125,7 @@ export const PromptComposer = React.forwardRef<HTMLTextAreaElement, PromptCompos
             </button>
           </div>
         </div>
-        <AiFocusRing palette="metal" />
+        <AiFocusRing />
       </div>
     );
   },

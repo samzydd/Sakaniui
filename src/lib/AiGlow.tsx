@@ -20,9 +20,6 @@ import styles from './AiGlow.module.css';
 /** `pulse` sweeps every 2.5s while idle, and once each time the field takes focus; `focus` sweeps only on focus; `off` draws nothing. */
 export type AiGlowMode = 'pulse' | 'focus' | 'off';
 
-/** `ember` (default): indigo, violet, magenta, red, brand orange, amber, pale gold: Input and Textarea. `metal`: graphite to champagne: the other AI parts. */
-export type AiGlowPalette = 'ember' | 'metal';
-
 /** Tail to head. Each light is one colour; the order is the gradient. */
 const LIGHTS = [0, 1, 2, 3, 4, 5, 6, 7, 8];
 
@@ -36,10 +33,10 @@ function Lights() {
   );
 }
 
-export const AiGlow: React.FC<{ mode: AiGlowMode; palette?: AiGlowPalette }> = ({ mode, palette = 'ember' }) => {
+export const AiGlow: React.FC<{ mode: AiGlowMode }> = ({ mode }) => {
   if (mode === 'off') return null;
   return (
-    <span className={[styles.glow, styles[`glow--${mode}`], palette === 'metal' ? styles.metal : ''].filter(Boolean).join(' ')} aria-hidden="true">
+    <span className={`${styles.glow} ${styles[`glow--${mode}`]}`} aria-hidden="true">
       <span className={styles.glow__bloom}><span className={styles.glow__ring}><Lights /></span></span>
       <span className={styles.glow__line}><span className={styles.glow__ring}><Lights /></span></span>
     </span>
@@ -47,6 +44,4 @@ export const AiGlow: React.FC<{ mode: AiGlowMode; palette?: AiGlowPalette }> = (
 };
 
 /** The Textarea's focus border: a static 1.5px ember gradient, left to right, that replaces the plain strong border while the box has focus. */
-export const AiFocusRing: React.FC<{ palette?: AiGlowPalette }> = ({ palette = 'ember' }) => (
-  <span className={[styles.ring, palette === 'metal' ? styles.metal : ''].filter(Boolean).join(' ')} aria-hidden="true" />
-);
+export const AiFocusRing: React.FC = () => <span className={styles.ring} aria-hidden="true" />;
