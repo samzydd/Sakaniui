@@ -2,6 +2,14 @@
 
 All notable changes to `@sakaniui/react` are documented here.
 
+## 0.14.1
+
+- **Fixed: a bare `LiquidGlass` lens became a solid disc under `prefers-reduced-transparency`.** With "Reduce transparency" on
+  (macOS Accessibility, Windows "Transparency effects" off), glass surfaces turn into plain opaque surfaces so text stays readable. A
+  `LiquidGlass` with no children and `tint="none"` has no text to protect, a pure refraction lens, and it was turning into a solid white
+  or black blob over the page. It now stays see-through and gets a thin `--color-border-strong` outline. Glass that holds content is
+  unchanged: it still goes opaque.
+
 ## 0.14.0
 
 - **New: `variant="ai"` on `Input` and `Textarea`**, the prompt box of an AI product, built from the new *Input AI* and *Textarea AI* sets in
