@@ -204,6 +204,8 @@
   "src/blocks/AccountOverviewBlock/AccountOverviewBlock.tsx": "0.1.0",
   "src/blocks/ActivityLogBlock/ActivityLogBlock.tsx": "0.1.0",
   "src/blocks/AiChatBlock/AiChatBlock.tsx": "0.15.0",
+  "src/blocks/AiChatBlock/parts/AiSidebar.tsx": "0.15.0",
+  "src/blocks/AiChatBlock/parts/ComposerOptions.tsx": "0.15.0",
   "src/blocks/AiWelcomeBlock/AiWelcomeBlock.tsx": "0.15.0",
   "src/blocks/AppHeaderBlock/AppHeaderBlock.tsx": "0.1.0",
   "src/blocks/Billing/AddCardFormBlock/AddCardFormBlock.tsx": "0.3.0",
@@ -388,6 +390,7 @@
   "src/lib/AiGlow.tsx": "0.14.0",
   "src/lib/ChartTooltip.tsx": "0.1.0",
   "src/lib/LiquidGlass.tsx": "0.4.0",
+  "src/lib/MetalRing.tsx": "0.15.0",
   "src/lib/SakaniLogo.tsx": "0.3.22",
   "src/lib/useHoverHighlight.tsx": "0.3.21"
 }
