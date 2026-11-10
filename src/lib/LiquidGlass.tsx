@@ -30,7 +30,8 @@
  * Chromium only — Safari and Firefox get the frosted fallback
  * (--liquid-fallback-blur) with a CSS rim. Plus: tint (the fill), the outer
  * shadow, and a pointer-following glare (off with reduced motion). With
- * prefers-reduced-transparency it becomes a plain opaque surface.
+ * prefers-reduced-transparency it becomes a plain opaque surface, unless it sets reducedTransparency="ignore" (for a decorative
+ * showcase that is nothing without the glass).
  *
  * It marks itself data-surface="liquid", so components inside (Sidebar,
  * buttons, cards…) drop their own fill and sit on this material.
@@ -550,6 +551,9 @@ export interface LiquidGlassProps extends React.HTMLAttributes<HTMLDivElement> {
   bake?: boolean | 'auto';
   /** Squish slightly when pressed (buttons, toolbar pills). */
   interactive?: boolean;
+  /** 'respect' (default): with prefers-reduced-transparency the glass becomes a plain opaque surface. 'ignore': keep the full
+   *  glass anyway. Only for a decorative showcase that means nothing without it; never for a surface that holds the user's content. */
+  reducedTransparency?: 'respect' | 'ignore';
 }
 
 /** An effect override as the custom properties the hook reads. */
@@ -566,7 +570,7 @@ const effectVars = (e?: Partial<LiquidGlassEffect>): React.CSSProperties => {
 };
 
 export const LiquidGlass = React.forwardRef<HTMLDivElement, LiquidGlassProps>(
-  ({ variant = 'regular', tint = 'auto', radius = 20, refraction = 'auto', effect, source = true, bake = 'auto', interactive, className, style, children, onPointerMove, ...rest }, forwarded) => {
+  ({ variant = 'regular', tint = 'auto', radius = 20, refraction = 'auto', effect, source = true, bake = 'auto', interactive, reducedTransparency = 'respect', className, style, children, onPointerMove, ...rest }, forwarded) => {
     const ref = React.useRef<HTMLDivElement | null>(null);
     const setRef = (el: HTMLDivElement | null) => {
       ref.current = el;
@@ -579,6 +583,7 @@ export const LiquidGlass = React.forwardRef<HTMLDivElement, LiquidGlassProps>(
         {...rest}
         {...glass.props}
         data-bare={children == null || children === false ? '' : undefined}
+        data-reduced-transparency={reducedTransparency === 'ignore' ? 'ignore' : undefined}
         className={[styles.liquid, styles[variant], tint !== 'auto' ? styles[`tint-${tint}`] : '', interactive ? styles.interactive : '', className ?? ''].filter(Boolean).join(' ')}
         style={{ borderRadius: radius, ...effectVars(effect), ...glass.props.style, ...style }}
         onPointerMove={(e) => { glass.props.onPointerMove(e); onPointerMove?.(e); }}

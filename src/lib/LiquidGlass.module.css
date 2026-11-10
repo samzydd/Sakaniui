@@ -127,24 +127,20 @@
   .interactive:active { transform: none; }
 }
 
-/* Reduce transparency: a plain, opaque surface — no tint, blur or refraction. */
+/* Reduce transparency: a plain, opaque surface — no tint, blur or refraction. A LiquidGlass with
+   reducedTransparency="ignore" (data-reduced-transparency) opts out: a decorative showcase that is nothing without the glass. */
 @media (prefers-reduced-transparency: reduce) {
-  .liquid.regular,
-  .liquid.clear,
-  .liquid.tint-regular,
-  .liquid.tint-clear,
-  .liquid.tint-subtle,
-  .liquid.tint-none {
+  .liquid.regular:not([data-reduced-transparency='ignore']),
+  .liquid.clear:not([data-reduced-transparency='ignore']),
+  .liquid.tint-regular:not([data-reduced-transparency='ignore']),
+  .liquid.tint-clear:not([data-reduced-transparency='ignore']),
+  .liquid.tint-subtle:not([data-reduced-transparency='ignore']),
+  .liquid.tint-none:not([data-reduced-transparency='ignore']) {
     background: var(--color-bg-surface);
     -webkit-backdrop-filter: none !important;
     backdrop-filter: none !important;
   }
-  .liquid::after { display: none; }
-  .sourceClip, .fill { display: none; }
-  /* A bare lens (no children, tint 'none': a pure refraction disc) has no content to protect, so an opaque
-     fill would only paint a solid blob over the page. Keep it see-through and outline it instead. */
-  .liquid.tint-none[data-bare] {
-    background: transparent;
-    box-shadow: inset 0 0 0 1.5px var(--color-border-strong), var(--liquid-shadow);
-  }
+  .liquid:not([data-reduced-transparency='ignore'])::after { display: none; }
+  .liquid:not([data-reduced-transparency='ignore']) .sourceClip,
+  .liquid:not([data-reduced-transparency='ignore']) .fill { display: none; }
 }

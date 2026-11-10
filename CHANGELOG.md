@@ -2,6 +2,14 @@
 
 All notable changes to `@sakaniui/react` are documented here.
 
+## 0.14.2
+
+- **New: `reducedTransparency="ignore"` on `LiquidGlass`.** By default liquid glass turns into a plain opaque surface under
+  `prefers-reduced-transparency` (macOS "Reduce transparency", Windows "Transparency effects" off, which Windows also does on its own in
+  battery saver), and that is still the default, so a surface that holds your content stays readable. Pass `"ignore"` on a purely decorative
+  showcase, such as a demo of the glass over a photo, that means nothing as a plain surface: it keeps the tint, the blur, the refraction and
+  the rim light. Do not use it on anything that carries the user's content.
+
 ## 0.14.1
 
 - **Fixed: a bare `LiquidGlass` lens became a solid disc under `prefers-reduced-transparency`.** With "Reduce transparency" on
