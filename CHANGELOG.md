@@ -2,6 +2,27 @@
 
 All notable changes to `@sakaniui/react` are documented here.
 
+## 0.15.0
+
+- **New: the AI conversation parts**, built from the new *AI Components* and *AI Blocks* pages in Figma. Presentational, with no AI SDK:
+  you pass text and state, and they draw it.
+  - **`AiMessage`**: one turn. `role="assistant"` is full-width text beside a metal-ringed avatar, with copy, regenerate and feedback
+    actions once done (`streaming` hides them and ends the text with a slate caret); `role="user"` is a right-aligned bubble.
+  - **`ReasoningTrace`**: the thinking panel. `status="streaming"` turns a metal ring, shimmers "Thinking" and counts the seconds, with
+    each new line clearing a soft blur; `status="done"` reads "Thought for 6s", shows a one-line `summary` when closed and folds open.
+  - **`ToolCall`**: the row an agent leaves when it calls a tool: a running ring, a check or a cross, the call in code, its duration,
+    and Input and Output panels when open.
+  - **`SuggestionChip`**: a suggested prompt, `variant="starter"` (a card with a hint, for the empty screen) or `"follow-up"` (a pill under a reply).
+  - **`PromptComposer`**: the prompt box. It grows with the text up to `maxRows`, Enter sends, send becomes Stop while
+    `status="streaming"`, and a metal border draws in on focus. The model picker is not inside it: put it in `actions` or in a row under the box.
+  - **`AttachmentChip`**: a file, an image, an upload in progress (a metal progress line) or an error.
+- **New blocks: `AiChatBlock` and `AiWelcomeBlock`**, composition examples built from the Sidebar parts plus the components above. The chat
+  block is live: send a message and it plays a reply (thinking, a tool call, then text arriving) so the streaming states show.
+- **New tokens: `--ai-metal-0` to `--ai-metal-6` and `--ai-metal-gradient`** (light and dark): graphite and silver steel with a hint of
+  slate blue and champagne, the look of anything AI.
+- **Changed: the AI glow and focus border on `Input` and `Textarea` (`variant="ai"`) are now metal**, not the ember gradient of
+  0.14: a dark graphite tail and a pale champagne head, from the new tokens. No prop changes.
+
 ## 0.14.1
 
 - **Fixed: a bare `LiquidGlass` lens became a solid disc under `prefers-reduced-transparency`.** With "Reduce transparency" on

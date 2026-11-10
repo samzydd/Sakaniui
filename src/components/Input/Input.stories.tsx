@@ -128,7 +128,7 @@ export const AIError: Story = {
 };
 
 /** Every state on a dark surface. The prompt box reads the same tokens as the rest of SakaniUI, so it follows the theme with nothing dark-specific:
- *  the box, the "+" and the send button flip, and the ember light and the gradient focus border show on it. */
+ *  the box, the "+" and the send button flip, and the metal light and the gradient focus border show on it. */
 export const AIDarkStates: Story = {
   name: 'AI dark states',
   render: () => (

@@ -229,6 +229,32 @@
   --transition-hover: var(--motion-slow) var(--ease-out);
 }
 
+/* ---- AI metal ------------------------------------------------------------
+ * The look of anything AI: graphite and silver steel with a hint of slate blue and champagne, never a bright multi-colour
+ * gradient. Seven stops, tail to head (0 graphite, 1 slate, 2 silver-lilac, 3 silver, 4 platinum, 5 champagne, 6 pale
+ * champagne). Figma: the Semantic variables ai/metal-0..6. The gradient is re-declared on .dark because a custom property
+ * that reads other custom properties resolves where it is declared. */
+:root {
+  --ai-metal-0: #3D4450;
+  --ai-metal-1: #5C687D;
+  --ai-metal-2: #8590A4;
+  --ai-metal-3: #A9B0BF;
+  --ai-metal-4: #C4CAD5;
+  --ai-metal-5: #CDB98F;
+  --ai-metal-6: #E2D3AE;
+  --ai-metal-gradient: linear-gradient(90deg, var(--ai-metal-0), var(--ai-metal-1), var(--ai-metal-2), var(--ai-metal-3), var(--ai-metal-4), var(--ai-metal-5), var(--ai-metal-6));
+}
+.dark {
+  --ai-metal-0: #5A6272;
+  --ai-metal-1: #7B879C;
+  --ai-metal-2: #A2ABBC;
+  --ai-metal-3: #C6CCD8;
+  --ai-metal-4: #E4E7ED;
+  --ai-metal-5: #EBDDBB;
+  --ai-metal-6: #FBF6E8;
+  --ai-metal-gradient: linear-gradient(90deg, var(--ai-metal-0), var(--ai-metal-1), var(--ai-metal-2), var(--ai-metal-3), var(--ai-metal-4), var(--ai-metal-5), var(--ai-metal-6));
+}
+
 /* Base font — everything using `font-family: inherit` resolves through here. */
 html, body {
   font-family: var(--font-sans);

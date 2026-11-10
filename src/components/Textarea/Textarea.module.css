@@ -73,7 +73,7 @@
   backdrop-filter: var(--surface-blur);
   transition: border-color var(--transition-base);
 }
-.ai:focus-within { border-color: transparent; }   /* the gradient ring (AiFocusRing) is the focus border; Figma: 1.5px ember gradient */
+.ai:focus-within { border-color: transparent; }   /* the gradient ring (AiFocusRing) is the focus border; Figma: 1.5px metal gradient */
 .ai--error, .ai--error:focus-within { border-color: var(--color-danger-solid); }
 .ai--disabled { opacity: var(--opacity-60); cursor: not-allowed; }
 

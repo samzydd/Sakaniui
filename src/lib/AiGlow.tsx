@@ -1,8 +1,8 @@
 /**
  * AiGlow
  *
- * The light that sweeps once around the border of an "ai" Input or Textarea, from the top-left, clockwise, in an ember gradient
- * (indigo, violet, magenta, red, brand orange, amber, pale gold: a cool tail and a hot head), as a soft line of about 2px with a
+ * The light that sweeps once around the border of an "ai" Input or Textarea, from the top-left, clockwise, in a metal gradient
+ * (graphite, slate, silver, platinum, champagne: a dark tail and a pale head), as a soft line of about 2px with a
  * hazy bloom, one lap in about 1.3s, repeating every 2.5s while idle.
  *
  * It is a string of small lights that follow the border's own path (`offset-path: inset(0 round r)`), each one colour
@@ -43,5 +43,5 @@ export const AiGlow: React.FC<{ mode: AiGlowMode }> = ({ mode }) => {
   );
 };
 
-/** The Textarea's focus border: a static 1.5px ember gradient, left to right, that replaces the plain strong border while the box has focus. */
+/** The Textarea's focus border: a static 1.5px metal gradient, left to right, that replaces the plain strong border while the box has focus. */
 export const AiFocusRing: React.FC = () => <span className={styles.ring} aria-hidden="true" />;

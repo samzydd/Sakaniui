@@ -79,7 +79,7 @@ export const AI: Story = {
   render: () => <div style={{ padding: 40, display: 'grid', placeItems: 'center' }}><PromptTextarea /></div>,
 };
 
-/** Focus swaps the border for a static 1.5px ember gradient (left to right). autoFocus so the state shows without a click. */
+/** Focus swaps the border for a static 1.5px metal gradient (left to right). autoFocus so the state shows without a click. */
 export const AIFocus: Story = {
   name: 'AI focus',
   render: () => <div style={{ padding: 40, display: 'grid', placeItems: 'center' }}><PromptTextarea autoFocus glow="off" /></div>,
@@ -117,7 +117,7 @@ export const AIError: Story = {
 };
 
 /** Every state on a dark surface. The prompt box reads the same tokens as the rest of SakaniUI, so it follows the theme with nothing dark-specific:
- *  the box, the "+" and the send button flip, and the ember light and the gradient focus border show on it. */
+ *  the box, the "+" and the send button flip, and the metal light and the gradient focus border show on it. */
 export const AIDarkStates: Story = {
   name: 'AI dark states',
   render: () => (
@@ -130,7 +130,7 @@ export const AIDarkStates: Story = {
   ),
 };
 
-/** Dark, and focused: the border becomes the ember gradient. autoFocus so the state shows without a click. */
+/** Dark, and focused: the border becomes the metal gradient. autoFocus so the state shows without a click. */
 export const AIDarkFocus: Story = {
   name: 'AI dark focus',
   render: () => <div className="dark" style={{ padding: 40, display: 'grid', placeItems: 'center', background: 'var(--color-bg-canvas)', minHeight: 260 }}><PromptTextarea autoFocus glow="off" /></div>,

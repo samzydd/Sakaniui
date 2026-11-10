@@ -1,0 +1,22 @@
+/* AiChatBlock.module.css: widths and spacing read from the Figma block (1440x900). */
+.block { display: flex; width: 100%; height: 100%; min-height: 640px; overflow: hidden; background: var(--color-bg-canvas); font-family: var(--font-sans); color: var(--color-fg-default); }
+.main { display: flex; flex-direction: column; flex: 1; min-width: 0; }
+
+.top { display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; height: 56px; padding: 0 var(--space-20) 0 var(--space-24); box-sizing: border-box; }
+.title {
+  display: inline-flex; align-items: center; gap: var(--space-6); padding: var(--space-6) var(--space-8); margin-left: calc(var(--space-8) * -1);
+  border: none; border-radius: var(--radius-md); background: none; cursor: pointer; color: var(--color-fg-default);
+  font: inherit; font-size: 16px; font-weight: 500; line-height: 24px;
+}
+.title:hover { background: var(--color-bg-subtle); }
+.title:focus-visible { outline: 2px solid var(--color-border-focus); outline-offset: 1px; }
+.title > svg { color: var(--color-fg-muted); }
+.actions { display: flex; align-items: center; gap: var(--space-4); }
+
+.scroll { flex: 1; min-height: 0; overflow-y: auto; }
+.thread { display: flex; flex-direction: column; gap: var(--space-20); box-sizing: border-box; width: 100%; max-width: 808px; margin: 0 auto; padding: var(--space-24); }
+.followUps { display: flex; flex-wrap: wrap; gap: var(--space-8); }
+
+.dock { flex-shrink: 0; padding: 0 var(--space-24) var(--space-16); box-sizing: border-box; }
+.composer { display: flex; flex-direction: column; gap: var(--space-8); width: 100%; max-width: 760px; margin: 0 auto; }
+.disclaimer { margin: 0; text-align: center; font-size: 12px; font-weight: 500; line-height: 16px; color: var(--color-fg-muted); opacity: 0.75; }
