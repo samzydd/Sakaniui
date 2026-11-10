@@ -141,4 +141,10 @@
   }
   .liquid::after { display: none; }
   .sourceClip, .fill { display: none; }
+  /* A bare lens (no children, tint 'none': a pure refraction disc) has no content to protect, so an opaque
+     fill would only paint a solid blob over the page. Keep it see-through and outline it instead. */
+  .liquid.tint-none[data-bare] {
+    background: transparent;
+    box-shadow: inset 0 0 0 1.5px var(--color-border-strong), var(--liquid-shadow);
+  }
 }

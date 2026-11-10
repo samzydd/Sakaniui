@@ -578,6 +578,7 @@ export const LiquidGlass = React.forwardRef<HTMLDivElement, LiquidGlassProps>(
         ref={setRef}
         {...rest}
         {...glass.props}
+        data-bare={children == null || children === false ? '' : undefined}
         className={[styles.liquid, styles[variant], tint !== 'auto' ? styles[`tint-${tint}`] : '', interactive ? styles.interactive : '', className ?? ''].filter(Boolean).join(' ')}
         style={{ borderRadius: radius, ...effectVars(effect), ...glass.props.style, ...style }}
         onPointerMove={(e) => { glass.props.onPointerMove(e); onPointerMove?.(e); }}
