@@ -81,6 +81,9 @@ const DEMO_LINES = [
 ];
 const DEMO_REPLY = 'Here is what I found. Two accounts need attention before Friday, and one renewal is already signed. I can draft the messages or pull the full activity timeline for either account, whichever you would like next.';
 
+/** Demo timing in ms. Real-time feel; shorten to speed the demo up. */
+const T = { firstLine: 1200, line: 2400, tool: 3200, word: 70 };
+
 const TOOL_INPUT = { query: 'Acme Corp', limit: 5 };
 const TOOL_OUTPUT = { results: 3, top: 'Acme Corp (Enterprise, $48,000)', lastContact: '9 days ago' };
 
@@ -115,15 +118,18 @@ export const AiChatBlock: React.FC<AiChatBlockProps> = ({ className }) => {
     setTurns((t) => [...t, { id, prompt, phase: 'thinking', lines: [], elapsed: 0, summary: 'Checked the CRM and wrote an answer', toolRunning: false, reply: [], followUps: [] }]);
     const started = performance.now();
     const tick = window.setInterval(() => patch(id, { elapsed: (performance.now() - started) / 1000 }), 100);
-    DEMO_LINES.forEach((l, i) => at(500 + i * 800, () => setTurns((t) => t.map((x) => (x.id === id ? { ...x, lines: [...x.lines, l] } : x)))));
-    at(3000, () => patch(id, { phase: 'tool', toolRunning: true }));
-    at(4300, () => patch(id, { toolRunning: false }));
-    at(4500, () => patch(id, { phase: 'writing' }));
+    // real-time pacing: a line of reasoning every couple of seconds, a tool call that takes a few, then the answer at reading speed
+    DEMO_LINES.forEach((l, i) => at(T.firstLine + i * T.line, () => setTurns((t) => t.map((x) => (x.id === id ? { ...x, lines: [...x.lines, l] } : x)))));
+    const toolAt = T.firstLine + DEMO_LINES.length * T.line;
+    at(toolAt, () => { window.clearInterval(tick); patch(id, { phase: 'tool', toolRunning: true, elapsed: Math.round((performance.now() - started) / 1000) }); });   // thinking ends here, so the timer stops
+    at(toolAt + T.tool, () => patch(id, { toolRunning: false }));
+    at(toolAt + T.tool + 300, () => patch(id, { phase: 'writing' }));
     const words = DEMO_REPLY.split(' ');
-    words.forEach((_, i) => at(4600 + i * 45, () => patch(id, { reply: [words.slice(0, i + 1).join(' ')] })));
-    at(4600 + words.length * 45 + 200, () => {
+    const writeAt = toolAt + T.tool + 400;
+    words.forEach((_, i) => at(writeAt + i * T.word, () => patch(id, { reply: [words.slice(0, i + 1).join(' ')] })));
+    at(writeAt + words.length * T.word + 300, () => {
       window.clearInterval(tick);
-      patch(id, { phase: 'done', elapsed: Math.round((performance.now() - started) / 1000), followUps: ['Draft the messages', 'Show the activity timeline'] });
+      patch(id, { phase: 'done', followUps: ['Draft the messages', 'Show the activity timeline'] });
       setStreaming(false);
     });
   };
