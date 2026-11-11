@@ -2,7 +2,7 @@
    trail behind it. Still (reduced motion): ray 0 is the head and the rays counter-clockwise of it are the trail. */
 .rays { flex-shrink: 0; display: block; }
 .ray { opacity: max(0.14, calc(1 - (8 - var(--i)) * 0.11)); }
-.ray:first-child { opacity: 1; }
+.ray--head { opacity: 1; }
 @media (prefers-reduced-motion: no-preference) {
   .ray { animation: ray 0.96s linear infinite; animation-delay: calc((var(--i) - 8) * 0.12s); opacity: 1; }
 }

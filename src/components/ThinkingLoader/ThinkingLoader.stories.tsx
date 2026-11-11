@@ -6,7 +6,7 @@ const meta = {
   title: 'AI/Thinking Loader',
   component: ThinkingLoader,
   tags: ['autodocs'],
-  parameters: { docs: { description: { component: `The status pill of an AI that is working: a ray spinner and a shimmering label. Matches the Figma "Thinking Loader".
+  parameters: { docs: { description: { component: `The status pill of an AI that is working: a gradient ray spinner and a shimmering label. Matches the Figma "Thinking Loader".
 
 Change \`label\` as the work moves on and the text crossfades while the pill grows or shrinks to fit. You choose the label from what your model is doing; the component only shows it.` } } },
 } satisfies Meta<typeof ThinkingLoader>;
