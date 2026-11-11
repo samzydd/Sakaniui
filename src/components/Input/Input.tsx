@@ -55,7 +55,7 @@ export interface InputProps
   trailingIcon?: React.ReactNode;
   /** "ai" is the prompt box of an AI product: a pill with a 16px field, action slots and a light around the border. Defaults to "default". */
   variant?: InputVariant;
-  /** variant="ai": the light that sweeps clockwise around the border. "pulse" (default) sweeps every 2.5s while idle and once each time
+  /** variant="ai": the light that sweeps clockwise around the border. "once" (default) sweeps one lap shortly after it appears and then stays still, focused or not; "pulse" sweeps every 2.5s while idle and once each time
    *  the field takes focus; "focus" sweeps only on focus; "off" draws none. Reduced motion draws none. */
   glow?: AiGlowMode;
   /** variant="ai": actions before the field, such as an attach button. Interactive content is fine here (unlike `leadingIcon`). */
@@ -66,7 +66,7 @@ export interface InputProps
 
 export const Input = React.forwardRef<HTMLInputElement, InputProps>(
   ({ label, description, error, size = 'md',
-    unstyled, leadingIcon, trailingIcon, variant = 'default', glow = 'pulse', leading, trailing,
+    unstyled, leadingIcon, trailingIcon, variant = 'default', glow = 'once', leading, trailing,
     disabled, id, className, ...rest }, ref) => {
     const reactId = React.useId();
     const inputId = id ?? reactId;

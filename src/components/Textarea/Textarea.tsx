@@ -35,7 +35,7 @@ export interface TextareaProps
   /** "ai" is the prompt box of an AI product: a 16px-radius box, a 16px field that grows with the text, an actions row and a light
    *  around the border. Defaults to "default". */
   variant?: TextareaVariant;
-  /** variant="ai": the light that sweeps clockwise around the border. "pulse" (default) sweeps every 2.5s while idle and once each
+  /** variant="ai": the light that sweeps clockwise around the border. "once" (default) sweeps one lap shortly after it appears and then stays still, focused or not; "pulse" sweeps every 2.5s while idle and once each
    *  time the field takes focus; "focus" sweeps only on focus; "off" draws none. Reduced motion draws none. */
   glow?: AiGlowMode;
   /** variant="ai": actions on the left of the row under the field, such as an attach button. */
@@ -51,7 +51,7 @@ const LINE_PX = 24;
 export const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
   // rows=3 is what lands on Figma's 84px box (3 x 20px lines + 10/10 padding);
   // the old default of 4 rendered 102px, so min-height never applied.
-  ({ label, description, error, disabled, id, className, rows, variant = 'default', glow = 'pulse', leading, trailing, maxRows = 8, onInput, ...rest }, ref) => {
+  ({ label, description, error, disabled, id, className, rows, variant = 'default', glow = 'once', leading, trailing, maxRows = 8, onInput, ...rest }, ref) => {
     const reactId = React.useId();
     const areaId = id ?? reactId;
     const hasError = Boolean(error);

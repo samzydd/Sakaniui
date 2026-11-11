@@ -216,8 +216,8 @@ lists its other names under `aliases` in `manifest.json`, and `search_components
 - **Input / Textarea `variant="ai"`** — The prompt box of an AI product ("Ask anything"): use `Input` for one line and
   `Textarea` when the prompt can run long (it grows with the text up to `maxRows`). Put the buttons in `leading` and
   `trailing` (an attach "+", a mic, a send button that replaces the mic once there is text); they take interactive
-  content, unlike `leadingIcon`. A thin ember light sweeps round the border while it is idle and on focus (`glow`:
-  `"pulse"` default, `"focus"`, `"off"`); under reduced motion it draws none. *Why:* it reads as the place to talk to the AI,
+  content, unlike `leadingIcon`. A thin ember light sweeps once round the border shortly after it appears, then rests: it never moves
+  again while someone writes in it (`glow`: `"once"` default, `"pulse"`, `"focus"`, `"off"`); under reduced motion it draws none. *Why:* it reads as the place to talk to the AI,
   not as another form field. *Not for* ordinary forms: use the default variant there, and still give it a label
   (`aria-label` if the design has none).
 - **Checkbox / Radio / Switch** — Checkbox: independent yes/no, or multiple choices. Radio: exactly one of a

@@ -101,6 +101,9 @@
     .glow { display: block; }
     .glow__light { animation-delay: calc((8 - var(--i)) * 22ms); animation-fill-mode: both; }
 
+    /* once: one lap shortly after the box appears (0.5s, so it is seen), then it rests for good. Focus does not touch it. */
+    .glow--once .glow__light { animation: ai-glow-once 1.3s linear both; animation-delay: calc(500ms + (8 - var(--i)) * 22ms); }
+
     .glow--pulse .glow__light { animation: ai-glow-pulse 2.5s infinite; animation-delay: calc((8 - var(--i)) * 22ms); }
     /* focus takes over: one lap each time the field gains focus, then it rests until focus leaves */
     :focus-within > .glow--pulse .glow__light,

@@ -41,8 +41,8 @@ All notable changes to `@sakaniui/react` are documented here.
   - **Textarea:** a 16px-radius box with the field on top and an actions row underneath (`leading` on the left, `trailing` on the
     right). The field grows with what you type, up to `maxRows` lines (8 by default), then scrolls. Focus swaps the border for a static
     1.5px ember gradient, left to right (not for `error` or `disabled`, which keep their own borders).
-  - **`glow`:** `"pulse"` (default) sweeps the light every 2.5s while idle and once each time the field takes focus; `"focus"` sweeps
-    only on focus; `"off"` draws none. The light is a thin line in an ember gradient (indigo, violet, magenta, red, brand orange,
+  - **`glow`:** `"once"` (default, changed in 0.15.0; it was `"pulse"`) sweeps one lap shortly after the field appears and then stays still, focused or
+    not; `"pulse"` sweeps every 2.5s while idle and once each time the field takes focus; `"focus"` sweeps only on focus; `"off"` draws none. The light is a thin line in an ember gradient (indigo, violet, magenta, red, brand orange,
     amber, pale gold: a cool tail and a hot head) with a faint haze, one lap in about 1.3s, clockwise from the top-left. It follows the
     border's own path at an even speed (CSS `offset-path`), so it works on any box, wide or square. It is hidden under
     `prefers-reduced-motion` and where `offset-path: inset()` is not supported.

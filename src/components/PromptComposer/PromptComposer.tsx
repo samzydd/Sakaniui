@@ -3,7 +3,7 @@
  *
  * The prompt box of an AI product. Matches Figma "AI Prompt Composer": State Empty | Typing | Streaming | Attached.
  *
- *   empty      the send button is off; the ember light sweeps the border while idle (`glow`, Textarea variant="ai"'s)
+ *   empty      the send button is off; the ember light sweeps the border once, shortly after it appears, then rests (`glow`, Textarea variant="ai"'s)
  *   typing     an ember focus border draws in (the same ring as Textarea variant="ai"), send is on
  *   streaming  `status="streaming"`: send becomes Stop (`onStop`)
  *   attached   pass chips (AttachmentChip) as `attachments` and they sit above the field
@@ -59,7 +59,7 @@ const LINE = 24;
 export const PromptComposer = React.forwardRef<HTMLTextAreaElement, PromptComposerProps>(
   ({
     value, defaultValue = '', onValueChange, placeholder = 'Ask anything, or type / for skills', status = 'idle', onSubmit, onStop,
-    onAttach, onVoice, attachments, actions, maxRows = 8, glow = 'pulse', disabled, autoFocus, 'aria-label': ariaLabel = 'Message', className,
+    onAttach, onVoice, attachments, actions, maxRows = 8, glow = 'once', disabled, autoFocus, 'aria-label': ariaLabel = 'Message', className,
   }, forwarded) => {
     const [inner, setInner] = React.useState(defaultValue);
     const text = value !== undefined ? value : inner;
