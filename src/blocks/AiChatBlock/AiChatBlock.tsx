@@ -74,15 +74,15 @@ const SEED: Turn = {
   followUps: ['Draft the follow-ups', 'Show stalled deals'],
 };
 
-const DEMO_LINES = [
-  'Reading what you asked and which accounts it touches.',
-  'Pulling the latest activity for each account from the CRM.',
-  'Putting the answer together, shortest useful version first.',
+const DEMO_THOUGHTS = [
+  'They want the Q4 pipeline in a few lines, with the deals at risk called out. I should start from the opportunities closing this quarter, not the whole pipeline.',
+  'Acme has a $48,000 renewal and no reply since the proposal went out nine days ago. That silence is the biggest risk. Globex asked for a revised quote, so it is moving, just slowly.',
+  'Before I answer I will check the latest activity in the CRM, so the dates are right.',
 ];
 const DEMO_REPLY = 'Here is what I found. Two accounts need attention before Friday, and one renewal is already signed. I can draft the messages or pull the full activity timeline for either account, whichever you would like next.';
 
 /** Demo timing in ms. Real-time feel; shorten to speed the demo up. */
-const T = { firstLine: 1200, line: 2400, tool: 3200, word: 70 };
+const T = { firstLine: 1200, thinkWord: 60, paragraph: 700, tool: 3200, word: 70 };
 
 const TOOL_INPUT = { query: 'Acme Corp', limit: 5 };
 const TOOL_OUTPUT = { results: 3, top: 'Acme Corp (Enterprise, $48,000)', lastContact: '9 days ago' };
@@ -118,9 +118,19 @@ export const AiChatBlock: React.FC<AiChatBlockProps> = ({ className }) => {
     setTurns((t) => [...t, { id, prompt, phase: 'thinking', lines: [], elapsed: 0, summary: 'Checked the CRM and wrote an answer', toolRunning: false, reply: [], followUps: [] }]);
     const started = performance.now();
     const tick = window.setInterval(() => patch(id, { elapsed: (performance.now() - started) / 1000 }), 100);
-    // real-time pacing: a line of reasoning every couple of seconds, a tool call that takes a few, then the answer at reading speed
-    DEMO_LINES.forEach((l, i) => at(T.firstLine + i * T.line, () => setTurns((t) => t.map((x) => (x.id === id ? { ...x, lines: [...x.lines, l] } : x)))));
-    const toolAt = T.firstLine + DEMO_LINES.length * T.line;
+    // real-time pacing: the reasoning streams in word by word with a breath between paragraphs, a tool call takes a few
+    // seconds, then the answer arrives at reading speed
+    let cursor = T.firstLine;
+    DEMO_THOUGHTS.forEach((para, p) => {
+      const words = para.split(' ');
+      words.forEach((_, w) => {
+        const lines = [...DEMO_THOUGHTS.slice(0, p), words.slice(0, w + 1).join(' ')];
+        at(cursor, () => patch(id, { lines }));
+        cursor += T.thinkWord;
+      });
+      cursor += T.paragraph;
+    });
+    const toolAt = cursor;
     at(toolAt, () => { window.clearInterval(tick); patch(id, { phase: 'tool', toolRunning: true, elapsed: Math.round((performance.now() - started) / 1000) }); });   // thinking ends here, so the timer stops
     at(toolAt + T.tool, () => patch(id, { toolRunning: false }));
     at(toolAt + T.tool + 300, () => patch(id, { phase: 'writing' }));

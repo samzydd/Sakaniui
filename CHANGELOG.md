@@ -8,8 +8,10 @@ All notable changes to `@sakaniui/react` are documented here.
   you pass text and state, and they draw it.
   - **`AiMessage`**: one turn. `role="assistant"` is full-width text beside an ember-ringed avatar, with copy, regenerate and feedback
     actions once done (`streaming` hides them and ends the text with a slate caret); `role="user"` is a right-aligned bubble.
-  - **`ReasoningTrace`**: the thinking panel. `status="streaming"` turns a ray spinner, shimmers "Thinking" and counts the seconds, with
-    each new line clearing a soft blur; `status="done"` reads "Thought for 6s", shows a one-line `summary` when closed and folds open.
+  - **`ReasoningTrace`**: the thinking panel. `status="streaming"` turns a ray spinner, shimmers "Thinking" and counts whole seconds;
+    the reasoning streams in quietly (13/20, muted), each new word fading up out of a soft blur, inside a five-line window that glides
+    up as text arrives with the oldest line fading out at the top. Pass whole paragraphs or a paragraph growing word by word; only new
+    words animate. `status="done"` reads "Thought for 6s", shows a one-line `summary` when closed and folds open to the full reasoning.
   - **`ToolCall`**: the row an agent leaves when it calls a tool: a running ray spinner, a check or a cross, the call in code, its duration,
     and Input and Output panels when open.
   - **`ThinkingLoader`**: the status pill of an AI that is working: a ray spinner and a shimmering label ("Thinking", "Searching the web",
