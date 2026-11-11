@@ -3,6 +3,7 @@
    border (AiFocusRing, 1.5px, the Textarea's) replaces the plain one while the box has focus. */
 .root {
   --ai-radius: var(--radius-xl);
+  --ai-ring-opacity: 0.2;   /* the focus border is a soft 20% ember, not the Textarea's full strength (Figma: stroke 20%) */
   position: relative;
   display: flex;
   flex-direction: column;

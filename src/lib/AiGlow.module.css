@@ -54,7 +54,7 @@
   -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor;
   mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
 }
-:focus-within > .ring { opacity: 1; }
+:focus-within > .ring { opacity: var(--ai-ring-opacity, 1); }   /* a host can soften it: PromptComposer sets 0.2 */
 @media (prefers-reduced-motion: no-preference) {
   .ring { transition: opacity 160ms ease-out; }
 }
