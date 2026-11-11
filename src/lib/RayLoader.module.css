@@ -1,7 +1,9 @@
-/* RayLoader: eight rays, each starting its fade one eighth of a lap after the last. */
+/* RayLoader: eight rays turning clockwise. Ray i lights at i/8 of a lap and then fades, so the bright ray moves round with a
+   trail behind it. Still (reduced motion): ray 0 is the head and the rays counter-clockwise of it are the trail. */
 .rays { flex-shrink: 0; display: block; }
-.ray { opacity: calc(1 - var(--i) * 0.11); }
+.ray { opacity: max(0.14, calc(1 - (8 - var(--i)) * 0.11)); }
+.ray:first-child { opacity: 1; }
 @media (prefers-reduced-motion: no-preference) {
-  .ray { animation: ray 0.96s linear infinite; animation-delay: calc(var(--i) * -0.12s); opacity: 1; }
+  .ray { animation: ray 0.96s linear infinite; animation-delay: calc((var(--i) - 8) * 0.12s); opacity: 1; }
 }
 @keyframes ray { from { opacity: 1; } to { opacity: 0.14; } }

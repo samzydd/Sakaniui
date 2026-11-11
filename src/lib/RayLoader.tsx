@@ -2,7 +2,7 @@
  * RayLoader
  *
  * The working spinner of the AI parts: eight short rays round a point, each one fading a beat after the one before it, so a
- * bright ray appears to circle with a soft trail (0.96s a lap, stepped like an activity indicator). Takes its colour from
+ * bright ray circles clockwise with a soft trail behind it (0.96s a lap, stepped like an activity indicator). Takes its colour from
  * `currentColor`. Decorative (aria-hidden); whatever uses it says what is happening in text. Under prefers-reduced-motion it
  * stops and shows the trail frozen.
  */
