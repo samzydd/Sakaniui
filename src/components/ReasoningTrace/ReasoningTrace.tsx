@@ -3,7 +3,7 @@
  *
  * The thinking panel above a reply. Matches Figma "Reasoning Trace": State Streaming | Open | Closed.
  *
- *   streaming  a metal ring turns, the "Thinking" label shimmers, the seconds count, and each new line clears a soft 6px blur
+ *   streaming  a ray spinner turns, the "Thinking" label shimmers, the seconds count, and each new line clears a soft 6px blur
  *              (180ms) with a slate caret at the write frontier. Always open.
  *   done       the ring closes into a brain, the label reads "Thought for 6s". Closed it shows `summary` on the same row and
  *              a chevron pointing right; open, the lines fold down (320ms) and the chevron turns to point down (240ms).
@@ -18,7 +18,7 @@ import { IconBrain } from '../../icons/outline/brain';
 import { IconChevronDown } from '../../icons/outline/chevron-down';
 import { IconChevronRight } from '../../icons/outline/chevron-right';
 import { iconStrokeWidth } from '../../lib/iconStrokeWidth';
-import { MetalRing } from '../../lib/MetalRing';
+import { RayLoader } from '../../lib/RayLoader';
 import styles from './ReasoningTrace.module.css';
 
 export type ReasoningTraceStatus = 'streaming' | 'done';
@@ -53,7 +53,7 @@ export const ReasoningTrace: React.FC<ReasoningTraceProps> = ({
     <div className={[styles.root, streaming ? styles['root--streaming'] : '', className ?? ''].filter(Boolean).join(' ')} data-open={isOpen || undefined}>
       <button type="button" className={styles.header} onClick={toggle} aria-expanded={isOpen} aria-controls={id} disabled={streaming}>
         <span className={styles.label}>
-          {streaming ? <MetalRing size={14} /> : <IconBrain size={16} strokeWidth={iconStrokeWidth(16)} className={styles.brain} aria-hidden="true" />}
+          {streaming ? <RayLoader size={16} /> : <IconBrain size={16} strokeWidth={iconStrokeWidth(16)} className={styles.brain} aria-hidden="true" />}
           <span className={[styles.title, streaming ? styles['title--shimmer'] : ''].filter(Boolean).join(' ')}>
             {streaming ? 'Thinking' : `Thought${elapsed !== undefined ? ` for ${fmt(elapsed, 0)}` : ''}`}
           </span>

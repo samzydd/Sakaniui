@@ -133,6 +133,7 @@ export * from './components/Switch';
 export * from './components/Table';
 export * from './components/Tabs';
 export * from './components/Textarea';
+export * from './components/ThinkingLoader';
 export * from './components/Toast';
 export * from './components/ToolCall';
 export * from './components/Tooltip';

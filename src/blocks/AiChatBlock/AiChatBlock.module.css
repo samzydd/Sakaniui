@@ -16,6 +16,7 @@
 .scroll { flex: 1; min-height: 0; overflow-y: auto; }
 .thread { display: flex; flex-direction: column; gap: var(--space-20); box-sizing: border-box; width: 100%; max-width: 808px; margin: 0 auto; padding: var(--space-24); }
 .followUps { display: flex; flex-wrap: wrap; gap: var(--space-8); }
+.status { display: flex; }
 
 .dock { flex-shrink: 0; padding: 0 var(--space-24) var(--space-16); box-sizing: border-box; }
 .composer { display: flex; flex-direction: column; gap: var(--space-8); width: 100%; max-width: 760px; margin: 0 auto; }

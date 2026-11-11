@@ -16,7 +16,7 @@
  *                                │   └─ SuggestionChip (follow-up) row
  *                                └─ dock: PromptComposer, ComposerOptions, a disclaimer
  *
- * It is live: send a message and it plays a reply (thinking, a tool call, then text arriving) so the streaming states
+ * It is live: send a message and it plays a reply (thinking, a tool call, then text arriving, with a ThinkingLoader pill that names the step) so the streaming states
  * show. `runDemoReply` below is that script; replace it with your model's stream.
  */
 
@@ -29,6 +29,7 @@ import { IconButton } from '../../components/IconButton';
 import { AiMessage } from '../../components/AiMessage';
 import { ReasoningTrace } from '../../components/ReasoningTrace';
 import { ToolCall } from '../../components/ToolCall';
+import { ThinkingLoader } from '../../components/ThinkingLoader';
 import { SuggestionChip } from '../../components/SuggestionChip';
 import { PromptComposer } from '../../components/PromptComposer';
 import { AiSidebar } from './parts/AiSidebar';
@@ -186,6 +187,9 @@ export const AiChatBlock: React.FC<AiChatBlockProps> = ({ className }) => {
                 </React.Fragment>
               );
             })}
+            {streaming && last.phase !== 'thinking' && (
+              <div className={styles.status}><ThinkingLoader label={last.phase === 'tool' ? 'Searching the CRM' : 'Writing response'} /></div>
+            )}
           </div>
         </div>
 

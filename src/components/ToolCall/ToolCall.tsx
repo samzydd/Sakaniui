@@ -3,7 +3,7 @@
  *
  * The row an agent leaves when it calls a tool. Matches Figma "Tool Call": Status Running | Done | Error x Open | Closed.
  *
- *   header   a status mark (a turning metal ring, a green check, a red cross), the call as code ("search_crm" then its
+ *   header   a status mark (a turning ray spinner, a green check, a red cross), the call as code ("search_crm" then its
  *            arguments, muted), the duration, and a chevron
  *   details  when open: an Input and an Output panel on bg/subtle. While running the output reads "Waiting for the result…";
  *            on error it is tinted danger.
@@ -17,7 +17,7 @@ import { IconCircleCheck } from '../../icons/outline/circle-check';
 import { IconCircleX } from '../../icons/outline/circle-x';
 import { IconChevronRight } from '../../icons/outline/chevron-right';
 import { iconStrokeWidth } from '../../lib/iconStrokeWidth';
-import { MetalRing } from '../../lib/MetalRing';
+import { RayLoader } from '../../lib/RayLoader';
 import styles from './ToolCall.module.css';
 
 export type ToolCallStatus = 'running' | 'done' | 'error';
@@ -56,7 +56,7 @@ export const ToolCall: React.FC<ToolCallProps> = ({
       <button type="button" className={styles.header} onClick={toggle} aria-expanded={isOpen} aria-controls={id} disabled={!hasDetails}>
         <span className={styles.call}>
           <span className={styles.status} role="img" aria-label={label}>
-            {status === 'running' ? <MetalRing size={14} />
+            {status === 'running' ? <RayLoader size={16} />
               : status === 'error' ? <IconCircleX size={16} strokeWidth={iconStrokeWidth(16)} />
               : <IconCircleCheck size={16} strokeWidth={iconStrokeWidth(16)} />}
           </span>

@@ -1,0 +1,26 @@
+/* ThinkingLoader: Figma "Thinking Loader". A 32px pill: 1px border/default, surface fill, 10px left and 14px right padding,
+   an 8px gap between the 16px rays and the label (Geist Medium 14/20). The label is fg/muted with a pale band of fg/default
+   travelling through it (1.6s). */
+.root {
+  display: inline-flex; align-items: center; gap: var(--space-8);
+  height: 32px; box-sizing: border-box; padding: 0 var(--space-14, 14px) 0 var(--space-10, 10px);
+  font-family: var(--font-sans);
+  color: var(--color-fg-muted);
+  background: var(--color-bg-surface);
+  border: var(--border-width-100, 1px) solid var(--color-border-default);
+  border-radius: var(--radius-full);
+}
+.text { display: inline-block; overflow: hidden; white-space: nowrap; font-size: 14px; font-weight: 500; line-height: 20px; }
+.label { display: inline-block; color: var(--color-fg-muted); }
+
+@media (prefers-reduced-motion: no-preference) {
+  .text { transition: width 260ms cubic-bezier(0.4, 0, 0.2, 1); }
+  .label {
+    background: linear-gradient(100deg, var(--color-fg-muted) 35%, var(--color-fg-default) 50%, var(--color-fg-muted) 65%) 100% 0 / 250% 100%;
+    -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: shimmer 1.6s linear infinite, label-in 220ms ease-out both;
+  }
+}
+@keyframes shimmer { to { background-position: -100% 0; } }
+@keyframes label-in { from { opacity: 0; filter: blur(4px); } to { opacity: 1; filter: none; } }

@@ -1,0 +1,7 @@
+/* RayLoader: eight rays, each starting its fade one eighth of a lap after the last. */
+.rays { flex-shrink: 0; display: block; }
+.ray { opacity: calc(1 - var(--i) * 0.11); }
+@media (prefers-reduced-motion: no-preference) {
+  .ray { animation: ray 0.96s linear infinite; animation-delay: calc(var(--i) * -0.12s); opacity: 1; }
+}
+@keyframes ray { from { opacity: 1; } to { opacity: 0.14; } }

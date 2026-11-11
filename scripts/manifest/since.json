@@ -181,6 +181,7 @@
   "export:@sakaniui/react:Tags": "0.1.0",
   "export:@sakaniui/react:TeamCard": "0.3.0",
   "export:@sakaniui/react:Textarea": "0.1.0",
+  "export:@sakaniui/react:ThinkingLoader": "0.15.0",
   "export:@sakaniui/react:Ticker": "0.1.0",
   "export:@sakaniui/react:Toast": "0.1.0",
   "export:@sakaniui/react:Toaster": "0.9.0",
@@ -382,6 +383,7 @@
   "src/components/Table/Table.tsx": "0.1.0",
   "src/components/Tabs/Tabs.tsx": "0.1.0",
   "src/components/Textarea/Textarea.tsx": "0.1.0",
+  "src/components/ThinkingLoader/ThinkingLoader.tsx": "0.15.0",
   "src/components/Toast/Toast.tsx": "0.1.0",
   "src/components/ToolCall/ToolCall.tsx": "0.15.0",
   "src/components/Tooltip/Tooltip.tsx": "0.1.0",
@@ -391,6 +393,7 @@
   "src/lib/ChartTooltip.tsx": "0.1.0",
   "src/lib/LiquidGlass.tsx": "0.4.0",
   "src/lib/MetalRing.tsx": "0.15.0",
+  "src/lib/RayLoader.tsx": "0.15.0",
   "src/lib/SakaniLogo.tsx": "0.3.22",
   "src/lib/useHoverHighlight.tsx": "0.3.21"
 }

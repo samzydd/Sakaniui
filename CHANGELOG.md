@@ -8,13 +8,15 @@ All notable changes to `@sakaniui/react` are documented here.
   you pass text and state, and they draw it.
   - **`AiMessage`**: one turn. `role="assistant"` is full-width text beside a metal-ringed avatar, with copy, regenerate and feedback
     actions once done (`streaming` hides them and ends the text with a slate caret); `role="user"` is a right-aligned bubble.
-  - **`ReasoningTrace`**: the thinking panel. `status="streaming"` turns a metal ring, shimmers "Thinking" and counts the seconds, with
+  - **`ReasoningTrace`**: the thinking panel. `status="streaming"` turns a ray spinner, shimmers "Thinking" and counts the seconds, with
     each new line clearing a soft blur; `status="done"` reads "Thought for 6s", shows a one-line `summary` when closed and folds open.
-  - **`ToolCall`**: the row an agent leaves when it calls a tool: a running ring, a check or a cross, the call in code, its duration,
+  - **`ToolCall`**: the row an agent leaves when it calls a tool: a running ray spinner, a check or a cross, the call in code, its duration,
     and Input and Output panels when open.
+  - **`ThinkingLoader`**: the status pill of an AI that is working: a ray spinner and a shimmering label ("Thinking", "Searching the web",
+    "Writing response"). Change `label` and the text crossfades while the pill grows or shrinks to fit.
   - **`SuggestionChip`**: a suggested prompt, `variant="starter"` (a card with a hint, for the empty screen) or `"follow-up"` (a pill under a reply).
   - **`PromptComposer`**: the prompt box. It grows with the text up to `maxRows`, Enter sends, send becomes Stop while
-    `status="streaming"`, and the ember border of `Textarea variant="ai"` draws in on focus. The model picker is not inside it: put it in `actions` or in a row under the box.
+    `status="streaming"`, the ember light of `Textarea variant="ai"` sweeps the border while idle (`glow`) and a soft 20% ember border draws in on focus. The model picker is not inside it: put it in `actions` or in a row under the box.
   - **`AttachmentChip`**: a file, an image, an upload in progress (a metal progress line) or an error.
 - **New blocks: `AiChatBlock` and `AiWelcomeBlock`**, composition examples built from the Sidebar parts plus the components above. The chat
   block is live: send a message and it plays a reply (thinking, a tool call, then text arriving) so the streaming states show.
