@@ -53,7 +53,7 @@ export const ReasoningTrace: React.FC<ReasoningTraceProps> = ({
     <div className={[styles.root, streaming ? styles['root--streaming'] : '', className ?? ''].filter(Boolean).join(' ')} data-open={isOpen || undefined}>
       <button type="button" className={styles.header} onClick={toggle} aria-expanded={isOpen} aria-controls={id} disabled={streaming}>
         <span className={styles.label}>
-          {streaming ? <RayLoader size={16} /> : <IconBrain size={16} strokeWidth={iconStrokeWidth(16)} className={styles.brain} aria-hidden="true" />}
+          {streaming ? <RayLoader size={16} beat /> : <IconBrain size={16} strokeWidth={iconStrokeWidth(16)} className={styles.brain} aria-hidden="true" />}
           <span className={[styles.title, streaming ? styles['title--shimmer'] : ''].filter(Boolean).join(' ')}>
             {streaming ? 'Thinking' : `Thought${elapsed !== undefined ? ` for ${fmt(elapsed, 0)}` : ''}`}
           </span>

@@ -12,9 +12,10 @@ import styles from './RayLoader.module.css';
 
 const RAYS = [0, 1, 2, 3, 4, 5, 6, 7];
 
-export const RayLoader: React.FC<{ size?: number; className?: string }> = ({ size = 16, className }) => (
+/** `beat` makes the whole spinner give one soft pulse every 1.6s, timed to the shimmer of a label beside it (see ThinkingLoader). */
+export const RayLoader: React.FC<{ size?: number; className?: string; beat?: boolean }> = ({ size = 16, className, beat }) => (
   <svg
-    className={[styles.rays, className ?? ''].filter(Boolean).join(' ')}
+    className={[styles.rays, beat ? styles['rays--beat'] : '', className ?? ''].filter(Boolean).join(' ')}
     width={size}
     height={size}
     viewBox="0 0 16 16"

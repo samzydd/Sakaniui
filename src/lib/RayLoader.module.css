@@ -7,3 +7,10 @@
   .ray { animation: ray 0.96s linear infinite; animation-delay: calc((var(--i) - 8) * 0.12s); opacity: 1; }
 }
 @keyframes ray { from { opacity: 1; } to { opacity: 0.14; } }
+
+/* The beat: one soft pulse per shimmer lap (1.6s), peaking as the pale band is about to leave the left edge of the label, so the
+   spinner looks to push it out. Both animations start together when the pair mounts and are never restarted, so they stay in step. */
+@media (prefers-reduced-motion: no-preference) {
+  .rays--beat { transform-origin: 50% 50%; animation: beat 1.6s ease-out infinite; }
+}
+@keyframes beat { 0% { transform: scale(1); } 5% { transform: scale(1.18); } 16% { transform: scale(0.96); } 30%, 100% { transform: scale(1); } }
