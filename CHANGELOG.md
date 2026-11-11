@@ -8,6 +8,9 @@ All notable changes to `@sakaniui/react` are documented here.
   you pass text and state, and they draw it.
   - **`AiMessage`**: one turn. `role="assistant"` is full-width text beside an ember-ringed avatar, with copy, regenerate and feedback
     actions once done (`streaming` hides them and ends the text with a slate caret); `role="user"` is a right-aligned bubble.
+  - **`ChatOrb`**: the AI's face, now the assistant avatar in `AiMessage` in place of the ember-ringed sparkles. A soft white sphere with
+    two black eyes that turn toward the pointer anywhere on the page (easing, never snapping) and blink every 3 to 6 seconds. `size`,
+    `look`, `blink`, `label`; decorative by default; still under reduced motion.
   - **`ReasoningTrace`**: the thinking panel. `status="streaming"` turns a ray spinner, shimmers "Thinking" and counts whole seconds;
     the reasoning streams in quietly (13/20, muted), each new word fading up out of a soft blur, inside a five-line window that glides
     up as text arrives with the oldest line fading out at the top. Pass whole paragraphs or a paragraph growing word by word; only new
