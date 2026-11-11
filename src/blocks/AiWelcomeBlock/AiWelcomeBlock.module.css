@@ -6,7 +6,7 @@
 
 .prompt { display: flex; flex-direction: column; align-items: center; gap: var(--space-36); }
 .greeting { display: flex; align-items: center; gap: var(--space-14); margin: 0; font-size: 40px; font-weight: 500; line-height: 48px; letter-spacing: -0.01em; color: var(--color-fg-default); }
-.mark { flex-shrink: 0; color: var(--ai-metal-1); }
+.mark { flex-shrink: 0; }
 .composer { display: flex; flex-direction: column; gap: var(--space-12); width: 100%; }
 
 .recent { display: flex; flex-direction: column; gap: var(--space-14); }
@@ -33,12 +33,12 @@
 
 .bars { display: flex; align-items: flex-end; justify-content: center; gap: 10px; width: 100%; padding-bottom: 14px; box-sizing: border-box; }
 .bar { width: 12px; border-radius: var(--radius-xs); background: var(--color-border-strong); }
-.bar--accent { background: var(--ai-metal-1); }
+.bar--accent { background: var(--ai-ember-1); }
 
 .email { display: flex; flex-direction: column; gap: 8px; width: 100%; padding: 18px 20px; box-sizing: border-box; }
 .email > * { flex-shrink: 0; }
 .emailHead { display: flex; align-items: center; gap: 8px; }
-.dot { width: 16px; height: 16px; border-radius: 50%; background: var(--ai-metal-3); }
+.dot { width: 16px; height: 16px; border-radius: 50%; background: var(--ai-ember-gradient); }
 .emailName { display: flex; flex-direction: column; gap: 4px; }
 .emailName > span:nth-child(1) { width: 70px; height: 6px; border-radius: 3px; background: var(--color-border-strong); }
 .emailName > span:nth-child(2) { width: 44px; height: 5px; border-radius: 3px; background: var(--color-border-default); }
@@ -49,7 +49,7 @@
 .ringArc {
   position: absolute; inset: 0; border-radius: 50%;
   background:
-    conic-gradient(from 0deg, var(--ai-metal-0), var(--ai-metal-2) 0.2turn, var(--ai-metal-4) 0.4turn, var(--ai-metal-5) 0.72turn, transparent 0.72turn),
+    conic-gradient(from 0deg, var(--ai-ember-0), var(--ai-ember-1) 0.2turn, var(--ai-ember-3) 0.4turn, var(--ai-ember-5) 0.72turn, transparent 0.72turn),
     var(--color-border-default);
   -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 7px), #000 calc(100% - 7px));
   mask: radial-gradient(farthest-side, transparent calc(100% - 7px), #000 calc(100% - 7px));

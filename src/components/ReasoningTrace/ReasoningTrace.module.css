@@ -43,10 +43,10 @@
 }
 @keyframes line-in { from { opacity: 0; filter: blur(6px); } to { opacity: 1; filter: none; } }
 
-/* the slate caret at the write frontier */
+/* the violet caret at the write frontier */
 .root--streaming .lines > :last-child::after {
   content: ''; display: inline-block; width: 2px; height: 14px; margin-left: 2px; vertical-align: -2px;
-  background: var(--ai-metal-1); border-radius: 1px; animation: caret 1s steps(1) infinite;
+  background: var(--ai-ember-1); border-radius: 1px; animation: caret 1s steps(1) infinite;
 }
 @keyframes caret { 50% { opacity: 0; } }
 @media (prefers-reduced-motion: reduce) {

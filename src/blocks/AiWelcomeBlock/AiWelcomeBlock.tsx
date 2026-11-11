@@ -7,13 +7,13 @@
  * Architecture (read from the Figma block, 1440x900):
  *
  *   app sidebar (AiSidebar)      main (content centred, a little above the middle)
- *   "New chat" open              ├─ greeting: a metal sparkle and "Good afternoon, Samuel" (40px)
+ *   "New chat" open              ├─ greeting: an ember sparkle and "Good afternoon, Samuel" (40px)
  *                                ├─ PromptComposer, then ComposerOptions under it
  *                                └─ "Recent work": three preview cards (a chart, an email, a forecast)
  */
 
 import React from 'react';
-import { IconSparkles } from '../../icons/outline/sparkles';
+import { AiGlyph } from '../../lib/AiGlyph';
 import { iconStrokeWidth } from '../../lib/iconStrokeWidth';
 import { PromptComposer } from '../../components/PromptComposer';
 import { AiSidebar } from '../AiChatBlock/parts/AiSidebar';
@@ -77,7 +77,7 @@ export const AiWelcomeBlock: React.FC<AiWelcomeBlockProps> = ({ greeting = 'Good
         <div className={styles.content}>
           <div className={styles.prompt}>
             <h1 className={styles.greeting}>
-              <IconSparkles size={34} strokeWidth={iconStrokeWidth(34)} className={styles.mark} aria-hidden="true" />
+              <AiGlyph size={34} strokeWidth={iconStrokeWidth(34)} className={styles.mark} />
               <span>{greeting}, {name}</span>
             </h1>
             <div className={styles.composer}>

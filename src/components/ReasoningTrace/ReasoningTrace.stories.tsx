@@ -7,7 +7,7 @@ const meta = {
   tags: ['autodocs'],
   parameters: { docs: { description: { component: `The thinking panel above a reply. Matches the Figma "Reasoning Trace" set: Streaming, Open, Closed.
 
-- **streaming**: a metal ring turns, "Thinking" shimmers, the seconds count and each new line clears a soft blur, with a slate caret at the write frontier.
+- **streaming**: a ray spinner turns, "Thinking" shimmers, the seconds count and each new line clears a soft blur, with a violet caret at the write frontier.
 - **done**: reads "Thought for 6s"; closed it shows \`summary\`, open the lines fold down.
 - Pass the reasoning as children, one paragraph per line. Presentational: append lines as they arrive, then set \`status="done"\` with the final \`elapsed\`.` } } },
   decorators: [(S) => <div style={{ width: 520, maxWidth: '100%', padding: 24, boxSizing: 'border-box' }}><S /></div>],

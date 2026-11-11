@@ -1,4 +1,4 @@
-/* AiMessage: Figma "AI Message". Assistant: a row, gap 12, a 28px avatar (surface, a 1.5px metal gradient border, a slate
+/* AiMessage: Figma "AI Message". Assistant: a row, gap 12, a 28px avatar (surface, a 1.5px ember gradient border, an ember
    sparkle) and a column, gap 12, of text (Geist Medium 16/24, paragraphs 12px apart) and a 2px-gap row of ghost icon buttons.
    User: a right-aligned bubble, bg/subtle, radius-2xl, padding 10/16, body/md. */
 .assistant {
@@ -14,9 +14,8 @@
   display: inline-flex; align-items: center; justify-content: center;
   box-sizing: border-box;
   width: 28px; height: 28px; border-radius: var(--radius-full);
-  color: var(--ai-metal-1);
   border: 1.5px solid transparent;
-  background: linear-gradient(var(--color-bg-surface), var(--color-bg-surface)) padding-box, var(--ai-metal-gradient) border-box;
+  background: linear-gradient(var(--color-bg-surface), var(--color-bg-surface)) padding-box, var(--ai-ember-gradient) border-box;
 }
 .content { display: flex; flex-direction: column; gap: var(--space-12); flex: 1; min-width: 0; }
 .text { font-size: 16px; font-weight: 500; line-height: 24px; color: var(--color-fg-default); }
@@ -24,14 +23,14 @@
 .text > * + * { margin-top: var(--space-12); }
 .actions { display: flex; gap: var(--space-2); margin-left: calc(var(--space-8) * -1); }
 
-/* the write frontier: a slate caret after the last character */
+/* the write frontier: a violet caret after the last character */
 .assistant--streaming .text > :last-child::after {
   content: '';
   display: inline-block;
   width: 2px; height: 18px;
   margin-left: 2px;
   vertical-align: -3px;
-  background: var(--ai-metal-1);
+  background: var(--ai-ember-1);
   border-radius: 1px;
   animation: caret 1s steps(1) infinite;
 }

@@ -3,7 +3,7 @@
  *
  * One turn of an AI conversation. Matches Figma "AI Message": Role Assistant (State Streaming | Done) or User.
  *
- *   assistant  full-width text beside a metal-ringed avatar; a row of copy, regenerate and feedback actions under it once done
+ *   assistant  full-width text beside an ember-ringed avatar; a row of copy, regenerate and feedback actions under it once done
  *   user       a right-aligned bubble
  *
  * `streaming` hides the actions and ends the text with a slate caret. Paragraphs: pass several children (or <p>s) and they sit
@@ -12,7 +12,7 @@
  */
 
 import React from 'react';
-import { IconSparkles } from '../../icons/outline/sparkles';
+import { AiGlyph } from '../../lib/AiGlyph';
 import { IconCopy } from '../../icons/outline/copy';
 import { IconRefresh } from '../../icons/outline/refresh';
 import { IconThumbUp } from '../../icons/outline/thumb-up';
@@ -50,7 +50,7 @@ export const AiMessage: React.FC<AiMessageProps> = ({
   const paragraphs = React.Children.toArray(children).map((c, i) => (typeof c === 'string' || typeof c === 'number' ? <p key={i}>{c}</p> : c));
   return (
     <div className={[styles.assistant, streaming ? styles['assistant--streaming'] : '', className ?? ''].filter(Boolean).join(' ')}>
-      <span className={styles.avatar} aria-hidden="true"><IconSparkles size={14} strokeWidth={iconStrokeWidth(14)} /></span>
+      <span className={styles.avatar} aria-hidden="true"><AiGlyph size={14} strokeWidth={iconStrokeWidth(14)} /></span>
       <div className={styles.content}>
         <div className={styles.text} aria-live={streaming ? 'polite' : undefined} aria-busy={streaming || undefined}>{paragraphs}</div>
         {!streaming && actions !== false && (

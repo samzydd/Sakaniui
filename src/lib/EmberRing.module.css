@@ -1,6 +1,6 @@
-/* MetalRing: the working ring of every AI part (thinking, a running tool call, an upload). An arc of about 280 degrees in the
-   metal gradient, dark tail to pale head, that turns once a second. Figma: an ellipse arc (end 1.55 pi, inner radius 0.74) filled
-   with the metal gradient. Still under reduced motion. */
+/* EmberRing: the progress ring of an upload in an AI part. An arc of about 280 degrees in the
+   ember gradient, cool tail to hot head, that turns once a second. Figma: an ellipse arc (end 1.55 pi, inner radius 0.74) filled
+   with the ember gradient. Still under reduced motion. */
 .ring {
   --ring-w: 2px;
   flex-shrink: 0;
@@ -11,13 +11,13 @@
   background: conic-gradient(
     from 0deg,
     transparent 0turn,
-    var(--ai-metal-0) 0.06turn,
-    var(--ai-metal-1) 0.2turn,
-    var(--ai-metal-2) 0.34turn,
-    var(--ai-metal-3) 0.48turn,
-    var(--ai-metal-4) 0.6turn,
-    var(--ai-metal-5) 0.7turn,
-    var(--ai-metal-6) 0.775turn,
+    var(--ai-ember-0) 0.06turn,
+    var(--ai-ember-1) 0.2turn,
+    var(--ai-ember-2) 0.34turn,
+    var(--ai-ember-3) 0.48turn,
+    var(--ai-ember-4) 0.6turn,
+    var(--ai-ember-5) 0.7turn,
+    var(--ai-ember-6) 0.775turn,
     transparent 0.775turn
   );
   -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - var(--ring-w)), #000 calc(100% - var(--ring-w)));

@@ -5,7 +5,7 @@
  *
  *   file       an icon tile, the name and a meta line ("PDF · 2.4 MB")
  *   image      the same with a thumbnail (`preview`) in the tile
- *   uploading  a metal ring in the tile and a metal progress line along the bottom (`progress`, 0-100)
+ *   uploading  an ember ring in the tile and an ember progress line along the bottom (`progress`, 0-100)
  *   error      a danger tile, border and meta line
  *
  * It arrives scaling from 0.96 and fading in (180ms); `progress` eases between values (160ms). Pass `onRemove` for the x.
@@ -17,7 +17,7 @@ import { IconPhoto } from '../../icons/outline/photo';
 import { IconAlertTriangle } from '../../icons/outline/alert-triangle';
 import { IconX } from '../../icons/outline/x';
 import { iconStrokeWidth } from '../../lib/iconStrokeWidth';
-import { MetalRing } from '../../lib/MetalRing';
+import { EmberRing } from '../../lib/EmberRing';
 import styles from './AttachmentChip.module.css';
 
 export type AttachmentChipType = 'file' | 'image' | 'uploading' | 'error';
@@ -43,7 +43,7 @@ export const AttachmentChip: React.FC<AttachmentChipProps> = ({ type = 'file', n
     <div className={[styles.chip, styles[`chip--${type}`], className ?? ''].filter(Boolean).join(' ')}>
       <div className={styles.row}>
         <span className={styles.preview} aria-hidden="true" style={type === 'image' && preview ? { backgroundImage: `url(${preview})` } : undefined}>
-          {type === 'uploading' ? <MetalRing size={14} />
+          {type === 'uploading' ? <EmberRing size={14} />
             : type === 'error' ? <IconAlertTriangle size={16} strokeWidth={iconStrokeWidth(16)} />
             : type === 'image' ? (preview ? null : <IconPhoto size={16} strokeWidth={iconStrokeWidth(16)} />)
             : <IconFileText size={16} strokeWidth={iconStrokeWidth(16)} />}

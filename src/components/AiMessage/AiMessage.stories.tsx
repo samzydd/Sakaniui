@@ -7,7 +7,7 @@ const meta = {
   tags: ['autodocs'],
   parameters: { docs: { description: { component: `One turn of an AI conversation. Matches the Figma "AI Message" set: Role Assistant (Streaming or Done) or User.
 
-- **assistant**: full-width text beside a metal-ringed avatar, with copy, regenerate and feedback actions once done.
+- **assistant**: full-width text beside an ember-ringed avatar, with copy, regenerate and feedback actions once done.
 - **user**: a right-aligned bubble.
 - \`streaming\` hides the actions and ends the text with a slate caret. Pass several children for paragraphs.` } } },
   decorators: [(S) => <div style={{ width: 560, maxWidth: '100%', padding: 24, boxSizing: 'border-box' }}><S /></div>],

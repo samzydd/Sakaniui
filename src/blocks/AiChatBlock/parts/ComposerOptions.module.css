@@ -8,5 +8,5 @@
 }
 .option:hover { background: var(--color-bg-subtle); color: var(--color-fg-default); }
 .option:focus-visible { outline: 2px solid var(--color-border-focus); outline-offset: 1px; }
-.accent { color: var(--ai-metal-1); }
+.accent { color: var(--ai-ember-1); }
 .extra { opacity: 0.6; }

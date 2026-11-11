@@ -1,5 +1,5 @@
 /* AttachmentChip: Figma "Attachment Chip". 240 wide, radius-lg, border/subtle; the row is padding 6/8/6/6, gap 10, a 32px tile
-   (radius-md); name label/sm, meta 13/18 muted. Uploading adds a 3px metal progress line along the bottom. */
+   (radius-md); name label/sm, meta 13/18 muted. Uploading adds a 3px ember progress line along the bottom. */
 .chip {
   position: relative;
   display: flex;
@@ -45,5 +45,5 @@
 .remove:focus-visible { outline: 2px solid var(--color-border-focus); outline-offset: 1px; }
 
 .track { height: 3px; background: var(--color-bg-muted); }
-.fill { height: 100%; background: var(--ai-metal-gradient); transition: width 160ms ease-out; }
+.fill { height: 100%; background: var(--ai-ember-gradient); transition: width 160ms ease-out; }
 @media (prefers-reduced-motion: reduce) { .fill { transition: none; } }

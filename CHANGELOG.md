@@ -6,7 +6,7 @@ All notable changes to `@sakaniui/react` are documented here.
 
 - **New: the AI conversation parts**, built from the new *AI Components* and *AI Blocks* pages in Figma. Presentational, with no AI SDK:
   you pass text and state, and they draw it.
-  - **`AiMessage`**: one turn. `role="assistant"` is full-width text beside a metal-ringed avatar, with copy, regenerate and feedback
+  - **`AiMessage`**: one turn. `role="assistant"` is full-width text beside an ember-ringed avatar, with copy, regenerate and feedback
     actions once done (`streaming` hides them and ends the text with a slate caret); `role="user"` is a right-aligned bubble.
   - **`ReasoningTrace`**: the thinking panel. `status="streaming"` turns a ray spinner, shimmers "Thinking" and counts the seconds, with
     each new line clearing a soft blur; `status="done"` reads "Thought for 6s", shows a one-line `summary` when closed and folds open.
@@ -17,11 +17,11 @@ All notable changes to `@sakaniui/react` are documented here.
   - **`SuggestionChip`**: a suggested prompt, `variant="starter"` (a card with a hint, for the empty screen) or `"follow-up"` (a pill under a reply).
   - **`PromptComposer`**: the prompt box. It grows with the text up to `maxRows`, Enter sends, send becomes Stop while
     `status="streaming"`, the ember light of `Textarea variant="ai"` sweeps the border while idle (`glow`) and a soft 20% ember border draws in on focus. The model picker is not inside it: put it in `actions` or in a row under the box.
-  - **`AttachmentChip`**: a file, an image, an upload in progress (a metal progress line) or an error.
+  - **`AttachmentChip`**: a file, an image, an upload in progress (an ember ring and progress line) or an error.
 - **New blocks: `AiChatBlock` and `AiWelcomeBlock`**, composition examples built from the Sidebar parts plus the components above. The chat
   block is live: send a message and it plays a reply (thinking, a tool call, then text arriving) so the streaming states show.
-- **New tokens: `--ai-metal-0` to `--ai-metal-6` and `--ai-metal-gradient`** (light and dark): graphite and silver steel with a hint of
-  slate blue and champagne, the look of anything AI.
+- **New tokens: `--ai-ember-0` to `--ai-ember-6` and `--ai-ember-gradient`**: the gradient of everything AI, the ember of `Textarea variant="ai"`
+  (indigo, violet, magenta, red, orange, amber, pale gold). Used by the assistant avatar and mark, the attachment progress and the welcome cards.
 
 ## 0.14.1
 

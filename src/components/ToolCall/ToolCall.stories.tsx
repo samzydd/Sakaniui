@@ -7,7 +7,7 @@ const meta = {
   tags: ['autodocs'],
   parameters: { docs: { description: { component: `The row an agent leaves when it calls a tool. Matches the Figma "Tool Call" set: Status Running, Done, Error x Open, Closed.
 
-The header shows a status mark (a turning metal ring, a check, a cross), the call as code, its duration and a chevron; open, it shows Input and Output panels. \`input\` and \`output\` take a string or any value (shown as JSON). Presentational: you set \`status\` and \`duration\` as the call progresses.` } } },
+The header shows a status mark (a turning ray spinner, a check, a cross), the call as code, its duration and a chevron; open, it shows Input and Output panels. \`input\` and \`output\` take a string or any value (shown as JSON). Presentational: you set \`status\` and \`duration\` as the call progresses.` } } },
   decorators: [(S) => <div style={{ width: 520, maxWidth: '100%', padding: 24, boxSizing: 'border-box' }}><S /></div>],
   args: { name: 'search_crm', args: '(query="Acme Corp")', input: { query: 'Acme Corp', limit: 5 } },
 } satisfies Meta<typeof ToolCall>;

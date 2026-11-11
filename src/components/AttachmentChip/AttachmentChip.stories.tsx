@@ -7,7 +7,7 @@ const meta = {
   tags: ['autodocs'],
   parameters: { docs: { description: { component: `A file or image attached to a prompt. Matches the Figma "Attachment Chip" set: File, Image, Uploading, Error.
 
-Uploading shows a metal ring and a metal progress line (\`progress\`, 0-100). Pass \`onRemove\` for the x.` } } },
+Uploading shows an ember ring and an ember progress line (\`progress\`, 0-100). Pass \`onRemove\` for the x.` } } },
   decorators: [(S) => <div style={{ padding: 24 }}><S /></div>],
   args: { name: 'q3-report.pdf', meta: 'PDF · 2.4 MB', onRemove: () => {} },
 } satisfies Meta<typeof AttachmentChip>;
