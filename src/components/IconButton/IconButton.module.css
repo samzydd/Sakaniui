@@ -31,29 +31,39 @@
 .button--primary {
   transition: background-color var(--transition-base), color var(--transition-base), border-color var(--transition-base), box-shadow var(--transition-base), opacity var(--transition-base), transform var(--transition-hover);
  background: var(--color-accent-default); color: var(--color-fg-on-accent); border-color: var(--color-accent-default); }
-.button--primary:hover:not(:disabled) { background: var(--color-accent-hover); border-color: var(--color-accent-hover); box-shadow: var(--shadow-sm); }
+@media (hover: hover) {
+  .button--primary:hover:not(:disabled) { background: var(--color-accent-hover); border-color: var(--color-accent-hover); box-shadow: var(--shadow-sm); }
+}
 
 /* Figma's Secondary has no stroke (unlike Outline) -- border-color matches
    its own background so it renders invisible, same as Button's Secondary. */
 .button--secondary {
   transition: background-color var(--transition-base), color var(--transition-base), border-color var(--transition-base), box-shadow var(--transition-base), opacity var(--transition-base), transform var(--transition-hover);
  background: var(--color-bg-subtle); color: var(--color-fg-default); border-color: var(--color-bg-subtle); }
-.button--secondary:hover:not(:disabled) { background: var(--color-bg-muted); border-color: var(--color-bg-muted); box-shadow: var(--shadow-sm); }
+@media (hover: hover) {
+  .button--secondary:hover:not(:disabled) { background: var(--color-bg-muted); border-color: var(--color-bg-muted); box-shadow: var(--shadow-sm); }
+}
 
 .button--outline {
   transition: background-color var(--transition-base), color var(--transition-base), border-color var(--transition-base), box-shadow var(--transition-base), opacity var(--transition-base), transform var(--transition-hover);
  background: transparent; color: var(--color-fg-default); border-color: var(--color-border-default); }
-.button--outline:hover:not(:disabled) { background: var(--color-bg-subtle); box-shadow: var(--shadow-sm); }
+@media (hover: hover) {
+  .button--outline:hover:not(:disabled) { background: var(--color-bg-subtle); box-shadow: var(--shadow-sm); }
+}
 
 .button--ghost {
   transition: background-color var(--transition-base), color var(--transition-base), border-color var(--transition-base), box-shadow var(--transition-base), opacity var(--transition-base), transform var(--transition-hover);
  background: transparent; color: var(--color-fg-muted); border-color: transparent; }
-.button--ghost:hover:not(:disabled) { background: var(--color-bg-subtle); color: var(--color-fg-default); box-shadow: var(--shadow-sm); }
+@media (hover: hover) {
+  .button--ghost:hover:not(:disabled) { background: var(--color-bg-subtle); color: var(--color-fg-default); box-shadow: var(--shadow-sm); }
+}
 
 .button--destructive {
   transition: background-color var(--transition-base), color var(--transition-base), border-color var(--transition-base), box-shadow var(--transition-base), opacity var(--transition-base), transform var(--transition-hover);
  background: var(--color-danger-solid); color: var(--color-fg-on-accent); border-color: var(--color-danger-solid); }
-.button--destructive:hover:not(:disabled) { background: var(--color-danger-fg); border-color: var(--color-danger-fg); box-shadow: var(--shadow-sm); }
+@media (hover: hover) {
+  .button--destructive:hover:not(:disabled) { background: var(--color-danger-fg); border-color: var(--color-danger-fg); box-shadow: var(--shadow-sm); }
+}
 
 /* Pressed (mirrors Button's :active states / Figma State=Pressed) */
 .button--primary:active:not(:disabled) { background: var(--color-accent-active); border-color: var(--color-accent-active); }

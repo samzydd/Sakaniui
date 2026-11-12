@@ -20,7 +20,9 @@
   width: 24px; height: 24px; border: none; background: none;
   color: var(--color-fg-muted); border-radius: var(--radius-sm); cursor: pointer;
 }
-.col__action:where(:hover) { background: var(--color-bg-muted); color: var(--color-fg-default); }
+@media (hover: hover) {
+  .col__action:where(:hover) { background: var(--color-bg-muted); color: var(--color-fg-default); }
+}
 .col__body { display: flex; flex-direction: column; gap: var(--space-10); }
 .col__drop {
   display: flex; align-items: center; justify-content: center;
@@ -36,4 +38,6 @@
   color: var(--color-fg-muted); font-family: var(--font-sans); font-size: 13px; font-weight: 500;
   border-radius: var(--radius-md);
 }
-.col__add:where(:hover) { background: var(--color-bg-muted); color: var(--color-fg-default); }
+@media (hover: hover) {
+  .col__add:where(:hover) { background: var(--color-bg-muted); color: var(--color-fg-default); }
+}

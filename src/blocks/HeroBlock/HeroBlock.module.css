@@ -2,9 +2,11 @@
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  width: 1280px;
+  width: 100%;
+  max-width: 1280px;
+  container: hero / inline-size;
   box-sizing: border-box;
-  padding: var(--space-48);
+  padding: clamp(var(--space-16), 4vw, var(--space-48));   /* 48px on a desktop, 16px at the sides on a phone */
   background: var(--color-bg-canvas);
   font-family: var(--font-sans);
 }
@@ -13,7 +15,7 @@
 .blockCentered {
   align-items: center;
   gap: var(--space-20);
-  padding: var(--space-64) var(--space-48);
+  padding: clamp(var(--space-48), 6vw, var(--space-64)) clamp(var(--space-16), 4vw, var(--space-48));
 }
 
 .titleCentered {
@@ -107,4 +109,16 @@
   display: flex;
   align-items: flex-start;
   gap: var(--space-12);
+}
+
+/* Narrow containers (a phone, a side panel, a docs preview). The block fills its container up to its Figma width
+   (max-width above) and, below these widths, puts the image under the copy and lets the image keep its proportions. */
+@container hero (max-width: 860px) {
+  .titleCentered { font-size: 32px; line-height: 40px; letter-spacing: -0.64px; }
+  .descriptionCentered { font-size: 16px; line-height: 24px; }
+  .imageCentered { height: auto; aspect-ratio: 16 / 10; }
+  .row { flex-direction: column; align-items: stretch; gap: var(--space-32); }
+  .imageSplit { width: 100%; height: auto; aspect-ratio: 7 / 5; flex-shrink: 1; }
+  .ctaRow { flex-wrap: wrap; }
+  .blockCentered .ctaRow { justify-content: center; }
 }

@@ -68,13 +68,15 @@
 }
 
 /* Label text */
-.text { display: flex; flex-direction: column; gap: var(--space-2); }
-.text__label { font-size: 14px; font-weight: 500; color: var(--color-fg-muted); line-height: 1.4; white-space: nowrap; }
+.text { display: flex; flex-direction: column; gap: var(--space-2); min-width: 0; }
+.text__label { font-size: 14px; font-weight: 500; color: var(--color-fg-muted); line-height: 1.4; }   /* wraps when the line is too long (a terms-of-service label on a phone) */
 .text__description { font-size: 12px; color: var(--color-fg-muted); line-height: 1.4; }
 
 /* Hover — border strengthens (mirrors Figma Checkbox State=Hover) */
-.wrapper:hover .box,
-.checkbox:hover .box { border-color: var(--color-border-strong); }
+@media (hover: hover) {
+  .wrapper:hover .box,
+  .checkbox:hover .box { border-color: var(--color-border-strong); }
+}
 
 /* With a description the control aligns to the first line of text instead
    of the block centre. */

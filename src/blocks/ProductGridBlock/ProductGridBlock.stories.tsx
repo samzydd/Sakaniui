@@ -102,6 +102,9 @@ card must never affect another card's own selection.` } } },
     subtitle: 'Thoughtfully made home goods, restocked every week.',
     products,
   },
+  // The block is a size container (it lays itself out by its own width), so it needs a definite width from its
+  // parent; the centered canvas only shrink-wraps. Its Figma width on a desktop; on a phone the canvas caps it to the screen.
+  decorators: [(S) => <div style={{ width: 1280, maxWidth: '100%' }}><S /></div>],
 } satisfies Meta<typeof ProductGridBlock>;
 
 export default meta;

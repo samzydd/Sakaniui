@@ -746,7 +746,7 @@ export const CommandMenu: React.FC<CommandMenuProps> = ({
               <div
                 ref={(node) => { bodyRef.current = node; hover.ref(node); }}
                 {...hover.groupProps}
-                onMouseLeave={() => { hover.groupProps.onMouseLeave(); if (activeItem) { const el = itemEls.current.get(activeItem.id); if (el) requestAnimationFrame(() => hover.showItem(el)); } }}
+                onPointerLeave={() => { hover.groupProps.onPointerLeave(); if (activeItem) { const el = itemEls.current.get(activeItem.id); if (el) requestAnimationFrame(() => hover.showItem(el)); } }}
                 className={styles.body}
               >
                 {hover.highlight}

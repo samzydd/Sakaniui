@@ -27,6 +27,7 @@
 }
 
 .cell {
+  min-width: 0;   /* with minmax(0, 1fr) columns the grid narrows with its container instead of overflowing */
   aspect-ratio: 1;
   min-height: 14px;
   border-radius: var(--radius-sm);

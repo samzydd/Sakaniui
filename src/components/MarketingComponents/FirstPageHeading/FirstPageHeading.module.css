@@ -20,8 +20,8 @@
 .title {
   margin: 0;
   width: 100%;
-  font-size: 48px;
-  line-height: 56px;
+  font-size: clamp(32px, 10vw, 48px);   /* 48px from a 480px screen up; one long word still fits a 320px phone */
+  line-height: 1.1667;
   font-weight: 500;
   letter-spacing: -0.96px;
   color: var(--color-fg-default);

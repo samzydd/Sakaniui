@@ -4,6 +4,7 @@
   align-items: flex-start;
   gap: var(--space-16);
   width: 560px;
+  max-width: 100%;   /* never wider than its container (a phone) */
   box-sizing: border-box;
   padding: var(--space-24);
   background: var(--color-bg-surface);
@@ -79,6 +80,7 @@
   justify-content: center;
   gap: var(--space-12);
   width: 485px;
+  max-width: 100%;
   box-sizing: border-box;
   padding: var(--space-24);
   background: var(--color-bg-surface);

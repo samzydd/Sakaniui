@@ -22,7 +22,9 @@
 
 /* --hover-fill is transparent inside a hover group (Menu), where one
    highlight glides between items instead; this is the fallback elsewhere. */
-.item:where(:hover) { background: var(--hover-fill, var(--color-bg-canvas)); }
+@media (hover: hover) {
+  .item:where(:hover) { background: var(--hover-fill, var(--color-bg-canvas)); }
+}
 .item:where(:focus-visible) { box-shadow: 0 0 0 2px var(--color-border-focus); }
 .item__icon { display: inline-flex; color: var(--color-fg-muted); flex-shrink: 0; }
 .item__label { flex: 1 1 auto; }
@@ -43,4 +45,6 @@
 .item--destructive .item__icon { color: var(--color-danger-fg); }
 /* --hover-tone recolors the shared highlight while it sits on this item. */
 .item--destructive { --hover-tone: var(--color-danger-bg); }
-.item--destructive:where(:hover) { background: var(--hover-fill, var(--color-danger-bg)); }
+@media (hover: hover) {
+  .item--destructive:where(:hover) { background: var(--hover-fill, var(--color-danger-bg)); }
+}

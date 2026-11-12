@@ -12,7 +12,9 @@
   text-align: left;
   transition: transform 120ms ease-out, background-color 120ms ease-out, border-color 120ms ease-out;
 }
-.chip:hover { background: var(--color-bg-subtle); border-color: var(--color-border-strong); transform: translateY(-1px); }
+@media (hover: hover) {
+  .chip:hover { background: var(--color-bg-subtle); border-color: var(--color-border-strong); transform: translateY(-1px); }
+}
 .chip:active { transform: scale(0.98); }
 .chip:focus-visible { outline: 2px solid var(--color-border-focus); outline-offset: 2px; }
 .chip:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
@@ -26,7 +28,9 @@
   background: var(--color-bg-subtle); color: var(--color-fg-muted);
   transition: background-color 120ms ease-out;
 }
-.chip:hover .tile { background: var(--color-bg-surface); }
+@media (hover: hover) {
+  .chip:hover .tile { background: var(--color-bg-surface); }
+}
 .arrow { display: inline-flex; color: var(--color-fg-muted); }
 
 .text { display: flex; flex-direction: column; gap: var(--space-2); min-width: 0; }
@@ -40,5 +44,8 @@
 @keyframes chip-rise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
 @media (prefers-reduced-motion: reduce) {
   .chip, .tile { transition: none; }
-  .chip:hover, .chip:active { transform: none; }
+  .chip:active { transform: none; }
+@media (hover: hover) {
+  .chip:hover { transform: none; }
+}
 }

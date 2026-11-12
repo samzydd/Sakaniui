@@ -38,9 +38,13 @@
   transition: transform var(--transition-base), box-shadow var(--transition-base),
               border-color var(--transition-base);
 }
-.slider:hover::-webkit-slider-thumb { transform: scale(1.08); box-shadow: var(--shadow-sm); }
+@media (hover: hover) {
+  .slider:hover::-webkit-slider-thumb { transform: scale(1.08); box-shadow: var(--shadow-sm); }
+}
 .slider:active::-webkit-slider-thumb { transform: scale(1.18); box-shadow: var(--shadow-md); }
-.slider:hover::-moz-range-thumb { transform: scale(1.08); }
+@media (hover: hover) {
+  .slider:hover::-moz-range-thumb { transform: scale(1.08); }
+}
 .slider:active::-moz-range-thumb { transform: scale(1.18); }
 
 /* Thumb — Firefox */

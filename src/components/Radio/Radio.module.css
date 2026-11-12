@@ -25,7 +25,9 @@
 }
 
 /* Hover (Figma: Hover) */
-.wrapper:hover .circle { border-color: var(--color-border-strong); }
+@media (hover: hover) {
+  .wrapper:hover .circle { border-color: var(--color-border-strong); }
+}
 
 /* Inner dot */
 .dot {

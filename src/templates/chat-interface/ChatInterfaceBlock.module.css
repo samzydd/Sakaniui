@@ -90,7 +90,9 @@
   color: var(--color-fg-muted); border-radius: var(--radius-md);
   transition: background-color var(--transition-base), color var(--transition-base);
 }
-.chatAction:where(:hover) { background: var(--color-bg-canvas); color: var(--color-fg-default); }
+@media (hover: hover) {
+  .chatAction:where(:hover) { background: var(--color-bg-canvas); color: var(--color-fg-default); }
+}
 .chatAction:where(:focus-visible) { outline: none; box-shadow: 0 0 0 2px var(--color-border-focus); }
 
 /* ---- panes ---- */

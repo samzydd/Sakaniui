@@ -31,7 +31,9 @@
   cursor: pointer;
   transition: background-color 180ms ease, transform 300ms cubic-bezier(0.34, 1.56, 0.64, 1);
 }
-.iconButton:hover { background: var(--surface-bg-subtle); }
+@media (hover: hover) {
+  .iconButton:hover { background: var(--surface-bg-subtle); }
+}
 .iconButton:active { transform: scale(0.9); }
 .iconButton:focus-visible,
 .navItem:focus-visible,
@@ -138,7 +140,9 @@
   cursor: pointer;
   transition: color 200ms ease;
 }
-.navItem:hover { color: var(--color-fg-default); }
+@media (hover: hover) {
+  .navItem:hover { color: var(--color-fg-default); }
+}
 .navItem[aria-selected='true'] { color: var(--color-fg-default); font-weight: 600; }
 .sidebarFoot { margin-top: auto; }
 .pinned { display: flex; flex-direction: column; gap: 2px; }
@@ -155,7 +159,9 @@
   cursor: pointer;
   transition: background-color 180ms ease;
 }
-.pinnedItem:hover { background: var(--surface-bg-subtle); }
+@media (hover: hover) {
+  .pinnedItem:hover { background: var(--surface-bg-subtle); }
+}
 .pinnedArt {
   width: 40px;
   height: 40px;
@@ -342,7 +348,9 @@
   cursor: pointer;
   transition: color 220ms ease;
 }
-.tab:hover { color: var(--color-fg-default); }
+@media (hover: hover) {
+  .tab:hover { color: var(--color-fg-default); }
+}
 .tab[aria-selected='true'] { color: var(--color-brand-default); }
 
 /* The drag lens ---------------------------------------------------------- */
@@ -365,3 +373,25 @@
   .selection, .dragLens, .knobSolid { transition: none; }
   .stretch-x-0, .stretch-x-1, .stretch-y-0, .stretch-y-1, .knobLens { animation: none; }
 }
+
+/* Below a desktop width the composition can't hold its 1180px layout (it used to keep min-width: 1180px and overflow,
+   so a phone saw the sidebar over the headline). Tablet: the frame fits the screen and the headline stays clear of the
+   right column. Phone: the sidebar and the mic chip step aside, the player spans the top, the headline sits above the
+   tab bar, and the tab bar fits the width. */
+@media (max-width: 1180px) {
+  .frame { min-width: 0; }
+  .hero { right: 24px; }
+  .tabBar { left: calc(50% + 148px); }   /* centred in the space right of the 296px sidebar, not under it */
+}
+@media (max-width: 760px) {
+  .frame { min-height: 640px; }
+  .sidebar, .micChip { display: none; }
+  .toolbar { top: 16px; right: 16px; }
+  .player { top: 76px; left: 16px; right: 16px; width: auto; }
+  .hero { left: 20px; right: 20px; bottom: 112px; max-width: none; }
+  .headline { font-size: 40px; }
+  .lede { font-size: 15px; line-height: 22px; }
+  .tabBar { left: 50%; transform: translateX(-50%); margin-left: 0; bottom: 16px; }
+  .tab { width: min(88px, 21vw); }
+}
+

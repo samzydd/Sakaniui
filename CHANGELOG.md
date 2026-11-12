@@ -10,6 +10,43 @@ All notable changes to `@sakaniui/react` are documented here.
 - **`ChatOrb` takes `lookAt`**: an element for the eyes to read instead of following the pointer (pass `null` to go back to it). The
   orb also has a hairline edge in the text colour now, so a white ball keeps an edge on a light surface.
 
+### Phones, touch and slow connections
+
+A pass over every component and block at 320, 390, 768 and 1280px, with touch emulated and on a throttled 3G connection.
+Desktop layouts are unchanged.
+
+- **Hover no longer sticks after a tap.** On a touch screen a tap left the hover look behind (a grey button, a lifted card) until you
+  tapped somewhere else. Hover styles now apply only where the device can hover (`@media (hover: hover)`), across 59 stylesheets;
+  `:active` still gives press feedback. The flowing hover highlight (`HoverGroup`, menus, lists, Command Menu) ignores touch too.
+  Hover rules that reveal something hidden (a tooltip, a table's drag handle) are unchanged, so a tap still reveals them.
+- **No zoom when you tap into a field on iPhone.** iOS Safari zooms the page into any field under 16px and doesn't zoom back. On a
+  touch screen the text in `Input`, `Textarea`, `SidebarSearch`, `ChatComposer`, `CodeSnippet` (editable), `QuantitySelector`,
+  `Calendar`'s month and year, and the auth blocks' fields and code boxes is 16px. Mouse layouts keep their 13-14px.
+- **Bigger touch targets, same drawing.** Small controls get an invisible 32px hit area on a touch screen: the `TopBar` icons, password
+  and balance toggles, `FilterChip` and `Tags` remove, `SidebarPromo` dismiss, `AttachmentChip` remove, and `Map`'s popup close and dot
+  markers.
+- **A tap anywhere on a field focuses it.** `Input`'s frame (and the auth blocks' password frames) is taller than the text line inside; a
+  tap on its padding or icon used to do nothing.
+- **Blocks fit a phone.** Blocks that held their Figma width (1040-1784px) now fill their container up to it and reflow below it: the
+  marketing blocks (Hero, Pricing, Team, Testimonial, Logo Cloud, Feature Grid, Blog Listing, Careers, CTA Banner, FAQ), Product Detail,
+  Product Grid, Checkout Flow, Shopping Cart, Order Confirmation, the Billing cards, Data Table (toolbar) and Section Footer. They follow
+  their own width (container queries), so they also adapt in a side panel or a docs preview.
+- **AI Chat and AI Welcome on a phone:** below 720px the sidebar becomes a drawer opened from a menu button; the composer options no
+  longer wrap and the recent-work cards scroll sideways.
+- **Components at 320px:** `Toast`, `Stepper`, `Pagination`, `SegmentedControl`, `HeatmapChart`, `CheckoutSteps`, `ProductGallery`
+  thumbnails, `MobileNavigationMenu`, `FirstPageHeading`, `SubFeature`, `Checkbox` labels (they wrap now) and `Skeleton` no longer
+  overflow a small phone.
+- **Liquid glass:**
+  - `LiquidBackdrop` takes `placeholder`, painted under the photo until it loads. The default is a muted mid-tone, so light labels stay
+    readable while a photo crawls in over 3G instead of vanishing on a blank page. `LiquidDashboardBlock` passes it on as
+    `backgroundPlaceholder` (its story uses a 1 KB blurred copy of the photo).
+  - `LiquidDashboardBlock` no longer jumps on load: its sidebar collapsed to the rail with its width transition on first paint. Its top bar
+    keeps the title clear of the icons beside the rail on a phone.
+  - The Liquid Glass showcase and playground stories fit phones and tablets.
+- **Icons and emoji ship one module each.** `@sakaniui/react/icons` and `@sakaniui/react/emoji` were each one large module (1.9 MB and
+  8.9 MB). Rollup and esbuild kept only what an app imported, but Next.js didn't, and shipped both whole, about 1.4 MB gzipped per page,
+  seven seconds on 3G. Same import paths; CommonJS unchanged.
+
 ## 0.15.0
 
 - **New: the AI conversation parts**, built from the new *AI Components* and *AI Blocks* pages in Figma. Presentational, with no AI SDK:

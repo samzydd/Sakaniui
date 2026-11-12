@@ -16,6 +16,7 @@
   );
   background-size: 200% 100%;
   animation: skeleton-shimmer 1.4s ease-in-out infinite;
+  max-width: 100%;
 }
 
 /* ─── Variants ── */

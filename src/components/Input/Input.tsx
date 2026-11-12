@@ -73,6 +73,21 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
     const hasError = Boolean(error);
     const ai = variant === 'ai';
 
+    // The frame is taller than the text field inside it (10px of padding above and below at md), and a tap on that padding,
+    // or on a decorative icon, would otherwise do nothing: on a phone that reads as a dead field. Any press on the frame
+    // that isn't on a control of its own focuses the field.
+    const control = React.useRef<HTMLInputElement | null>(null);
+    const setControl = React.useCallback((node: HTMLInputElement | null) => {
+      control.current = node;
+      if (typeof ref === 'function') ref(node);
+      else if (ref) ref.current = node;
+    }, [ref]);
+    const focusFromFrame = (e: React.MouseEvent<HTMLDivElement>) => {
+      const t = e.target as HTMLElement;
+      if (disabled || t === control.current || t.closest('button, a, input, select, textarea, [role="button"]')) return;
+      control.current?.focus();
+    };
+
     return (
       <div className={[styles.field, className ?? ''].filter(Boolean).join(' ')}>
         {/* Label — Figma Title, label/md */}
@@ -90,12 +105,13 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
             hasError ? styles['input--error'] : '',
             disabled ? styles['input--disabled'] : '',
           ].filter(Boolean).join(' ')}
+          onClick={focusFromFrame}
         >
           {ai && <AiGlow mode={disabled ? 'off' : glow} />}
           {ai && leading && <span className={styles.input__actions}>{leading}</span>}
           {leadingIcon && <span className={styles.input__icon} aria-hidden="true">{renderInputIcon(leadingIcon)}</span>}
           <input
-            ref={ref}
+            ref={setControl}
             id={inputId}
             className={styles.input__control}
             disabled={disabled}

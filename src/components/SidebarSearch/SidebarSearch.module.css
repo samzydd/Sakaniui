@@ -61,4 +61,12 @@
   border: var(--border-width-100) solid var(--surface-border);
   border-radius: var(--radius-md); color: var(--color-fg-muted); cursor: pointer;
 }
-.collapsed:hover { color: var(--color-fg-default); }
+@media (hover: hover) {
+  .collapsed:hover { color: var(--color-fg-default); }
+}
+
+/* Touch screens: iOS Safari zooms the whole page into any text field under 16px the moment it is focused, and does not
+   zoom back out. On a coarse pointer the field's text is 16px, so tapping into it never zooms. Mouse layouts are unchanged. */
+@media (pointer: coarse) {
+  .search__input { font-size: 16px; }
+}

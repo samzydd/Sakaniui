@@ -155,7 +155,9 @@
   text-align: left;
 }
 .step__sources--button { cursor: pointer; }
-.step__sources--button:hover .step__sourcesLabel { color: var(--color-fg-default); }
+@media (hover: hover) {
+  .step__sources--button:hover .step__sourcesLabel { color: var(--color-fg-default); }
+}
 .step__sources--button:focus-visible { outline: 2px solid var(--color-border-focus); outline-offset: 2px; border-radius: var(--radius-sm); }
 .step__sourcesChevron { color: var(--color-fg-subtle); }
 

@@ -33,6 +33,7 @@ import { ThinkingLoader } from '../../components/ThinkingLoader';
 import { SuggestionChip } from '../../components/SuggestionChip';
 import { PromptComposer } from '../../components/PromptComposer';
 import { AiSidebar } from './parts/AiSidebar';
+import { AiNav, AiNavButton, useAiNav } from './parts/AiNav';
 import { ComposerOptions } from './parts/ComposerOptions';
 import styles from './AiChatBlock.module.css';
 
@@ -95,6 +96,7 @@ export interface AiChatBlockProps {
 }
 
 export const AiChatBlock: React.FC<AiChatBlockProps> = ({ className }) => {
+  const nav = useAiNav();
   const [turns, setTurns] = React.useState<Turn[]>([SEED]);
   const [streaming, setStreaming] = React.useState(false);
   const timers = React.useRef<number[]>([]);
@@ -156,9 +158,12 @@ export const AiChatBlock: React.FC<AiChatBlockProps> = ({ className }) => {
 
   return (
     <div className={[styles.block, className ?? ''].filter(Boolean).join(' ')}>
-      <AiSidebar activeChat="Pipeline review" />
+      <AiNav open={nav.open} onClose={() => nav.setOpen(false)}>
+        <AiSidebar activeChat="Pipeline review" onNav={() => nav.setOpen(false)} onChat={() => nav.setOpen(false)} />
+      </AiNav>
       <main className={styles.main}>
         <header className={styles.top}>
+          <AiNavButton open={nav.open} onOpen={() => nav.setOpen(true)} />
           <button type="button" className={styles.title} aria-haspopup="menu">
             <span>Pipeline review</span>
             <IconChevronDown size={12} strokeWidth={iconStrokeWidth(12)} aria-hidden="true" />

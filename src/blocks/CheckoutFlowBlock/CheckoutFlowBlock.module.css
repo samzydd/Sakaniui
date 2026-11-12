@@ -3,9 +3,11 @@
   flex-direction: column;
   align-items: center;
   gap: var(--space-32);
-  width: 960px;
+  width: 100%;
+  max-width: 960px;
+  container: checkout / inline-size;
   box-sizing: border-box;
-  padding: var(--space-48);
+  padding: clamp(var(--space-16), 4vw, var(--space-48));   /* 48px on a desktop, 16px at the sides on a phone */
   background: var(--color-bg-canvas);
   font-family: var(--font-sans);
 }
@@ -147,4 +149,11 @@
 .summaryTotalValue {
   font-weight: 600;
   color: var(--color-fg-default);
+}
+
+/* Narrow containers (a phone, a side panel, a docs preview): the block fills its container up to its Figma width
+   (max-width above) and, below these widths, stacks the form over the order summary. */
+@container checkout (max-width: 720px) {
+  .columns { flex-direction: column; align-items: stretch; }
+  .formCard, .summaryCard { flex: none; width: 100%; }
 }

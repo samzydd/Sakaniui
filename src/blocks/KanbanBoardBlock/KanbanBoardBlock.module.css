@@ -81,7 +81,9 @@
   color: var(--color-fg-muted); border-radius: var(--radius-sm);
   transition: background-color var(--transition-base), color var(--transition-base);
 }
-.column__action:where(:hover) { background: var(--color-bg-muted); color: var(--color-fg-default); }
+@media (hover: hover) {
+  .column__action:where(:hover) { background: var(--color-bg-muted); color: var(--color-fg-default); }
+}
 .column__action:where(:focus-visible) { outline: none; box-shadow: 0 0 0 2px var(--color-border-focus); }
 
 .column__body { display: flex; flex-direction: column; gap: var(--space-10); }
@@ -106,7 +108,9 @@
   border-radius: var(--radius-md);
   transition: background-color var(--transition-base), color var(--transition-base);
 }
-.column__add:where(:hover) { background: var(--color-bg-muted); color: var(--color-fg-default); }
+@media (hover: hover) {
+  .column__add:where(:hover) { background: var(--color-bg-muted); color: var(--color-fg-default); }
+}
 .column__add:where(:focus-visible) { outline: none; box-shadow: 0 0 0 2px var(--color-border-focus); }
 
 /* ---- empty column ---- */

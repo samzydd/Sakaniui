@@ -74,3 +74,11 @@
 .textarea::placeholder {
   color: var(--color-fg-subtle);
 }
+
+/* Touch screens: iOS Safari zooms the whole page into any text field under 16px the moment it is focused, and does not
+   zoom back out. On a coarse pointer the field's text is 16px, so tapping into it never zooms. Mouse layouts are unchanged. */
+@media (pointer: coarse) {
+  /* The highlighted copy under the textarea grows with it, so the two layers stay aligned glyph for glyph. */
+  .textarea,
+  .editableBody .body { font-size: 16px; }
+}

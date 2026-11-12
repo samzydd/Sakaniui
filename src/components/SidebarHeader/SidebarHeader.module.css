@@ -83,4 +83,6 @@ button.header__logoWrap:hover .header__logoIcon { display: inline-flex; }
   border: none; background: transparent; color: var(--color-fg-muted);
   cursor: pointer; padding: var(--space-4); border-radius: var(--radius-sm); flex-shrink: 0;
 }
-.header__toggle:hover { background: var(--color-bg-subtle); color: var(--color-fg-default); }
+@media (hover: hover) {
+  .header__toggle:hover { background: var(--color-bg-subtle); color: var(--color-fg-default); }
+}

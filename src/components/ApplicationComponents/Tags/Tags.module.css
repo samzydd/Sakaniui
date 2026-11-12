@@ -20,3 +20,10 @@
 .tag { transition: opacity 160ms var(--ease-out, ease-out), transform 160ms var(--ease-out, ease-out); }
 /* Removing: a quick fade and slight shrink before the parent drops it. */
 .tag--leaving { opacity: 0; transform: scale(0.92); pointer-events: none; }
+
+/* Touch: these controls are drawn small, but a fingertip needs a bigger target. On a coarse pointer an invisible hit
+   area extends each one to 32px (WCAG 2.5.8 asks for at least 24px); what is drawn does not change. */
+@media (pointer: coarse) {
+  .remove { position: relative; }
+  .remove::after { content: ''; position: absolute; inset: -10px; }   /* 12px drawn, 32px to touch */
+}

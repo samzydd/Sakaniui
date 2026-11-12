@@ -1,12 +1,24 @@
 .row { display: flex; align-items: center; justify-content: space-between; padding: 0 var(--space-4); font-family: var(--font-sans); }
 .group { display: flex; align-items: center; gap: var(--space-4); }
 .option {
+  white-space: nowrap; flex-shrink: 0;
   display: inline-flex; align-items: center; gap: var(--space-6);
   padding: var(--space-6) var(--space-8); border: none; border-radius: var(--radius-md); background: none; cursor: pointer;
   font: inherit; font-size: 14px; font-weight: 500; line-height: 20px; color: var(--color-fg-muted);
   transition: background-color 120ms ease-out, color 120ms ease-out;
 }
-.option:hover { background: var(--color-bg-subtle); color: var(--color-fg-default); }
+@media (hover: hover) {
+  .option:hover { background: var(--color-bg-subtle); color: var(--color-fg-default); }
+}
 .option:focus-visible { outline: 2px solid var(--color-border-focus); outline-offset: 1px; }
 .accent { color: var(--ai-ember-1); }
 .extra { opacity: 0.6; }
+
+/* Narrow: labels never wrap inside a chip; the row tightens and, if it still doesn't fit, scrolls sideways. */
+@container aiblock (max-width: 720px) {
+  .row { gap: var(--space-4); overflow-x: auto; scrollbar-width: none; margin: 0 calc(var(--space-4) * -1); }
+  .row::-webkit-scrollbar { display: none; }
+  .group { gap: 0; }
+  .option { padding: var(--space-6); }
+  .extra { display: none; }
+}

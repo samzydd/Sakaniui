@@ -26,6 +26,9 @@
 }
 
 .sidebarWrap { display: flex; flex-shrink: 0; }
+/* Until the first frame has painted, nothing in the sidebar animates (see `settling` in the block). */
+.root[data-settling] .sidebarWrap,
+.root[data-settling] .sidebarWrap * { transition: none !important; }
 
 /* Collapsed rail: hovering (or focusing) anywhere on it turns the logo into the
    "open sidebar" button, so you don't have to aim at the logo. The two glyphs sit in
@@ -72,8 +75,12 @@
 .navItem { position: relative; z-index: 1; }
 /* Hover is the glass and nothing else: the item must not change its own look
    (the library darkens the icon on hover, 160ms before the lens fades in). */
-.navItem :where(button, a):hover:not([aria-current]) [class*='item__icon'] { color: var(--color-fg-muted) !important; }
-.navItem :where(button, a):hover { background: transparent !important; box-shadow: none !important; }
+@media (hover: hover) {
+  .navItem :where(button, a):hover:not([aria-current]) [class*='item__icon'] { color: var(--color-fg-muted) !important; }
+}
+@media (hover: hover) {
+  .navItem :where(button, a):hover { background: transparent !important; box-shadow: none !important; }
+}
 /* Collapsed: a 64px rail. Items are centered 32px buttons, groups have no labels
    so a hairline stands in for the gap, and the rail doesn't scroll sideways. */
 .navItemCollapsed { display: flex; justify-content: center; }
@@ -120,10 +127,18 @@
   flex: 1;
   min-width: 0;
   height: 100%;
+  container: dashmain / inline-size;   /* the top bar below adapts to the space beside the rail */
 }
 
-.topbarLeft { display: flex; align-items: center; gap: 10px; color: var(--color-fg-default); }
-.topbarTitle { font-family: var(--font-sans); font-size: 18px; font-weight: 500; line-height: 26px; white-space: nowrap; }
+.topbarLeft { display: flex; align-items: center; gap: 10px; min-width: 0; color: var(--color-fg-default); }
+.topbarTitle { font-family: var(--font-sans); font-size: 18px; font-weight: 500; line-height: 26px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* Phone: beside the 64px rail there is little room for the top bar. Its side padding tightens and the page icon
+   goes, so the title never slides under the search, bell and account buttons (it truncates as a last resort). */
+@container dashmain (max-width: 420px) {
+  .main > [data-surface] > [class*='bar'] { padding-left: var(--space-12); padding-right: var(--space-12); }
+  .topbarLeft > svg { display: none; }
+}
 
 /* The panel is taller than the space it sits in, so its rounded bottom
    corners fall below the window and only the top corners show — the design's

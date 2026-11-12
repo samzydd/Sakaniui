@@ -16,6 +16,7 @@ import React from 'react';
 import { ChatOrb } from '../../components/ChatOrb';
 import { PromptComposer } from '../../components/PromptComposer';
 import { AiSidebar } from '../AiChatBlock/parts/AiSidebar';
+import { AiNav, AiNavButton, useAiNav } from '../AiChatBlock/parts/AiNav';
 import { ComposerOptions } from '../AiChatBlock/parts/ComposerOptions';
 import styles from './AiWelcomeBlock.module.css';
 
@@ -69,10 +70,14 @@ export interface AiWelcomeBlockProps {
 
 export const AiWelcomeBlock: React.FC<AiWelcomeBlockProps> = ({ greeting = 'Good afternoon', name = 'Samuel', onSubmit, className }) => {
   const [draft, setDraft] = React.useState('');
+  const nav = useAiNav();
   return (
     <div className={[styles.block, className ?? ''].filter(Boolean).join(' ')}>
-      <AiSidebar activeNav="new" />
+      <AiNav open={nav.open} onClose={() => nav.setOpen(false)}>
+        <AiSidebar activeNav="new" onNav={() => nav.setOpen(false)} onChat={() => nav.setOpen(false)} />
+      </AiNav>
       <main className={styles.main}>
+        <AiNavButton open={nav.open} onOpen={() => nav.setOpen(true)} className={styles.menu} />
         <div className={styles.content}>
           <div className={styles.prompt}>
             <h1 className={styles.greeting}>

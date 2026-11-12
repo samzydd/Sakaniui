@@ -21,7 +21,9 @@
   text-decoration: none;
   transition: color var(--transition-base);
 }
-a.crumb:hover { color: var(--color-fg-default); text-decoration: underline; text-underline-offset: 2px; }
+@media (hover: hover) {
+  a.crumb:hover { color: var(--color-fg-default); text-decoration: underline; text-underline-offset: 2px; }
+}
 
 .current {
   font-size: 14px;
@@ -53,4 +55,6 @@ a.crumb:hover { color: var(--color-fg-default); text-decoration: underline; text
 }
 /* --hover-fill is transparent inside a hover group, where one highlight
    glides between items instead; this is the fallback elsewhere. */
-a.chip:hover { background: var(--hover-fill, var(--color-bg-subtle)); }
+@media (hover: hover) {
+  a.chip:hover { background: var(--hover-fill, var(--color-bg-subtle)); }
+}

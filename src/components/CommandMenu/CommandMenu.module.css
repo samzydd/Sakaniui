@@ -84,7 +84,9 @@
   color: var(--color-fg-subtle);
   border-radius: var(--radius-full);
 }
-.field__clear:hover { color: var(--color-fg-default); }
+@media (hover: hover) {
+  .field__clear:hover { color: var(--color-fg-default); }
+}
 
 .token {
   display: inline-flex;
@@ -106,7 +108,9 @@
   padding: 0; border: none; background: none; cursor: pointer;
   color: var(--color-fg-subtle);
 }
-.token__remove:hover { color: var(--color-fg-default); }
+@media (hover: hover) {
+  .token__remove:hover { color: var(--color-fg-default); }
+}
 
 /* ---- scopes ---- */
 .scopes {
@@ -147,7 +151,9 @@
   cursor: pointer;
   transition: background-color var(--transition-hover), color var(--transition-hover);
 }
-.scope:hover { color: var(--color-fg-default); }
+@media (hover: hover) {
+  .scope:hover { color: var(--color-fg-default); }
+}
 .scope--active { color: var(--color-fg-default); }
 .scope__count {
   display: inline-flex; align-items: center;
@@ -203,7 +209,9 @@
   font: inherit; font-size: 11px; line-height: 16px; font-weight: 500; letter-spacing: 0;
   color: var(--color-fg-muted);
 }
-.group__action:hover { color: var(--color-fg-default); text-decoration: underline; }
+@media (hover: hover) {
+  .group__action:hover { color: var(--color-fg-default); text-decoration: underline; }
+}
 
 /* ---- item ---- */
 .item {
@@ -289,7 +297,9 @@
   cursor: pointer;
   transition: background-color var(--transition-hover), color var(--transition-hover);
 }
-.chip:hover { background: var(--surface-bg-subtle-hover); }
+@media (hover: hover) {
+  .chip:hover { background: var(--surface-bg-subtle-hover); }
+}
 .chip__em { font-weight: 600; color: var(--color-fg-default); }
 
 /* a feed of faded rows with a magnifying lens over it (the lens shows the same rows, magnified) */
@@ -398,7 +408,9 @@
 .answer__title { font-size: 14px; line-height: 20px; font-weight: 500; color: var(--color-fg-default); }
 .answer__status { font-size: 12px; line-height: 16px; font-weight: 500; color: var(--color-fg-muted); }
 .answer__copy { margin-left: auto; display: inline-flex; padding: 0; border: none; background: none; cursor: pointer; color: var(--color-fg-muted); }
-.answer__copy:hover { color: var(--color-fg-default); }
+@media (hover: hover) {
+  .answer__copy:hover { color: var(--color-fg-default); }
+}
 .answer__body { font-size: 14px; line-height: 20px; color: var(--color-fg-default); }
 .answer__sources { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-6); }
 .answer__sourcesLabel { font-size: 12px; line-height: 16px; font-weight: 500; color: var(--color-fg-muted); }
@@ -469,7 +481,9 @@
   cursor: pointer;
   transition: background-color var(--transition-hover), border-color var(--transition-hover);
 }
-.trigger:hover { background: var(--surface-bg-subtle-hover); border-color: var(--surface-border-strong); }
+@media (hover: hover) {
+  .trigger:hover { background: var(--surface-bg-subtle-hover); border-color: var(--surface-border-strong); }
+}
 .trigger:focus-visible { outline: 2px solid var(--color-border-focus); outline-offset: 2px; }
 .trigger__icon { flex-shrink: 0; color: var(--color-fg-subtle); }
 .trigger__text { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--color-fg-subtle); }

@@ -14,7 +14,10 @@
 .elapsed { font-size: 13px; font-weight: 400; line-height: 20px; color: var(--color-fg-subtle); font-variant-numeric: tabular-nums; }
 .summary { font-size: 13px; font-weight: 400; line-height: 20px; color: var(--color-fg-subtle); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .chevron { flex-shrink: 0; display: inline-flex; color: var(--color-fg-subtle); transition: color 160ms ease-out; }
-.header:hover:not(:disabled) .title, .header:hover:not(:disabled) .chevron { color: var(--color-fg-default); }
+@media (hover: hover) {
+  .header:hover:not(:disabled) .title,
+  .header:hover:not(:disabled) .chevron { color: var(--color-fg-default); }
+}
 
 /* the label shimmers (1.6s): a pale band travels through the muted text, like the Thinking Loader's */
 @media (prefers-reduced-motion: no-preference) {

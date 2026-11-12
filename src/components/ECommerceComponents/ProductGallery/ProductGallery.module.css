@@ -46,7 +46,10 @@
   flex-direction: row;
   gap: var(--space-8);
   width: 100%;
+  overflow-x: auto;
+  scrollbar-width: none;
 }
+.thumbsBottom::-webkit-scrollbar { display: none; }
 .thumbsLeft {
   flex-direction: column;
   gap: var(--space-8);
@@ -63,8 +66,13 @@
   cursor: pointer;
 }
 .thumbBottom {
+  /* 80px squares, shrinking together (never below 48px) when the gallery is narrower than the row; past that the
+     row scrolls instead of spilling out of the gallery. */
+  flex: 0 1 80px;
+  min-width: 48px;
   width: 80px;
-  height: 80px;
+  height: auto;
+  aspect-ratio: 1;
   border-radius: 10px;
 }
 .thumbLeft {

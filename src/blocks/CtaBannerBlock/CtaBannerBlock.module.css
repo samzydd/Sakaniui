@@ -2,9 +2,11 @@
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  width: 1263px;
+  width: 100%;
+  max-width: 1263px;
+  container: ctabanner / inline-size;
   box-sizing: border-box;
-  padding: var(--space-48);
+  padding: clamp(var(--space-16), 4vw, var(--space-48));   /* 48px on a desktop, 16px at the sides on a phone */
   background: var(--color-bg-canvas);
   font-family: var(--font-sans);
 }
@@ -75,4 +77,12 @@
   display: flex;
   align-items: flex-start;
   gap: var(--space-12);
+}
+
+/* Narrow containers (a phone, a side panel, a docs preview). The block fills its container up to its Figma width
+   (max-width above) and, below these widths, tightens the banner and lets its line and buttons wrap. */
+@container ctabanner (max-width: 720px) {
+  .banner { padding: var(--space-40) var(--space-20); }
+  .descriptionAccent { white-space: normal; }
+  .ctaRow { flex-wrap: wrap; justify-content: center; }
 }

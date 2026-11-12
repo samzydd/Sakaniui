@@ -16,8 +16,10 @@
   cursor: pointer;
 }
 
-.link:hover {
-  text-decoration-color: currentColor;
+@media (hover: hover) {
+  .link:hover {
+    text-decoration-color: currentColor;
+  }
 }
 
 .link:visited {

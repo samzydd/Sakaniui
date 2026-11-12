@@ -24,7 +24,9 @@
   text-align: center;
   transition: background-color var(--transition-base), border-color var(--transition-base);
 }
-.dropzone:hover { border-color: var(--color-border-strong); }
+@media (hover: hover) {
+  .dropzone:hover { border-color: var(--color-border-strong); }
+}
 .dropzoneDragging { background: var(--color-accent-subtle); border-color: var(--color-accent-default); }
 
 .dropzoneIcon {

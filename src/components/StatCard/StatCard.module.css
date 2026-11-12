@@ -45,7 +45,9 @@
   display: inline-flex; border: none; background: transparent; color: var(--color-fg-muted);
   cursor: pointer; padding: var(--space-2); border-radius: var(--radius-sm); flex-shrink: 0;
 }
-.card__menu:hover { background: var(--color-bg-canvas); color: var(--color-fg-default); }
+@media (hover: hover) {
+  .card__menu:hover { background: var(--color-bg-canvas); color: var(--color-fg-default); }
+}
 
 .card__value {
   font-size: 30px;

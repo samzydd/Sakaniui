@@ -24,7 +24,9 @@
   text-align: left;
   font-family: inherit;
 }
-.item__header:hover { background: var(--color-bg-subtle); }
+@media (hover: hover) {
+  .item__header:hover { background: var(--color-bg-subtle); }
+}
 
 .item__title {
   font-size: 14px;

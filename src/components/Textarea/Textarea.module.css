@@ -98,3 +98,9 @@
 
 .ai__actions { display: flex; align-items: center; justify-content: space-between; gap: var(--space-8); margin-top: var(--space-10); margin-left: calc(var(--space-12) * -1); margin-right: calc(var(--space-12) * -1); }
 .ai__side { display: inline-flex; align-items: center; gap: var(--space-4); }
+
+/* Touch screens: iOS Safari zooms the whole page into any text field under 16px the moment it is focused, and does not
+   zoom back out. On a coarse pointer the field's text is 16px, so tapping into it never zooms. Mouse layouts are unchanged. */
+@media (pointer: coarse) {
+  .textarea { font-size: 16px; }
+}

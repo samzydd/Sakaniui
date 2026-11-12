@@ -275,7 +275,10 @@ const THICK_GLASS = { refraction: 1, depth: 44, dispersion: 0.7, frost: 0, light
 
 /** A clear lens you can drag anywhere over the photo. */
 const DragLens = () => {
-  const [pos, setPos] = React.useState({ x: 0.36, y: 0.27 }); // as a fraction of the stage: on the right-hand balloon
+  // As a fraction of the stage: on the right-hand balloon. On a phone that spot is the player's controls, so the lens
+  // starts on the hills to the right of the headline instead.
+  const [pos, setPos] = React.useState(() =>
+    typeof window !== 'undefined' && window.matchMedia('(max-width: 760px)').matches ? { x: 0.74, y: 0.5 } : { x: 0.36, y: 0.27 });
   const drag = React.useRef<{ dx: number; dy: number; w: number; h: number; l: number; t: number } | null>(null);
   const [held, setHeld] = React.useState(false);
   return (

@@ -3,8 +3,14 @@
   align-items: center;
   gap: var(--space-8);
   height: 24px;
+  max-width: 100%;
+  /* Narrow screens: connectors shorten first (32px down to 12px); if the steps still don't fit, the row scrolls
+     sideways rather than spilling out of its container. */
+  overflow-x: auto;
+  scrollbar-width: none;
   font-family: var(--font-sans);
 }
+.steps::-webkit-scrollbar { display: none; }
 
 .step {
   display: flex;
@@ -14,7 +20,8 @@
 }
 
 .connector {
-  flex-shrink: 0;
+  flex: 0 1 32px;
+  min-width: 12px;
   width: 32px;
   height: 1px;
   background: var(--color-border-default);

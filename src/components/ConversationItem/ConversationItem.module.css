@@ -49,8 +49,12 @@
  */
 /* --hover-fill is transparent inside a hover group, where one highlight
    glides between items instead; this is the fallback elsewhere. */
-.item:where(:hover) { background: var(--hover-fill, var(--color-bg-subtle)); }
-.item--active:where(:hover) { background: var(--color-accent-subtle); }
+@media (hover: hover) {
+  .item:where(:hover) { background: var(--hover-fill, var(--color-bg-subtle)); }
+}
+@media (hover: hover) {
+  .item--active:where(:hover) { background: var(--color-accent-subtle); }
+}
 .item:where(:active) { background: var(--color-bg-muted); }
 .item--active:where(:active) { background: var(--color-accent-subtle); }
 .item:where(:focus-visible) {

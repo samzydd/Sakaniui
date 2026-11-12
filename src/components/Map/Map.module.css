@@ -69,7 +69,10 @@
   cursor: pointer;
   transition: background-color var(--transition-base), color var(--transition-base);
 }
-.button:hover:not(:disabled), .button[data-hovered]:not(:disabled) { background: var(--color-bg-subtle); }
+.button[data-hovered]:not(:disabled) { background: var(--color-bg-subtle); }
+@media (hover: hover) {
+  .button:hover:not(:disabled) { background: var(--color-bg-subtle); }
+}
 .button:focus-visible { outline: 2px solid var(--color-border-focus); outline-offset: -2px; }
 .button:disabled { color: var(--color-fg-subtle); cursor: default; }
 .divider { height: 1px; background: var(--color-border-subtle); }
@@ -102,7 +105,10 @@
   transform: translate(-50%, -50%);
 }
 button.marker { cursor: pointer; }
-.marker:hover, .marker[data-hovered] { z-index: 3; }
+.marker[data-hovered] { z-index: 3; }
+@media (hover: hover) {
+  .marker:hover { z-index: 3; }
+}
 .marker--selected { z-index: 2; }
 button.marker:focus-visible { outline: 2px solid var(--color-border-focus); outline-offset: 2px; border-radius: var(--radius-full); }
 
@@ -132,7 +138,10 @@ button.marker:focus-visible { outline: 2px solid var(--color-border-focus); outl
   opacity: 0.22;
   transition: transform 160ms, opacity 160ms, background-color 160ms;
 }
-.marker--pin:hover .pin, .marker--pin[data-hovered] .pin { transform: translateY(-3px); filter: drop-shadow(0 4px 6px rgb(0 0 0 / 0.2)); }
+.marker--pin[data-hovered] .pin { transform: translateY(-3px); filter: drop-shadow(0 4px 6px rgb(0 0 0 / 0.2)); }
+@media (hover: hover) {
+  .marker--pin:hover .pin { transform: translateY(-3px); filter: drop-shadow(0 4px 6px rgb(0 0 0 / 0.2)); }
+}
 .marker--pin:hover .pinShadow, .marker--pin[data-hovered] .pinShadow { transform: scaleX(0.86); opacity: 0.14; }
 .marker--pin.marker--selected .pin { transform: scale(1.25); filter: drop-shadow(0 4px 6px rgb(0 0 0 / 0.2)); }
 .marker--pin.marker--selected .pinShadow { width: 30px; height: 11px; margin-left: -15px; bottom: -5.5px; background: var(--color-accent-subtle); opacity: 1; }
@@ -146,7 +155,10 @@ button.marker:focus-visible { outline: 2px solid var(--color-border-focus); outl
   box-shadow: 0 0 0 2px var(--color-bg-surface), var(--shadow-sm);
   transition: box-shadow 160ms, width 160ms, height 160ms;
 }
-.marker--dot:hover, .marker--dot[data-hovered] { box-shadow: 0 0 0 2px var(--color-bg-surface), 0 0 0 6px var(--color-accent-subtle); }
+.marker--dot[data-hovered] { box-shadow: 0 0 0 2px var(--color-bg-surface), 0 0 0 6px var(--color-accent-subtle); }
+@media (hover: hover) {
+  .marker--dot:hover { box-shadow: 0 0 0 2px var(--color-bg-surface), 0 0 0 6px var(--color-accent-subtle); }
+}
 .marker--dot.marker--selected { width: 20px; height: 20px; box-shadow: 0 0 0 2px var(--color-bg-surface), 0 0 0 10px var(--color-accent-subtle); }
 
 /* Cluster: 40px (44 selected) with the count in label/md-strong, fg/on-accent. */
@@ -161,7 +173,10 @@ button.marker:focus-visible { outline: 2px solid var(--color-border-focus); outl
   box-shadow: 0 0 0 2px var(--color-bg-surface), var(--shadow-md);
   transition: box-shadow 160ms, width 160ms, height 160ms;
 }
-.marker--cluster:hover, .marker--cluster[data-hovered] { box-shadow: 0 0 0 2px var(--color-bg-surface), 0 0 0 6px var(--color-accent-subtle), var(--shadow-md); }
+.marker--cluster[data-hovered] { box-shadow: 0 0 0 2px var(--color-bg-surface), 0 0 0 6px var(--color-accent-subtle), var(--shadow-md); }
+@media (hover: hover) {
+  .marker--cluster:hover { box-shadow: 0 0 0 2px var(--color-bg-surface), 0 0 0 6px var(--color-accent-subtle), var(--shadow-md); }
+}
 .marker--cluster.marker--selected { width: 44px; height: 44px; box-shadow: 0 0 0 2px var(--color-bg-surface), 0 0 0 6px var(--color-accent-subtle), var(--shadow-md); }
 .clusterCount { color: var(--color-fg-on-accent); font-size: 14px; font-weight: 600; line-height: 1; font-variant-numeric: tabular-nums; }
 
@@ -203,7 +218,9 @@ button.marker:focus-visible { outline: 2px solid var(--color-border-focus); outl
   color: var(--color-fg-muted);
   cursor: pointer;
 }
-.popupClose:hover { background: var(--color-bg-subtle); color: var(--color-fg-default); }
+@media (hover: hover) {
+  .popupClose:hover { background: var(--color-bg-subtle); color: var(--color-fg-default); }
+}
 .popupDescription { color: var(--color-fg-muted); font-size: 12px; line-height: 16px; }
 /* The pointer: a 16x8 notch, its top edge tucked under the card's border. */
 .popupPointer {
@@ -231,4 +248,12 @@ button.marker:focus-visible { outline: 2px solid var(--color-border-focus); outl
 @media (prefers-reduced-motion: reduce) {
   .tile, .pin, .pinShadow, .marker--dot, .marker--cluster { transition: none; }
   .popup { animation: none; }
+}
+
+/* Touch: these controls are drawn small, but a fingertip needs a bigger target. On a coarse pointer an invisible hit
+   area extends each one to 32px (WCAG 2.5.8 asks for at least 24px); what is drawn does not change. */
+@media (pointer: coarse) {
+  .popupClose { position: relative; }
+  .popupClose::after { content: ''; position: absolute; inset: -6px; }   /* 20px drawn, 32px to touch */
+  button.marker--dot::after { content: ''; position: absolute; inset: -8px; }   /* 16px drawn, 32px to touch */
 }
