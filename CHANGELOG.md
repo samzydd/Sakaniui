@@ -11,7 +11,7 @@ All notable changes to `@sakaniui/react` are documented here.
   - **`ChatOrb`**: the AI's face, now the assistant avatar in `AiMessage` in place of the ember-ringed sparkles. A soft white sphere with
     two black eyes that turn toward the pointer anywhere on the page (easing, never snapping) and blink every 3 to 6 seconds. `glance`
     (AiMessage sets it when the first text arrives) turns the eyes toward the response for 1.4s before they look straight; the eyes squint
-    while the pointer is over the orb (`squintOnHover`). Short eyebrows sit over the eyes and move with them (left raised while thinking, both lifted on a glance, lowered on a squint or blink; `brows={false}` removes them). `thinking`
+    while the pointer is over the orb (`squintOnHover`). `thinking`
     makes the eyes sweep side to side, looking a little up, instead of following the pointer (AiMessage sets it while it streams with no text
     yet). `size`, `look`, `blink`, `label`; decorative by default; still under reduced motion.
   - **`ReasoningTrace`**: the thinking panel. `status="streaming"` turns a ray spinner, shimmers "Thinking" and counts whole seconds;
