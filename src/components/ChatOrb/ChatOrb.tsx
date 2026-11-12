@@ -12,6 +12,9 @@
  *   glance  when the response arrives the eyes first turn toward the text beside the orb (right, a hair down), hold for 1.4s, then
  *           ease straight ahead and go back to following the pointer. Set `glance` true when text starts arriving.
  *   squint  with the pointer over the orb the eyes narrow, as if pleased; they open again when it leaves.
+ *   lookAt  give it an element and the eyes read it instead of following the pointer: they start at the beginning of its text,
+ *           sweep along it (0.8s) and rest at its end, re-aiming as the layout moves (a new line of reasoning arriving). Pass
+ *           null to go back to the pointer.
  *
  * Decorative by default (aria-hidden): the message text beside it carries the meaning. Pass `label` to expose it as an image.
  * Reduced motion, `look={false}` and touch with no pointer: the eyes rest straight ahead (`thinking` then holds them looking up and to one side, with no sweep). `blink={false}` turns blinking off.
@@ -32,6 +35,8 @@ export interface ChatOrbProps {
   thinking?: boolean;
   /** The response has arrived: glance toward the text (to the right) for 1.4s, then look straight. Fires each time it turns true. */
   glance?: boolean;
+  /** Read this element instead of following the pointer: the eyes sweep along its text, then rest at its end, and keep aiming as the page moves. */
+  lookAt?: HTMLElement | null;
   /** The eyes squint while the pointer is over the orb. Default true. */
   squintOnHover?: boolean;
   /** Accessible name. Omit for a decorative orb. */
@@ -49,19 +54,23 @@ const FULL_TURN = 4;
 const GLANCE_X = 0.12;
 const GLANCE_Y = 0.025;
 const GLANCE_MS = 1400;
+/** Looking at an element: the eyes sweep READ_SWEEP across over READ_MS, and travel GAZE_Y_BOOST times further up and down than for the pointer. */
+const READ_MS = 800;
+const READ_SWEEP = 0.12;   // how far (shares of the diameter) the eyes travel across while reading
+const GAZE_Y_BOOST = 1.6;
 
-export const ChatOrb: React.FC<ChatOrbProps> = ({ size = 28, look = true, blink = true, thinking = false, glance = false, squintOnHover = true, label, className, style }) => {
+export const ChatOrb: React.FC<ChatOrbProps> = ({ size = 28, look = true, blink = true, thinking = false, glance = false, lookAt = null, squintOnHover = true, label, className, style }) => {
   const root = React.useRef<HTMLSpanElement>(null);
   const eyes = React.useRef<HTMLSpanElement>(null);
 
   // the glance: turn toward the response beside the orb, hold, then let go (the pointer takes over on its next move)
   const [glancing, setGlancing] = React.useState(false);
   React.useEffect(() => {
-    if (!glance || typeof window === 'undefined' || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    if (!glance || lookAt || typeof window === 'undefined' || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     setGlancing(true);
     const t = window.setTimeout(() => setGlancing(false), GLANCE_MS);
     return () => { window.clearTimeout(t); setGlancing(false); };
-  }, [glance]);
+  }, [glance, lookAt]);
   React.useEffect(() => {
     const g = eyes.current;
     if (!g || !glancing) return;
@@ -70,6 +79,56 @@ export const ChatOrb: React.FC<ChatOrbProps> = ({ size = 28, look = true, blink 
     return () => { g.style.removeProperty('--ox'); g.style.removeProperty('--oy'); };
   }, [glancing]);
 
+  // looking at an element: the eyes read it. They start at the beginning of the line and sweep along its text (a line of reasoning
+  // being written), then rest at its end; they keep aiming as the layout settles or moves (a step rising in, text typing in)
+  React.useEffect(() => {
+    const el = root.current;
+    const g = eyes.current;
+    if (!lookAt || !el || !g) return;
+    const still = typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const t0 = performance.now();
+    let raf = 0;
+    const textBox = () => {
+      const range = document.createRange();
+      range.selectNodeContents(lookAt);
+      const b = range.getBoundingClientRect();
+      return b.width > 0 ? b : lookAt.getBoundingClientRect();
+    };
+    const aim = () => {
+      raf = 0;
+      const p = still ? 1 : Math.min(1, (performance.now() - t0) / READ_MS);
+      const eased = 1 - Math.pow(1 - p, 2);
+      const r = el.getBoundingClientRect();
+      const t = textBox();
+      // where the line is from the orb, as a turn of the eyes; the reading sweep rides on top of it, left to right, so it shows
+      // even when the line is too far off to the side for the turn alone to change
+      const dx = t.left + 6 - (r.left + r.width / 2);
+      const dy = t.top + t.height / 2 - (r.top + r.height / 2);
+      const turnX = Math.max(-1, Math.min(1, dx / (r.width * 3)));
+      const turnY = Math.max(-1, Math.min(1, dy / (r.width * 1.2)));
+      g.style.setProperty('--ox', (turnX * REACH_X + (eased - 0.5) * READ_SWEEP).toFixed(4));
+      g.style.setProperty('--oy', (turnY * REACH_Y * GAZE_Y_BOOST).toFixed(4));
+      g.style.setProperty('--squeeze', (1 - Math.abs(turnX) * 0.1).toFixed(3));
+      if (p < 1) raf = requestAnimationFrame(aim);
+    };
+    const queue = () => { if (!raf) raf = requestAnimationFrame(aim); };
+    aim();
+    const timers = [450, 900, 1500].map((ms) => window.setTimeout(queue, ms));
+    const ro = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(queue) : null;
+    ro?.observe(lookAt);
+    ro?.observe(el);
+    window.addEventListener('scroll', queue, true);
+    window.addEventListener('resize', queue);
+    return () => {
+      timers.forEach(window.clearTimeout);
+      ro?.disconnect();
+      window.removeEventListener('scroll', queue, true);
+      window.removeEventListener('resize', queue);
+      if (raf) cancelAnimationFrame(raf);
+      g.style.removeProperty('--ox'); g.style.removeProperty('--oy'); g.style.removeProperty('--squeeze');
+    };
+  }, [lookAt]);
+
   // squint while the pointer is over the orb (mouse and pen only)
   const [squint, setSquint] = React.useState(false);
 
@@ -77,7 +136,7 @@ export const ChatOrb: React.FC<ChatOrbProps> = ({ size = 28, look = true, blink 
   React.useEffect(() => {
     const el = root.current;
     const g = eyes.current;
-    if (!look || thinking || glancing || !el || !g) return;
+    if (!look || thinking || glancing || lookAt || !el || !g) return;
     if (typeof window === 'undefined' || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     let raf = 0;
     let last: { x: number; y: number } | null = null;
@@ -108,7 +167,7 @@ export const ChatOrb: React.FC<ChatOrbProps> = ({ size = 28, look = true, blink 
       document.documentElement.removeEventListener('pointerleave', onLeave);
       if (raf) cancelAnimationFrame(raf);
     };
-  }, [look, thinking, glancing]);
+  }, [look, thinking, glancing, lookAt]);
 
   // blink: close for ~140ms at a random 3 to 6s interval (a quick double blink now and then)
   const [closed, setClosed] = React.useState(false);
@@ -138,7 +197,7 @@ export const ChatOrb: React.FC<ChatOrbProps> = ({ size = 28, look = true, blink 
       onPointerLeave={squintOnHover ? () => setSquint(false) : undefined}
       {...(label ? { role: 'img', 'aria-label': label } : { 'aria-hidden': true })}
     >
-      <span ref={eyes} className={styles.eyes} data-closed={closed || undefined} data-thinking={thinking || undefined} data-glancing={glancing || undefined} data-squint={squint || undefined}>
+      <span ref={eyes} className={styles.eyes} data-closed={closed || undefined} data-thinking={thinking || undefined} data-glancing={glancing || undefined} data-gazing={lookAt ? true : undefined} data-squint={squint || undefined}>
         <span className={styles.eye} />
         <span className={styles.eye} />
       </span>

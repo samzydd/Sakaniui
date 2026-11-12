@@ -8,7 +8,7 @@
  *   Chain of Thought Step    Status pending | active | done; an icon, a label, an optional
  *                            monospace query and result count, and an optional Sources row
  *   Source Stack             3 to 5 overlapping site-icon chips (Source Chip, 18px)
- *   Working Indicator        Working (sparkle, "Working", elapsed) | Done ("Worked for 11s")
+ *   Working Indicator        Working (the Chat Orb, "Working", elapsed) | Done ("Worked for 11s")
  *
  * Icons can be anything: a Sakani icon, an emoji (💡 for thinking, 📄 for reading) or the real logo of the
  * site searched, in its brand colour (`sourceLogo('reddit')`). Colour stays on in every state; a pending
@@ -37,6 +37,7 @@
 
 import React from 'react';
 import { IconSearch as Search } from '../../icons/outline/search';
+import { ChatOrb } from '../ChatOrb';
 import { IconCircleCheck as CircleCheck } from '../../icons/outline/circle-check';
 import { IconChevronDown as ChevronDown } from '../../icons/outline/chevron-down';
 import { IconWorld as World } from '../../icons/outline/world';
@@ -86,7 +87,7 @@ function formatElapsed(seconds: number) {
 /* ------------------------------------------------------------------ */
 
 export interface WorkingIndicatorProps {
-  /** "working" shows a sparkle and a shimmering label; "done" shows a check. Defaults to "working". */
+  /** "working" shows the Chat Orb and a shimmering label; "done" shows a check. Defaults to "working". */
   status?: 'working' | 'done';
   /** Replaces the default label ("Working" / "Worked for"). */
   label?: string;
@@ -94,28 +95,13 @@ export interface WorkingIndicatorProps {
   elapsed?: number;
   /** Epoch ms when the work started; while "working" the time ticks on its own. */
   startedAt?: number;
+  /** The orb's eyes look at this element (the newest line of thought) instead of following the pointer. */
+  lookAt?: HTMLElement | null;
   className?: string;
 }
 
-/**
- * The sparkle beside "Working", in the brand colour and a 1px line: the library's sparkles icon with its three stars
- * split apart so each can move on its own. The big star turns a quarter every cycle (a four-point star looks the same after 90 degrees, so it reads
- * as a continuous turn) and breathes; the two small ones twinkle in turn, filling in as they peak.
- */
-const WorkingSpark: React.FC<{ className?: string }> = ({ className }) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg" width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor"
-    strokeWidth={iconStrokeWidth(16, 1)} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" focusable="false"
-    className={cx(styles.spark, className)}
-  >
-    <path className={styles.spark__big} d="M9 18a6 6 0 0 1 6 -6a6 6 0 0 1 -6 -6a6 6 0 0 1 -6 6a6 6 0 0 1 6 6" />
-    <path className={styles.spark__top} d="M16 6a2 2 0 0 1 2 2a2 2 0 0 1 2 -2a2 2 0 0 1 -2 -2a2 2 0 0 1 -2 2" />
-    <path className={styles.spark__bottom} d="M16 18a2 2 0 0 1 2 2a2 2 0 0 1 2 -2a2 2 0 0 1 -2 -2a2 2 0 0 1 -2 2" />
-  </svg>
-);
-
 export const WorkingIndicator: React.FC<WorkingIndicatorProps> = ({
-  status = 'working', label, elapsed, startedAt, className,
+  status = 'working', label, elapsed, startedAt, lookAt, className,
 }) => {
   const working = status === 'working';
   const [now, setNow] = React.useState(() => Date.now());
@@ -132,7 +118,7 @@ export const WorkingIndicator: React.FC<WorkingIndicatorProps> = ({
   return (
     <div className={cx(styles.indicator, working ? styles['indicator--working'] : styles['indicator--done'], className)} data-changed={changed || undefined} role="status">
       {working
-        ? <WorkingSpark className={styles.indicator__icon} />
+        ? <ChatOrb size={20} lookAt={lookAt} className={styles.indicator__icon} />
         : <CircleCheck className={styles.indicator__icon} size={16} strokeWidth={iconStrokeWidth(16)} aria-hidden="true" />}
       <span className={styles.indicator__label}>{label ?? (working ? 'Working' : 'Worked for')}</span>
       {seconds != null && (
@@ -298,7 +284,7 @@ export interface ChainOfThoughtProps {
   defaultOpen?: boolean;
   /** Called with the new state when the header is clicked. */
   onOpenChange?: (open: boolean) => void;
-  /** Adds the working line under the steps: "working" (sparkle, shimmer) or "done" ("Worked for 11.2s"). */
+  /** Adds the working line under the steps: "working" (the Chat Orb, whose eyes follow the newest step, and a shimmer) or "done" ("Worked for 11.2s"). */
   status?: 'working' | 'done';
   /** Elapsed seconds for the working line. */
   elapsed?: number;
@@ -327,12 +313,17 @@ export const ChainOfThought: React.FC<ChainOfThoughtProps> = ({
   // opening rise are staggered by them
   const stepsRef = React.useRef<HTMLOListElement>(null);
   const [stepCount, setStepCount] = React.useState(0);
+  const [gaze, setGaze] = React.useState<HTMLElement | null>(null);
   // after every render (steps come and go); it only sets state when the count changed, so it settles
   // eslint-disable-next-line react-hooks/exhaustive-deps
   React.useLayoutEffect(() => {
     const items = stepsRef.current ? Array.from(stepsRef.current.children) as HTMLElement[] : [];
     items.forEach((el, i) => el.style.setProperty('--step', String(i)));
     if (items.length !== stepCount) setStepCount(items.length);
+    // the orb on the working line reads the newest step (its label and query), and moves on when the next one arrives
+    const last = items[items.length - 1];
+    const target = (last?.querySelector(`.${styles.step__content}`) as HTMLElement | null) ?? null;
+    setGaze((prev) => (prev === target ? prev : target));
   });
   const finishing = useChanged(status, 900 + stepCount * 110, (s) => s === 'done');
   const opening = useChanged(isOpen, 700 + stepCount * 45, (o) => o === true);
@@ -361,7 +352,7 @@ export const ChainOfThought: React.FC<ChainOfThoughtProps> = ({
           </ReadyContext.Provider>
           {status && (
             <div className={styles.working}>
-              <WorkingIndicator status={status} elapsed={elapsed} startedAt={startedAt} />
+              <WorkingIndicator status={status} elapsed={elapsed} startedAt={startedAt} lookAt={gaze} />
             </div>
           )}
         </div>
