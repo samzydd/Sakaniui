@@ -300,6 +300,16 @@ user when you are composing** rather than implying a dedicated component exists.
   (`EmojiLightBulb` for planning, `EmojiPageFacingUp` for reading). Do not use a generic magnifier for every
   step. It only displays: you stream the steps in. Do not build this from `Stepper` (a
   progress bar for a known sequence) or `ActivityFeed` (a log of past events).
+- **An AI conversation.** Use the AI parts instead of building a chat from bubbles: `AiMessage` (the assistant's reply
+  beside the `ChatOrb`, or the user's bubble; set `streaming` while it arrives), `ReasoningTrace` (the thinking panel:
+  `status="streaming"` while the model thinks, then `"done"` with `elapsed` and a one-line `summary`), `ToolCall` (one per
+  tool call: `status` `running` / `done` / `error`, `name`, `args`, `input`, `output`), `ThinkingLoader` (a status pill whose
+  `label` follows what the model is doing: "Thinking", "Searching the web", "Writing response"), `PromptComposer` (the prompt
+  box: it grows, Enter sends, `status="streaming"` turns send into Stop; put the model picker in `actions` or a row under it),
+  `AttachmentChip` for files above it and `SuggestionChip` (`starter` on the empty screen, `follow-up` under a reply). They are
+  presentational: you stream the text and set the state. `AiChatBlock` and `AiWelcomeBlock` show them composed. The assistant's
+  face is the `ChatOrb`, not a sparkles icon, and the ember light round the prompt box sweeps once and rests: do not set
+  `glow="pulse"`. *Why:* one family with one quiet motion language. *Not for* chat between people: use `MessageBubble`.
 - **The model isn't sure.** State uncertainty in words next to the claim, not hidden in colour. Use an
   `Alert` (`color="info"` or `"warning"`) or a `Badge` ("Low confidence"). Offer the next step: verify,
   rephrase, or ask for more context.
