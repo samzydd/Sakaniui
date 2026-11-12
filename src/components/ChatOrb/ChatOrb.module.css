@@ -62,3 +62,25 @@
   80%  { translate: 22% -40%;   animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1); }
   100% { translate: 0 0; }
 }
+
+/* eyebrows: a short bar over each eye, as wide as the eye, in the eye's ink. They are children of the eye pair, so they travel with
+   it. --d is the ball's diameter in px (set by ChatOrb); --by is how far a brow sits from rest, in diameters, negative = up. */
+.brow {
+  --by: 0; --tilt: 0deg;
+  position: absolute; bottom: calc(100% + var(--d, 28px) * 0.06);
+  width: 36.3%; height: calc(var(--d, 28px) * 0.034); min-height: 1px;
+  border-radius: 999px; background: var(--orb-eye);
+  transform: translateY(calc(var(--d, 28px) * var(--by))) rotate(var(--tilt));
+}
+/* the inner ends sit a little higher, which keeps the face friendly rather than stern */
+.brow--l { left: 0; --tilt: -5deg; }
+.brow--r { right: 0; --tilt: 5deg; }
+@media (prefers-reduced-motion: no-preference) {
+  .brow { transition: transform 180ms cubic-bezier(0.2, 0, 0, 1); }
+}
+/* a glance lifts both; thinking raises the left one (curious) and eases the right; a squint or a blink brings them down a touch */
+.eyes[data-glancing] .brow { --by: -0.03; }
+.eyes[data-thinking] .brow--l { --by: -0.045; }
+.eyes[data-thinking] .brow--r { --by: 0.008; }
+.eyes[data-squint] .brow { --by: 0.016; }
+.eyes[data-closed] .brow { --by: 0.012; }

@@ -12,6 +12,8 @@
  *   glance  when the response arrives the eyes first turn toward the text beside the orb (right, a hair down), hold for 1.4s, then
  *           ease straight ahead and go back to following the pointer. Set `glance` true when text starts arriving.
  *   squint  with the pointer over the orb the eyes narrow, as if pleased; they open again when it leaves.
+ *   brows   a short dark brow sits over each eye and travels with it. Thinking raises the left one (curious), a glance lifts both,
+ *           a squint or a blink brings them down a touch. `brows={false}` leaves them off.
  *
  * Decorative by default (aria-hidden): the message text beside it carries the meaning. Pass `label` to expose it as an image.
  * Reduced motion, `look={false}` and touch with no pointer: the eyes rest straight ahead (`thinking` then holds them looking up and to one side, with no sweep). `blink={false}` turns blinking off.
@@ -34,6 +36,8 @@ export interface ChatOrbProps {
   glance?: boolean;
   /** The eyes squint while the pointer is over the orb. Default true. */
   squintOnHover?: boolean;
+  /** Eyebrows over the eyes. Default true. */
+  brows?: boolean;
   /** Accessible name. Omit for a decorative orb. */
   label?: string;
   className?: string;
@@ -50,7 +54,7 @@ const GLANCE_X = 0.12;
 const GLANCE_Y = 0.025;
 const GLANCE_MS = 1400;
 
-export const ChatOrb: React.FC<ChatOrbProps> = ({ size = 28, look = true, blink = true, thinking = false, glance = false, squintOnHover = true, label, className, style }) => {
+export const ChatOrb: React.FC<ChatOrbProps> = ({ size = 28, look = true, blink = true, thinking = false, glance = false, squintOnHover = true, brows = true, label, className, style }) => {
   const root = React.useRef<HTMLSpanElement>(null);
   const eyes = React.useRef<HTMLSpanElement>(null);
 
@@ -133,12 +137,13 @@ export const ChatOrb: React.FC<ChatOrbProps> = ({ size = 28, look = true, blink 
     <span
       ref={root}
       className={[styles.orb, className ?? ''].filter(Boolean).join(' ')}
-      style={{ width: size, height: size, ...style }}
+      style={{ width: size, height: size, ['--d' as string]: `${size}px`, ...style }}
       onPointerEnter={squintOnHover ? (e) => { if (e.pointerType !== 'touch') setSquint(true); } : undefined}
       onPointerLeave={squintOnHover ? () => setSquint(false) : undefined}
       {...(label ? { role: 'img', 'aria-label': label } : { 'aria-hidden': true })}
     >
       <span ref={eyes} className={styles.eyes} data-closed={closed || undefined} data-thinking={thinking || undefined} data-glancing={glancing || undefined} data-squint={squint || undefined}>
+        {brows && <><span className={`${styles.brow} ${styles['brow--l']}`} /><span className={`${styles.brow} ${styles['brow--r']}`} /></>}
         <span className={styles.eye} />
         <span className={styles.eye} />
       </span>
