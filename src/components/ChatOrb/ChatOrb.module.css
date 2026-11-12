@@ -42,8 +42,8 @@
 @media (prefers-reduced-motion: no-preference) {
   .eyes[data-glancing] { transition-duration: 320ms; }
 }
-/* a squint: the pointer is over the orb, the dots narrow to about 40% of their height */
-.eyes[data-squint] .eye { transform: scaleY(0.4); }
+/* a squint: the pointer is over the orb, the dots narrow to about 65% of their height */
+.eyes[data-squint] .eye { transform: scaleY(0.65); }
 /* a blink: the dot closes to a dash (it wins over a squint) */
 .eyes[data-closed] .eye { transform: scaleY(0.12); }
 
