@@ -1,0 +1,19 @@
+/* Story canvas on narrow screens.
+   Many stories wrap their component in a fixed-width box (width: 400, 713, 892…) sized for a desktop canvas. On a phone that
+   box is wider than the screen, so the story overflows and the browser crops it, which hides how the component itself
+   behaves at that width. Below 960px the wrapper is capped to the canvas instead (padding included), so a story shows the
+   component at the width a phone actually gives it. At desktop widths nothing changes. */
+@media (max-width: 960px) {
+  .sb-main-centered #storybook-root,
+  .sb-main-padded #storybook-root {
+    max-width: 100%;
+    min-width: 0;
+  }
+  /* The story's own wrapper, and fixed-width wrappers nested up to two levels in it (dark-mode decorators, story grids). */
+  #storybook-root > *,
+  #storybook-root > * > div[style*="width"],
+  #storybook-root > * > * > div[style*="width"] {
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+}

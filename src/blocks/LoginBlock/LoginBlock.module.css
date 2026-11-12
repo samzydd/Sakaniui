@@ -57,6 +57,7 @@
 }
 
 .fieldFrame {
+  cursor: text;   /* a press anywhere on the frame focuses the input (focusField) */
   display: flex;
   align-items: center;
   gap: var(--space-8);
@@ -77,6 +78,7 @@
   border-width: var(--border-width-150);
 }
 .fieldFrameDisabled {
+  cursor: not-allowed;
   background: var(--color-bg-subtle);
   opacity: var(--opacity-60);
 }
@@ -178,7 +180,9 @@
   cursor: pointer;
   transition: background-color var(--transition-base), box-shadow var(--transition-base);
 }
-.socialButton:hover:not(:disabled) { background: var(--color-bg-canvas); box-shadow: var(--shadow-sm); }
+@media (hover: hover) {
+  .socialButton:hover:not(:disabled) { background: var(--color-bg-canvas); box-shadow: var(--shadow-sm); }
+}
 .socialButton:disabled { opacity: var(--opacity-60); cursor: not-allowed; }
 
 /* ─── Skeleton ── */
@@ -196,4 +200,17 @@
   display: flex;
   gap: var(--space-8);
   width: 100%;
+}
+
+/* Touch screens: iOS Safari zooms the whole page into any text field under 16px the moment it is focused, and does not
+   zoom back out. On a coarse pointer the field's text is 16px, so tapping into it never zooms. Mouse layouts are unchanged. */
+@media (pointer: coarse) {
+  .fieldControl { font-size: 16px; }
+}
+
+/* Touch: these controls are drawn small, but a fingertip needs a bigger target. On a coarse pointer an invisible hit
+   area extends each one to 32px (WCAG 2.5.8 asks for at least 24px); what is drawn does not change. */
+@media (pointer: coarse) {
+  .visibilityToggle { position: relative; }
+  .visibilityToggle::after { content: ''; position: absolute; inset: -8px; }   /* 16px drawn, 32px to touch */
 }

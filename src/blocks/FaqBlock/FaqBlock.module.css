@@ -3,9 +3,11 @@
   flex-direction: column;
   align-items: center;
   gap: var(--space-24);
-  width: 1137px;
+  width: 100%;
+  max-width: 1137px;
+  container: faq / inline-size;
   box-sizing: border-box;
-  padding: var(--space-48);
+  padding: clamp(var(--space-16), 4vw, var(--space-48));   /* 48px on a desktop, 16px at the sides on a phone */
   background: var(--color-bg-canvas);
   font-family: var(--font-sans);
 }
@@ -29,4 +31,11 @@
 .column {
   flex: 1 1 0%;
   min-width: 0;
+}
+
+/* Narrow containers (a phone, a side panel, a docs preview). The block fills its container up to its Figma width
+   (max-width above) and, below these widths, stacks its two columns. */
+@container faq (max-width: 860px) {
+  .columns { flex-direction: column; gap: 0; }
+  .column { width: 100%; }
 }

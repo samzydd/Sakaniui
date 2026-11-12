@@ -40,9 +40,12 @@
   width: 32px; height: 32px; border: none; background: none;
   color: var(--color-fg-muted); border-radius: var(--radius-md); cursor: pointer; flex-shrink: 0;
 }
-.icon:where(:hover):not(:disabled) { background: var(--color-bg-canvas); color: var(--color-fg-default); }
+@media (hover: hover) {
+  .icon:where(:hover):not(:disabled) { background: var(--color-bg-canvas); color: var(--color-fg-default); }
+}
 .icon:disabled { cursor: not-allowed; opacity: 0.5; }
 .input {
+  min-width: 0;
   flex: 1 1 auto; border: none; background: none; outline: none;
   font-family: var(--font-sans); font-size: 13px; color: var(--color-fg-default); padding: 0 var(--space-4);
 }
@@ -52,5 +55,13 @@
 .send {
   transition: background-color var(--transition-base), border-color var(--transition-base), box-shadow var(--transition-base), color var(--transition-base), transform var(--transition-base);
  background: var(--color-accent-default); color: var(--color-fg-on-accent); }
-.send:where(:hover):not(:disabled) { background: var(--color-accent-hover); color: var(--color-fg-on-accent); }
+@media (hover: hover) {
+  .send:where(:hover):not(:disabled) { background: var(--color-accent-hover); color: var(--color-fg-on-accent); }
+}
 .send:disabled { background: var(--color-bg-muted); color: var(--color-fg-subtle); opacity: 1; }
+
+/* Touch screens: iOS Safari zooms the whole page into any text field under 16px the moment it is focused, and does not
+   zoom back out. On a coarse pointer the field's text is 16px, so tapping into it never zooms. Mouse layouts are unchanged. */
+@media (pointer: coarse) {
+  .input { font-size: 16px; }
+}

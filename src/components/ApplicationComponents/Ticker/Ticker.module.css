@@ -12,8 +12,10 @@
   height: 32px;
   animation: ticker-scroll var(--ticker-duration, 20s) linear infinite;
 }
-.ticker:hover .track {
-  animation-play-state: paused;
+@media (hover: hover) {
+  .ticker:hover .track {
+    animation-play-state: paused;
+  }
 }
 
 @keyframes ticker-scroll {

@@ -23,7 +23,9 @@
 }
 /* --hover-fill is transparent inside a hover group (Sidebar), where one
    highlight glides between items instead; this is the fallback elsewhere. */
-.subItem:hover:not(.subItem--disabled) { background: var(--hover-fill, var(--color-bg-subtle)); color: var(--color-fg-default); }
+@media (hover: hover) {
+  .subItem:hover:not(.subItem--disabled) { background: var(--hover-fill, var(--color-bg-subtle)); color: var(--color-fg-default); }
+}
 .subItem--active { background: var(--color-bg-subtle); color: var(--color-fg-default); }
 .subItem--disabled { color: var(--color-fg-subtle); cursor: not-allowed; pointer-events: none; }
 

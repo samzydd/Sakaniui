@@ -21,7 +21,9 @@
   border: var(--border-width-100) solid var(--color-border-default);
   background: var(--color-bg-surface); color: var(--color-fg-muted); cursor: pointer;
 }
-.navBtn:hover { background: var(--color-bg-canvas); color: var(--color-fg-default); }
+@media (hover: hover) {
+  .navBtn:hover { background: var(--color-bg-canvas); color: var(--color-fg-default); }
+}
 
 /* Weekdays */
 .weekdays { display: grid; grid-template-columns: repeat(7, 1fr); margin-bottom: var(--space-2); }
@@ -46,7 +48,9 @@
 
 /* --hover-fill is transparent inside a hover group, where one highlight
    glides between items instead; this is the fallback elsewhere. */
-.day--default:hover { background: var(--hover-fill, var(--color-bg-canvas)); }
+@media (hover: hover) {
+  .day--default:hover { background: var(--hover-fill, var(--color-bg-canvas)); }
+}
 .day--hover { background: var(--color-bg-canvas); }
 .day--selected { background: var(--color-accent-default); color: var(--color-fg-on-accent); font-weight: 600; }
 .day--today { border: var(--border-width-150) solid var(--color-brand-default); color: var(--color-brand-fg); font-weight: 600; }
@@ -70,4 +74,12 @@
   border-radius: var(--radius-sm);
   cursor: pointer;
 }
-.dropdown:hover { background: var(--color-bg-canvas); }
+@media (hover: hover) {
+  .dropdown:hover { background: var(--color-bg-canvas); }
+}
+
+/* Touch screens: iOS Safari zooms the whole page into any text field under 16px the moment it is focused, and does not
+   zoom back out. On a coarse pointer the field's text is 16px, so tapping into it never zooms. Mouse layouts are unchanged. */
+@media (pointer: coarse) {
+  .dropdown { font-size: 16px; }
+}

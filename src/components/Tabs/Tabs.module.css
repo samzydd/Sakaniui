@@ -58,7 +58,9 @@
   transition: color var(--transition-base);
 }
 .tab svg { flex-shrink: 0; }
-.tab:hover:not(.tab--disabled) { color: var(--color-fg-default); }
+@media (hover: hover) {
+  .tab:hover:not(.tab--disabled) { color: var(--color-fg-default); }
+}
 
 .tab--active { color: var(--color-fg-default); }
 

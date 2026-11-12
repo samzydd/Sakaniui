@@ -6,7 +6,8 @@
   flex-direction: column;
   gap: var(--space-16);
   width: 100%;
-  padding: var(--space-32);
+  container: datatable / inline-size;
+  padding: clamp(var(--space-16), 4vw, var(--space-32));   /* 32px on a desktop, 16px on a phone */
   background: var(--color-bg-canvas);
 }
 
@@ -100,9 +101,23 @@
   color: var(--color-fg-muted); border-radius: var(--radius-sm);
   transition: background-color var(--transition-base), color var(--transition-base);
 }
-.rowAction:where(:hover) { background: var(--color-bg-canvas); color: var(--color-fg-default); }
+@media (hover: hover) {
+  .rowAction:where(:hover) { background: var(--color-bg-canvas); color: var(--color-fg-default); }
+}
 .rowAction:where(:focus-visible) { outline: none; box-shadow: 0 0 0 2px var(--color-border-focus); }
 
 /* ---- footer ---- */
 .footer { display: flex; align-items: center; justify-content: space-between; }
 .footer__count { font-family: var(--font-sans); font-size: 12px; color: var(--color-fg-muted); }
+
+/* Narrow containers (a phone, a side panel): the toolbar wraps. Search takes the first line, filters and actions
+   wrap under it, and the footer's count and pager stack instead of pushing past the edge. */
+@container datatable (max-width: 640px) {
+  .toolbar { flex-wrap: wrap; }
+  .toolbar__left { flex: 1 1 100%; flex-wrap: wrap; }
+  .search { flex: 1 1 100%; width: auto; min-width: 0; }
+  .toolbar__right { flex-wrap: wrap; }
+  .spacer { display: none; }
+  .footer { flex-wrap: wrap; gap: var(--space-8); }
+  .bulkBar { flex-wrap: wrap; }
+}

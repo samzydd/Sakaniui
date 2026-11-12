@@ -3,6 +3,7 @@
   flex-direction: column;
   align-items: flex-start;
   width: 375px;
+  max-width: 100%;   /* 320px phones */
   box-sizing: border-box;
   padding: var(--space-12);
   background: var(--color-bg-surface);

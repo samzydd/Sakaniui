@@ -11,6 +11,7 @@
   gap: var(--space-12);
   box-sizing: border-box;
   width: 480px;
+  max-width: 100%;   /* never wider than its container (a phone) */
   padding: var(--space-16);
   background: var(--color-bg-surface);
   border: var(--border-width-100) solid var(--color-border-default);

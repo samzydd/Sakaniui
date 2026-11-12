@@ -51,6 +51,14 @@ import { Skeleton } from '../../components/Skeleton';
 import { iconStrokeWidth } from '../../lib/iconStrokeWidth';
 import styles from './SignUpBlock.module.css';
 
+
+/** The field frame is taller than the input it holds; a press on its padding or icon focuses the input, so on a phone
+ *  the whole frame works as the field instead of only the text line in the middle. */
+const focusField = (e: React.MouseEvent<HTMLDivElement>) => {
+  if ((e.target as HTMLElement).closest('button, a, input')) return;
+  e.currentTarget.querySelector('input')?.focus();
+};
+
 export type SignUpStatus = 'idle' | 'validation-error' | 'server-error' | 'loading' | 'skeleton';
 
 interface PasswordFieldProps {
@@ -70,7 +78,7 @@ const PasswordField: React.FC<PasswordFieldProps> = ({ id, label, placeholder, v
   return (
     <div className={styles.field}>
       <label htmlFor={id} className={styles.fieldLabel}>{label}</label>
-      <div className={[styles.fieldFrame, hasError ? styles.fieldFrameError : '', disabled ? styles.fieldFrameDisabled : ''].filter(Boolean).join(' ')}>
+      <div className={[styles.fieldFrame, hasError ? styles.fieldFrameError : '', disabled ? styles.fieldFrameDisabled : ''].filter(Boolean).join(' ')} onClick={focusField}>
         <span className={styles.fieldIcon} aria-hidden="true"><Lock size={16} strokeWidth={iconStrokeWidth(16)} /></span>
         <input
           id={id}

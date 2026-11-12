@@ -1,10 +1,13 @@
 .block {
   display: flex;
+  flex-wrap: wrap;   /* narrow: the details wrap under the gallery (a container can't restyle itself) */
   align-items: flex-start;
   gap: var(--space-48);
-  width: 1100px;
+  width: 100%;
+  max-width: 1100px;
+  container: pdp / inline-size;
   box-sizing: border-box;
-  padding: var(--space-48);
+  padding: clamp(var(--space-16), 4vw, var(--space-48));   /* 48px on a desktop, 16px at the sides on a phone */
   background: var(--color-bg-canvas);
   font-family: var(--font-sans);
 }
@@ -21,7 +24,7 @@
   flex-direction: column;
   align-items: flex-start;
   gap: var(--space-16);
-  flex: 1 1 0%;
+  flex: 1 1 300px;
   min-width: 0;
 }
 
@@ -47,6 +50,7 @@
 
 .ratingRow {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: var(--space-12);
 }
@@ -87,4 +91,13 @@
   align-items: center;
   gap: var(--space-12);
   width: 100%;
+}
+
+/* Narrow containers (a phone, a side panel, a docs preview): the block fills its container up to its Figma width
+   (max-width above) and, below these widths, puts the details under the gallery. */
+@container pdp (max-width: 820px) {
+  .gallery { width: 100%; max-width: 480px; align-self: center; }
+  .info { width: 100%; }
+  .options { flex-wrap: wrap; }
+  .actionRow { flex-wrap: wrap; }
 }

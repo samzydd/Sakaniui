@@ -1,7 +1,9 @@
 .block {
   box-sizing: border-box;
-  width: 1081px;
-  padding: var(--space-48);
+  width: 100%;
+  max-width: 1081px;
+  container: testimonial / inline-size;
+  padding: clamp(var(--space-16), 4vw, var(--space-48));   /* 48px on a desktop, 16px at the sides on a phone */
   background: var(--color-bg-canvas);
   font-family: var(--font-sans);
 }
@@ -83,4 +85,11 @@
   margin: 0;
   font-weight: 500;
   color: var(--color-fg-muted);
+}
+
+/* Narrow containers (a phone, a side panel, a docs preview). The block fills its container up to its Figma width
+   (max-width above) and, below these widths, stacks the grid cards. */
+@container testimonial (max-width: 860px) {
+  .grid { flex-direction: column; }
+  .nameCol { white-space: normal; }
 }

@@ -150,6 +150,10 @@ export interface LiquidDashboardBlockProps {
   /** The photograph behind everything. Not bundled: the glass needs something
    * colorful and detailed to bend, and which photo is your call. */
   backgroundImage: string;
+  /** Shown under the photo until it has loaded: a color, a gradient, or a tiny blurred copy of the photo as a data:
+   *  URL (a 20px-wide JPEG is about 1 KB). On a slow connection the photo can take seconds to arrive; this keeps the
+   *  light labels over it readable meanwhile. Defaults to a muted mid-tone. */
+  backgroundPlaceholder?: string;
   /** Avatar for the account menu in the top bar. */
   accountAvatar?: string;
   /** Photos for the people in the activity feed. */
@@ -157,8 +161,16 @@ export interface LiquidDashboardBlockProps {
   className?: string;
 }
 
-export const LiquidDashboardBlock: React.FC<LiquidDashboardBlockProps> = ({ backgroundImage, accountAvatar, people, className }) => {
+export const LiquidDashboardBlock: React.FC<LiquidDashboardBlockProps> = ({ backgroundImage, backgroundPlaceholder, accountAvatar, people, className }) => {
   const [collapsed, setCollapsed] = useState(false);
+  // The first collapse happens on load (a narrow window), before anyone has seen the sidebar open, so it must not
+  // animate: measuring the width forces a layout, and the rail's width transition would then play on load, shoving the
+  // panel sideways (a visible jump and most of the page's layout shift on a phone). Transitions come on a frame later.
+  const [settling, setSettling] = useState(true);
+  useLayoutEffect(() => {
+    let id = requestAnimationFrame(() => { id = requestAnimationFrame(() => setSettling(false)); });
+    return () => cancelAnimationFrame(id);
+  }, []);
   // Narrow windows collapse the sidebar to its rail by themselves, until the user
   // toggles it: after that their choice sticks.
   const rootRef = useRef<HTMLDivElement>(null);
@@ -242,7 +254,7 @@ export const LiquidDashboardBlock: React.FC<LiquidDashboardBlockProps> = ({ back
   }, [lens.active, lensReady]);
 
   return (
-    <LiquidBackdrop ref={rootRef} src={backgroundImage} veil="var(--liquid-overlay-tint)" className={[styles.root, className ?? ''].filter(Boolean).join(' ')}>
+    <LiquidBackdrop ref={rootRef} src={backgroundImage} placeholder={backgroundPlaceholder} veil="var(--liquid-overlay-tint)" data-settling={settling || undefined} className={[styles.root, className ?? ''].filter(Boolean).join(' ')}>
       {/* 2 · the one glass sheet over the photo (its 5% fill is the backdrop's veil) */}
       <LiquidGlass variant="regular" tint="none" radius={0} className={styles.overlay} />
 

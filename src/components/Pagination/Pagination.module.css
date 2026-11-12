@@ -23,9 +23,12 @@
   color: var(--color-fg-default);
   transition: background-color var(--transition-base), color var(--transition-base), border-color var(--transition-base);
 }
-.page:hover:not(.page--active), .arrow:hover:not(:disabled) {
-  background: var(--color-bg-canvas);
-  border-color: var(--color-border-default);
+@media (hover: hover) {
+  .page:hover:not(.page--active),
+  .arrow:hover:not(:disabled) {
+    background: var(--color-bg-canvas);
+    border-color: var(--color-border-default);
+  }
 }
 
 /* Active page — accent fill */
@@ -45,4 +48,11 @@
   height: 32px;
   color: var(--color-fg-subtle);
   font-size: 14px;
+}
+
+/* The narrowest phones (320px): seven numbers and two arrows don't fit at 32px. Buttons narrow to 28px and the gap to
+   2px, which brings the default pager inside the screen; still well over the 24px minimum target. */
+@media (max-width: 360px) {
+  .pagination { gap: var(--space-2); }
+  .page, .arrow { min-width: 28px; padding: 0 var(--space-4); }
 }

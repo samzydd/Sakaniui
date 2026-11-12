@@ -104,7 +104,10 @@ export function useHoverHighlight<T extends HTMLElement = HTMLDivElement>() {
     setGlide(true);
   }, [box, visible, glide]);
 
-  const onMouseOver = React.useCallback((e: React.MouseEvent) => {
+  // Pointer events, not mouse events: a tap on a touch screen also fires mouseover, which left the highlight stuck on
+  // the tapped item (there is no mouseleave until you tap somewhere else). Touch gets press feedback from :active.
+  const onPointerOver = React.useCallback((e: React.PointerEvent) => {
+    if (e.pointerType === 'touch') return;
     const container = ref.current;
     if (!container) return;
     const item = (e.target as HTMLElement).closest<HTMLElement>('[data-hover-item]');
@@ -199,7 +202,7 @@ export function useHoverHighlight<T extends HTMLElement = HTMLDivElement>() {
 
   return {
     ref: setRef,
-    groupProps: { 'data-hover-group': '', onMouseOver, onMouseLeave: hide },
+    groupProps: { 'data-hover-group': '', onPointerOver, onPointerLeave: hide },
     highlight,
     showItem,
   };

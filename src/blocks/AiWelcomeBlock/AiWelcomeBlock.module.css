@@ -1,7 +1,7 @@
 /* AiWelcomeBlock.module.css: widths and spacing read from the Figma block (1440x900). Content is 760 wide, gap 64; the
    greeting and the composer are 36 apart; the cards are three equal columns, 16 apart. */
-.block { display: flex; width: 100%; height: 100%; min-height: 640px; overflow: hidden; background: var(--color-bg-canvas); font-family: var(--font-sans); color: var(--color-fg-default); }
-.main { display: flex; align-items: center; justify-content: center; flex: 1; min-width: 0; padding: 0 var(--space-24) var(--space-80); box-sizing: border-box; overflow-y: auto; }
+.block { position: relative; container: aiblock / inline-size; display: flex; width: 100%; height: 100%; min-height: 640px; overflow: hidden; background: var(--color-bg-canvas); font-family: var(--font-sans); color: var(--color-fg-default); }
+.main { position: relative; display: flex; align-items: center; justify-content: center; flex: 1; min-width: 0; padding: 0 var(--space-24) var(--space-80); box-sizing: border-box; overflow-y: auto; }
 .content { display: flex; flex-direction: column; gap: var(--space-64); width: 100%; max-width: 760px; }
 
 .prompt { display: flex; flex-direction: column; align-items: center; gap: var(--space-36); }
@@ -12,7 +12,9 @@
 .recent { display: flex; flex-direction: column; gap: var(--space-14); }
 .recentHead { display: flex; align-items: center; justify-content: space-between; padding: 0 var(--space-8); font-size: 14px; font-weight: 500; line-height: 20px; color: var(--color-fg-muted); }
 .viewAll { padding: 0; border: none; background: none; cursor: pointer; font: inherit; color: var(--color-fg-muted); }
-.viewAll:hover { color: var(--color-fg-default); }
+@media (hover: hover) {
+  .viewAll:hover { color: var(--color-fg-default); }
+}
 .viewAll:focus-visible, .card:focus-visible { outline: 2px solid var(--color-border-focus); outline-offset: 2px; border-radius: var(--radius-sm); }
 
 .cards { display: flex; gap: var(--space-16); }
@@ -22,7 +24,9 @@
   background: var(--color-bg-surface); font: inherit; text-align: left; cursor: pointer; color: inherit;
   transition: transform 120ms ease-out, border-color 120ms ease-out;
 }
-.card:hover { border-color: var(--color-border-strong); transform: translateY(-1px); }
+@media (hover: hover) {
+  .card:hover { border-color: var(--color-border-strong); transform: translateY(-1px); }
+}
 .card:active { transform: scale(0.99); }
 .cardText { display: flex; flex-direction: column; gap: var(--space-2); padding: 0 var(--space-8) var(--space-8); }
 .cardTitle { font-size: 16px; font-weight: 500; line-height: 24px; color: var(--color-fg-default); }
@@ -59,4 +63,21 @@
 .forecastLines > span { height: 6px; border-radius: 3px; background: var(--color-border-default); }
 .forecastLines > span:first-child { background: var(--color-border-strong); }
 
-@media (prefers-reduced-motion: reduce) { .card { transition: none; } .card:hover, .card:active { transform: none; } }
+@media (prefers-reduced-motion: reduce) { .card { transition: none; } .card:active { transform: none; }
+@media (hover: hover) {
+  .card:hover { transform: none; }
+} }
+
+/* Narrow (a phone, or a small pane): the sidebar becomes a drawer (../AiChatBlock/parts/AiNav) opened from a menu
+   button in the corner; the greeting steps down a size and the recent-work cards scroll sideways, a card and a bit
+   at a time, instead of squeezing three into the width. */
+.menu { position: absolute; top: var(--space-12); left: var(--space-12); }
+@container aiblock (max-width: 720px) {
+  .main { padding: var(--space-64) var(--space-16) var(--space-32); align-items: flex-start; }
+  .content { gap: var(--space-40); }
+  .prompt { gap: var(--space-24); }
+  .greeting { font-size: 28px; line-height: 36px; gap: var(--space-12); align-self: flex-start; }
+  .cards { overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; margin: 0 calc(var(--space-16) * -1); padding: 0 var(--space-16) var(--space-2); }
+  .cards::-webkit-scrollbar { display: none; }
+  .card { flex: 0 0 min(240px, 72%); scroll-snap-align: start; scroll-margin-left: var(--space-16); }
+}

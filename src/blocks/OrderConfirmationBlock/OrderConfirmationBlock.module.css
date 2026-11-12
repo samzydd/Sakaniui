@@ -4,6 +4,7 @@
   align-items: center;
   gap: var(--space-16);
   width: 520px;
+  max-width: 100%;   /* never wider than its container (a phone) */
   box-sizing: border-box;
   padding: var(--space-24) var(--space-20);
   background: var(--color-bg-surface);

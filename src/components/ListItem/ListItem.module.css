@@ -19,7 +19,9 @@
 
 /* --hover-fill is transparent inside a hover group, where one highlight
    glides between items instead; this is the fallback elsewhere. */
-.item:hover:not(.item--disabled) { background: var(--hover-fill, var(--color-bg-canvas)); }
+@media (hover: hover) {
+  .item:hover:not(.item--disabled) { background: var(--hover-fill, var(--color-bg-canvas)); }
+}
 /* Inside a hover group the row's own bg/surface fill would paint over the
    highlight gliding behind it (the glide was running, just hidden). The
    group's container supplies the surface, so rows go clear there. */

@@ -26,7 +26,9 @@
   display: inline-flex; border: none; background: transparent; color: var(--color-fg-subtle);
   cursor: pointer; padding: 0; flex-shrink: 0;
 }
-.promo__dismiss:hover { color: var(--color-fg-default); }
+@media (hover: hover) {
+  .promo__dismiss:hover { color: var(--color-fg-default); }
+}
 .promo__desc { margin: 0; font-size: 12px; line-height: 16px; color: var(--color-fg-muted); }
 
 /* Full-width CTA — the shared Button (primary), stretched */
@@ -41,4 +43,13 @@
   border: 1px solid color-mix(in srgb, currentColor 70%, transparent);
   box-shadow: none;
 }
-:global([data-surface="liquid"]) .promo .promo__cta:hover { background: color-mix(in srgb, currentColor 18%, transparent); }
+@media (hover: hover) {
+  :global([data-surface="liquid"]) .promo .promo__cta:hover { background: color-mix(in srgb, currentColor 18%, transparent); }
+}
+
+/* Touch: these controls are drawn small, but a fingertip needs a bigger target. On a coarse pointer an invisible hit
+   area extends each one to 32px (WCAG 2.5.8 asks for at least 24px); what is drawn does not change. */
+@media (pointer: coarse) {
+  .promo__dismiss { position: relative; }
+  .promo__dismiss::after { content: ''; position: absolute; inset: -9px; }   /* 14px drawn, 32px to touch */
+}

@@ -76,7 +76,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
-    "build:lib": "vite build --config vite.lib.config.ts && cp src/styles/tokens.css dist/tokens.css && node scripts/manifest/generate.mjs && node scripts/manifest/verify.mjs",
+    "build:lib": "vite build --config vite.lib.config.ts && vite build --config vite.sets.config.ts && cp src/styles/tokens.css dist/tokens.css && node scripts/manifest/generate.mjs && node scripts/manifest/verify.mjs",
     "prepare": "npm run build:lib",
     "lint": "oxlint",
     "preview": "vite preview",

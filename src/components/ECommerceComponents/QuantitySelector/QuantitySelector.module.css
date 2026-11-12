@@ -137,3 +137,9 @@
     animation: none;
   }
 }
+
+/* Touch screens: iOS Safari zooms the page into any field under 16px when it is focused. The value (the input and the
+   rolling digits over it) is 16px on a coarse pointer so tapping in never zooms. */
+@media (pointer: coarse) {
+  .stepValue { font-size: 16px; }
+}

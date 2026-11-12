@@ -34,8 +34,12 @@
 }
 /* --hover-fill is transparent inside a hover group (Sidebar), where one
    highlight glides between items instead; this is the fallback elsewhere. */
-.item:hover:not(.item--disabled):not(.item--active):not(.item--active-flat) { background: var(--hover-fill, var(--surface-bg-subtle)); color: var(--color-fg-default); }
-.item:hover:not(.item--disabled):not(.item--active):not(.item--active-flat) .item__icon { color: var(--color-fg-default); }
+@media (hover: hover) {
+  .item:hover:not(.item--disabled):not(.item--active):not(.item--active-flat) { background: var(--hover-fill, var(--surface-bg-subtle)); color: var(--color-fg-default); }
+}
+@media (hover: hover) {
+  .item:hover:not(.item--disabled):not(.item--active):not(.item--active-flat) .item__icon { color: var(--color-fg-default); }
+}
 /* Focus (re-read 2026-08-10): a solid 2px brand border directly on the item,
  * not the old two-layer white-gap ring. */
 .item:focus-visible { outline: none; box-shadow: inset 0 0 0 2px var(--color-border-focus); }
@@ -75,7 +79,9 @@
 /* On glass the active item floats; it casts no shadow of its own (a lens or the
    5% fill is its indicator, and the accent bar still draws). */
 :global([data-surface="liquid"]) .item--active:not(:focus-visible) { box-shadow: none; }
-:global([data-surface="liquid"]) .item--active:hover:not(:focus-visible) { box-shadow: none; }
+@media (hover: hover) {
+  :global([data-surface="liquid"]) .item--active:hover:not(:focus-visible) { box-shadow: none; }
+}
 
 .item--active .item__icon,
 .item--active-flat .item__icon { color: var(--color-fg-default); }
@@ -91,8 +97,10 @@
      Indicator variants. */
   box-shadow: 0 1px 1px rgba(16, 15, 12, 0.05);
 }
-.item--active:hover {
-  box-shadow: 0 1px 1px rgba(16, 15, 12, 0.06), 0 1px 1.5px rgba(16, 15, 12, 0.1);
+@media (hover: hover) {
+  .item--active:hover {
+    box-shadow: 0 1px 1px rgba(16, 15, 12, 0.06), 0 1px 1.5px rgba(16, 15, 12, 0.1);
+  }
 }
 .item--active .item__bar { opacity: 1; }
 
@@ -100,8 +108,10 @@
   background: var(--surface-bg-subtle);
 }
 /* Expanded only -- Figma has no Collapsed=Yes "Active Hover - Default" variant. */
-.item--active-flat:not(.item--collapsed):hover {
-  background: var(--color-bg-canvas);
+@media (hover: hover) {
+  .item--active-flat:not(.item--collapsed):hover {
+    background: var(--color-bg-canvas);
+  }
 }
 
 .item--disabled { color: var(--color-fg-subtle); opacity: var(--opacity-60, 0.6); cursor: not-allowed; pointer-events: none; }

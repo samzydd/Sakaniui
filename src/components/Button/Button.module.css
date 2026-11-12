@@ -111,10 +111,12 @@
   border-color: var(--color-accent-default);
 }
 
-.button--primary:hover:not(:disabled) {
-  background-color: var(--color-accent-hover);
-  border-color: var(--color-accent-hover);
-  box-shadow: var(--shadow-sm);
+@media (hover: hover) {
+  .button--primary:hover:not(:disabled) {
+    background-color: var(--color-accent-hover);
+    border-color: var(--color-accent-hover);
+    box-shadow: var(--shadow-sm);
+  }
 }
 
 .button--primary:active:not(:disabled) {
@@ -138,10 +140,12 @@
   border-color: transparent;
 }
 
-.button--secondary:hover:not(:disabled) {
-  background-color: var(--surface-bg-subtle-hover);
-  border-color: transparent;
-  box-shadow: var(--shadow-sm);
+@media (hover: hover) {
+  .button--secondary:hover:not(:disabled) {
+    background-color: var(--surface-bg-subtle-hover);
+    border-color: transparent;
+    box-shadow: var(--shadow-sm);
+  }
 }
 
 .button--secondary:active:not(:disabled) {
@@ -161,10 +165,12 @@
   border-color: var(--surface-border-strong);
 }
 
-.button--outline:hover:not(:disabled) {
-  background-color: var(--surface-bg-subtle);
-  border-color: var(--color-border-strong);
-  box-shadow: var(--shadow-sm);
+@media (hover: hover) {
+  .button--outline:hover:not(:disabled) {
+    background-color: var(--surface-bg-subtle);
+    border-color: var(--color-border-strong);
+    box-shadow: var(--shadow-sm);
+  }
 }
 
 .button--outline:active:not(:disabled) {
@@ -187,8 +193,10 @@
   box-shadow: none;
 }
 
-.button--ghost:hover:not(:disabled) {
-  background-color: var(--surface-bg-subtle);
+@media (hover: hover) {
+  .button--ghost:hover:not(:disabled) {
+    background-color: var(--surface-bg-subtle);
+  }
 }
 
 .button--ghost:active:not(:disabled) {
@@ -207,10 +215,12 @@
   border-color: var(--color-danger-solid);
 }
 
-.button--destructive:hover:not(:disabled) {
-  background-color: var(--color-danger-fg);
-  border-color: var(--color-danger-fg);
-  box-shadow: var(--shadow-sm);
+@media (hover: hover) {
+  .button--destructive:hover:not(:disabled) {
+    background-color: var(--color-danger-fg);
+    border-color: var(--color-danger-fg);
+    box-shadow: var(--shadow-sm);
+  }
 }
 
 .button--destructive:active:not(:disabled) {

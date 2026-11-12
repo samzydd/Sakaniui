@@ -162,3 +162,9 @@
   gap: var(--space-12);
   width: 100%;
 }
+
+/* Touch screens: iOS Safari zooms the whole page into any text field under 16px the moment it is focused, and does not
+   zoom back out. On a coarse pointer the field's text is 16px, so tapping into it never zooms. Mouse layouts are unchanged. */
+@media (pointer: coarse) {
+  .otpBox { font-size: 16px; }
+}

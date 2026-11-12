@@ -72,8 +72,10 @@
 .bubble--top-left  { left: 0; }
 .bubble--top-right { right: 0; }
 .bubble--top-center{ left: 50%; transform: translate(-50%, 2px); }
-.wrapper:hover .bubble--top-center,
 .wrapper:focus-within .bubble--top-center { transform: translate(-50%, 0); }
+@media (hover: hover) {
+  .wrapper:hover .bubble--top-center { transform: translate(-50%, 0); }
+}
 
 .caret--top-left,
 .caret--top-center,
@@ -94,8 +96,10 @@
 .bubble--bottom-left  { left: 0; }
 .bubble--bottom-right { right: 0; }
 .bubble--bottom-center{ left: 50%; transform: translate(-50%, 2px); }
-.wrapper:hover .bubble--bottom-center,
 .wrapper:focus-within .bubble--bottom-center { transform: translate(-50%, 0); }
+@media (hover: hover) {
+  .wrapper:hover .bubble--bottom-center { transform: translate(-50%, 0); }
+}
 
 .caret--bottom-left,
 .caret--bottom-center,
@@ -115,8 +119,10 @@
   top: 50%;
   transform: translate(2px, -50%);
 }
-.wrapper:hover .bubble--center-left,
 .wrapper:focus-within .bubble--center-left { transform: translate(0, -50%); }
+@media (hover: hover) {
+  .wrapper:hover .bubble--center-left { transform: translate(0, -50%); }
+}
 
 .caret--center-left {
   left: 100%;
@@ -133,8 +139,10 @@
   top: 50%;
   transform: translate(-2px, -50%);
 }
-.wrapper:hover .bubble--center-right,
 .wrapper:focus-within .bubble--center-right { transform: translate(0, -50%); }
+@media (hover: hover) {
+  .wrapper:hover .bubble--center-right { transform: translate(0, -50%); }
+}
 
 .caret--center-right {
   right: 100%;

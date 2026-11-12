@@ -58,7 +58,7 @@ const PlaygroundLens = (a: PlaygroundArgs) => {
         tint={a.tint}
         radius={sh.r}
         effect={{ refraction: a.refraction, depth: a.depth, dispersion: a.dispersion, frost: a.frost, lightIntensity: a.lightIntensity, lightAngle: a.lightAngle }}
-        style={{ width: sh.w, height: sh.h, display: 'grid', placeItems: 'center', color: '#fff' }}
+        style={{ width: `min(${sh.w}px, calc(100vw - 32px))`, height: sh.h, display: 'grid', placeItems: 'center', color: '#fff' }}
       >
         <Move size={20} strokeWidth={1.75} style={{ opacity: 0.7, filter: 'drop-shadow(0 1px 2px rgba(0,0,0,.3))' }} aria-hidden="true" />
       </LiquidGlass>

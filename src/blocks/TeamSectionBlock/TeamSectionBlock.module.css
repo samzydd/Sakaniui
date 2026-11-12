@@ -12,9 +12,11 @@
      new row (caught via computed `grid-template-columns` inspection in
      Storybook, not visible at a glance since 3-then-1 still "looks" like
      a grid). */
-  width: 1784px;
+  width: 100%;
+  max-width: 1784px;
+  container: team / inline-size;
   box-sizing: border-box;
-  padding: var(--space-48);
+  padding: clamp(var(--space-16), 4vw, var(--space-48));   /* 48px on a desktop, 16px at the sides on a phone */
   background: var(--color-bg-canvas);
   font-family: var(--font-sans);
 }
@@ -25,7 +27,8 @@
 
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(404px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(404px, 100%), 404px));
+  justify-content: center;   /* cards keep their 404px design width; the row centers when fewer than 4 fit */
   gap: var(--space-24);
   width: 100%;
 }
@@ -33,3 +36,6 @@
 .card {
   max-width: none;
 }
+
+/* Narrow containers (a phone, a side panel, a docs preview). The block fills its container up to its Figma width
+   (max-width above) and, below these widths, gives back its side padding (the grid already drops columns as it narrows). */

@@ -60,6 +60,14 @@ import { Skeleton } from '../../components/Skeleton';
 import { iconStrokeWidth } from '../../lib/iconStrokeWidth';
 import styles from './LoginBlock.module.css';
 
+
+/** The field frame is taller than the input it holds; a press on its padding or icon focuses the input, so on a phone
+ *  the whole frame works as the field instead of only the text line in the middle. */
+const focusField = (e: React.MouseEvent<HTMLDivElement>) => {
+  if ((e.target as HTMLElement).closest('button, a, input')) return;
+  e.currentTarget.querySelector('input')?.focus();
+};
+
 export type LoginStatus = 'idle' | 'validation-error' | 'server-error' | 'loading' | 'skeleton';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -158,7 +166,7 @@ export const LoginBlock: React.FC<LoginBlockProps> = ({
 
       <div className={styles.field}>
         <label htmlFor="login-password" className={styles.fieldLabel}>Password</label>
-        <div className={[styles.fieldFrame, isServerError ? styles.fieldFrameError : '', isLoading ? styles.fieldFrameDisabled : ''].filter(Boolean).join(' ')}>
+        <div className={[styles.fieldFrame, isServerError ? styles.fieldFrameError : '', isLoading ? styles.fieldFrameDisabled : ''].filter(Boolean).join(' ')} onClick={focusField}>
           <span className={styles.fieldIcon} aria-hidden="true"><Lock size={16} strokeWidth={iconStrokeWidth(16)} /></span>
           <input
             id="login-password"

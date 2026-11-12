@@ -13,7 +13,9 @@
   width: 36px; height: 36px; border: none; background: none;
   color: var(--color-fg-muted); border-radius: var(--radius-md); cursor: pointer; flex-shrink: 0;
 }
-.bar__icon:where(:hover) { background: var(--color-bg-subtle); color: var(--color-fg-default); }
+@media (hover: hover) {
+  .bar__icon:where(:hover) { background: var(--color-bg-subtle); color: var(--color-fg-default); }
+}
 .bar__title {
   flex: 1 1 auto; font-family: var(--font-sans); font-weight: 600; font-size: 14px;
   color: var(--color-fg-default); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;

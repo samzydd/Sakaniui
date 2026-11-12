@@ -55,6 +55,9 @@ where the label reflects whatever's currently selected.` } } },
     defaultColor: 'Navy',
     defaultSize: 'M',
   },
+  // The block is a size container (it lays itself out by its own width), so it needs a definite width from its
+  // parent; the centered canvas only shrink-wraps. Its Figma width on a desktop; on a phone the canvas caps it to the screen.
+  decorators: [(S) => <div style={{ width: 1100, maxWidth: '100%' }}><S /></div>],
 } satisfies Meta<typeof ProductDetailBlock>;
 
 export default meta;

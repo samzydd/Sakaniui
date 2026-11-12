@@ -166,19 +166,31 @@ export interface LiquidBackdropProps extends React.HTMLAttributes<HTMLDivElement
   /** A color laid over the image, in the backdrop every lens sees too (a scrim in
    *  dark mode, Figma's 5% overlay fill in light). Any CSS color, var() included. */
   veil?: string;
+  /** Painted under the image until it has loaded (and if it never does): a CSS color, a gradient, or a tiny blurred
+   *  copy of the photo as a data: URL. On a slow connection the photo can take seconds; without this the glass sits
+   *  on a blank page and labels meant for a photo (light text on the sky) vanish. Default: a muted mid-tone that keeps
+   *  light labels readable. */
+  placeholder?: string;
 }
+
+/** Fallback under the photo: a muted landscape mid-tone, dark enough for light labels (white on its lightest stop is
+ *  about 5:1). */
+const BACKDROP_PLACEHOLDER = 'linear-gradient(180deg, #4d5a6b 0%, #6b6d66 55%, #474e3d 100%)';
 
 /** The photo (or any image) a liquid-glass UI sits on. Lenses inside refract the
  *  image itself instead of what the browser painted below them. */
 export const LiquidBackdrop = React.forwardRef<HTMLDivElement, LiquidBackdropProps>(
-  ({ src, position = 'center', veil, style, children, ...rest }, forwarded) => {
+  ({ src, position = 'center', veil, placeholder = BACKDROP_PLACEHOLDER, style, children, ...rest }, forwarded) => {
     const rootRef = React.useRef<HTMLDivElement | null>(null);
     const setRef = (el: HTMLDivElement | null) => {
       rootRef.current = el;
       if (typeof forwarded === 'function') forwarded(el); else if (forwarded) forwarded.current = el;
     };
-    const image = veil ? `linear-gradient(${veil}, ${veil}), url("${src}")` : `url("${src}")`;
-    const size = veil ? '100% 100%, cover' : 'cover';
+    // The placeholder is the bottom layer: a color becomes a flat gradient so every layer is an image (lens copies
+    // reuse the same stack, so they show it too while the photo loads).
+    const under = /gradient\(|url\(/.test(placeholder) ? placeholder : `linear-gradient(${placeholder}, ${placeholder})`;
+    const image = (veil ? `linear-gradient(${veil}, ${veil}), ` : '') + `url("${src}"), ${under}`;
+    const size = (veil ? '100% 100%, ' : '') + 'cover, cover';
     const value = React.useMemo<Backdrop>(() => ({ src, veil, image, size, position, rootRef }), [src, veil, image, size, position]);
     return (
       <div ref={setRef} {...rest} style={{ backgroundImage: image, backgroundSize: size, backgroundPosition: position, backgroundRepeat: 'no-repeat', ...style }}>

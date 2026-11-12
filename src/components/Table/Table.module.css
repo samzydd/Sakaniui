@@ -72,12 +72,16 @@
 /* --hover-fill is transparent inside the wrap's hover group, where one
    highlight glides between rows instead; unset elsewhere, so this fallback
    still applies wherever a row renders without the group. */
-.bodyRow:hover { background: var(--hover-fill, var(--color-bg-canvas)); }
+@media (hover: hover) {
+  .bodyRow:hover { background: var(--hover-fill, var(--color-bg-canvas)); }
+}
 /* The whole row is the click target when rows are selectable, so it should
    say so -- otherwise the pointer only changes over the 18px checkbox. */
 .bodyRow--selectable { cursor: pointer; }
 .bodyRow--selected { background: var(--color-accent-subtle); }
-.bodyRow--selected:hover { background: var(--color-accent-subtle); }
+@media (hover: hover) {
+  .bodyRow--selected:hover { background: var(--color-accent-subtle); }
+}
 .bodyCell {
   height: 44px;
   padding: var(--space-12) var(--space-16);

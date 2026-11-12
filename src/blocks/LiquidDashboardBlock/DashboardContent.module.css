@@ -214,7 +214,9 @@
   background: transparent;
   transition: background-color var(--transition-base);
 }
-.activityRow:hover { background: var(--color-bg-subtle); }
+@media (hover: hover) {
+  .activityRow:hover { background: var(--color-bg-subtle); }
+}
 
 .activityText {
   flex: 1;

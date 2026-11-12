@@ -15,9 +15,11 @@
   transition: width var(--transition-base), background-color var(--transition-base),
     border-color var(--transition-base), box-shadow var(--transition-base), color var(--transition-base);
 }
-.root:hover {
-  background: rgb(255 255 255 / 0.16);
-  color: var(--color-fg-default);
+@media (hover: hover) {
+  .root:hover {
+    background: rgb(255 255 255 / 0.16);
+    color: var(--color-fg-default);
+  }
 }
 
 .root--open {
@@ -30,7 +32,9 @@
   box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.25);
   color: var(--color-fg-default);
 }
-.root--open:hover { background: rgb(255 255 255 / 0.26); }
+@media (hover: hover) {
+  .root--open:hover { background: rgb(255 255 255 / 0.26); }
+}
 
 .icon { flex-shrink: 0; }
 

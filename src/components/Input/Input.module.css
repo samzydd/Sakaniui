@@ -45,6 +45,7 @@
   -webkit-backdrop-filter: var(--surface-blur);
   backdrop-filter: var(--surface-blur);
   transition: border-color var(--transition-base), box-shadow var(--transition-base);
+  cursor: text;   /* a press anywhere on the frame focuses the field (Input.tsx) */
 }
 
 /* Sizes — vertical padding varies, horizontal fixed at 12px (space-12) */
@@ -146,3 +147,9 @@
 /* with a leading action the field starts after it, not after the pill's own padding */
 .input--aiLeading { padding-left: var(--space-8); }
 .input__actions { display: inline-flex; align-items: center; gap: var(--space-4); flex-shrink: 0; }
+
+/* Touch screens: iOS Safari zooms the whole page into any text field under 16px the moment it is focused, and does not
+   zoom back out. On a coarse pointer the field's text is 16px, so tapping into it never zooms. Mouse layouts are unchanged. */
+@media (pointer: coarse) {
+  .input__control { font-size: 16px; }
+}

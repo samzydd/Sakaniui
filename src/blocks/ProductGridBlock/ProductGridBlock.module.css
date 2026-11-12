@@ -3,9 +3,11 @@
   flex-direction: column;
   align-items: center;
   gap: var(--space-16);
-  width: 1280px;
+  width: 100%;
+  max-width: 1280px;
+  container: pgrid / inline-size;
   box-sizing: border-box;
-  padding: var(--space-40);
+  padding: clamp(var(--space-16), 4vw, var(--space-40));   /* 40px on a desktop, 16px at the sides on a phone */
   background: var(--color-bg-canvas);
   font-family: var(--font-sans);
 }
@@ -15,6 +17,7 @@
    560px heading column. */
 .heading {
   width: 560px;
+  max-width: 100%;
 }
 
 .filterBar {
@@ -45,4 +48,14 @@
    overridden here so each card genuinely fills its column. */
 .card {
   max-width: none;
+}
+
+/* Narrow containers (a phone, a side panel, a docs preview): the block fills its container up to its Figma width
+   (max-width above) and, below these widths, drops columns (3, then 2) and lets the filter bar wrap. */
+@container pgrid (max-width: 960px) {
+  .grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+@container pgrid (max-width: 720px) {
+  .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .filterBar { flex-wrap: wrap; gap: var(--space-8); }
 }

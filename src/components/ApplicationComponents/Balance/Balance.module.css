@@ -59,8 +59,10 @@
   color: var(--color-fg-muted);
   transition: color var(--transition-base);
 }
-.hideToggle:hover {
-  color: var(--color-fg-default);
+@media (hover: hover) {
+  .hideToggle:hover {
+    color: var(--color-fg-default);
+  }
 }
 .hideToggle:focus-visible {
   outline: none;
@@ -138,4 +140,11 @@
   flex-shrink: 0;
   background: var(--color-bg-surface);
   border-radius: var(--radius-md);
+}
+
+/* Touch: these controls are drawn small, but a fingertip needs a bigger target. On a coarse pointer an invisible hit
+   area extends each one to 32px (WCAG 2.5.8 asks for at least 24px); what is drawn does not change. */
+@media (pointer: coarse) {
+  .hideToggle { position: relative; }
+  .hideToggle::after { content: ''; position: absolute; inset: -8px; }   /* 16px drawn, 32px to touch */
 }

@@ -22,9 +22,11 @@
 .card--interactive {
   transition: background-color var(--transition-base), color var(--transition-base), border-color var(--transition-base), box-shadow var(--transition-base), opacity var(--transition-base);
  cursor: pointer; }
-.card--interactive:hover {
-  border-color: transparent;
-  box-shadow: var(--surface-highlight), var(--shadow-md);
+@media (hover: hover) {
+  .card--interactive:hover {
+    border-color: transparent;
+    box-shadow: var(--surface-highlight), var(--shadow-md);
+  }
 }
 
 .card__header { display: flex; flex-direction: column; gap: var(--space-4); }

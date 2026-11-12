@@ -6,8 +6,12 @@ import emily from '../../assets/avatars/liquid-dashboard-emily-johnson.png';
 import michael from '../../assets/avatars/liquid-dashboard-michael-evans.png';
 import sarah from '../../assets/avatars/liquid-dashboard-sarah-williams.png';
 
+/** A 20 x 14 px copy of the photo (about 1 KB), shown blurred under it while the real one downloads. */
+const backdropPlaceholder = 'url("data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAASABIAAD/4QBMRXhpZgAATU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAAAAFKADAAQAAAABAAAADgAAAAD/7QA4UGhvdG9zaG9wIDMuMAA4QklNBAQAAAAAAAA4QklNBCUAAAAAABDUHYzZjwCyBOmACZjs+EJ+/8AAEQgADgAUAwEiAAIRAQMRAf/EAB8AAAEFAQEBAQEBAAAAAAAAAAABAgMEBQYHCAkKC//EALUQAAIBAwMCBAMFBQQEAAABfQECAwAEEQUSITFBBhNRYQcicRQygZGhCCNCscEVUtHwJDNicoIJChYXGBkaJSYnKCkqNDU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6g4SFhoeIiYqSk5SVlpeYmZqio6Slpqeoqaqys7S1tre4ubrCw8TFxsfIycrS09TV1tfY2drh4uPk5ebn6Onq8fLz9PX29/j5+v/EAB8BAAMBAQEBAQEBAQEAAAAAAAABAgMEBQYHCAkKC//EALURAAIBAgQEAwQHBQQEAAECdwABAgMRBAUhMQYSQVEHYXETIjKBCBRCkaGxwQkjM1LwFWJy0QoWJDThJfEXGBkaJicoKSo1Njc4OTpDREVGR0hJSlNUVVZXWFlaY2RlZmdoaWpzdHV2d3h5eoKDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uLj5OXm5+jp6vLz9PX29/j5+v/bAEMABAQEBAQEBgQEBgkGBgYJDAkJCQkMDwwMDAwMDxIPDw8PDw8SEhISEhISEhUVFRUVFRkZGRkZHBwcHBwcHBwcHP/bAEMBBAUFBwcHDAcHDB0UEBQdHR0dHR0dHR0dHR0dHR0dHR0dHR0dHR0dHR0dHR0dHR0dHR0dHR0dHR0dHR0dHR0dHf/dAAQAAv/aAAwDAQACEQMRAD8Al8cfDS3h1VTpVpaWFmYHOy5lTcZeijJbpk5zjoMVxPiHTfhhoSeX5D3NygHmCKdNgPcluQMnoOTXCaj4mu9VnkfVrq4ml3biQRhh6HJzWRqdvb69azJbotqsEZmBRdpO7jBAJB6V5NDP8VCooutJq+7PQr4LATg1TpJP7jorjXPhFHJtSx1A8DOHjxnv9ag/4SD4S/8APhqH/fcdfP8AI00TtHuztJH5Uzzpv73619os1xH/AD8f9fI+d/s/D/yL8f8AM//Z")';
+
 const args = {
   backgroundImage: backdrop,
+  backgroundPlaceholder: backdropPlaceholder,
   accountAvatar: account,
   people: { emily, michael, sarah },
 };

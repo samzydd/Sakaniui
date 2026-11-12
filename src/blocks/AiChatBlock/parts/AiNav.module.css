@@ -1,0 +1,39 @@
+/* AiNav: the sidebar in place when the block is wide, a slide-in drawer when it is narrow. */
+.nav { display: flex; flex-shrink: 0; }
+.scrim, .menu { display: none !important; }
+
+@container aiblock (max-width: 720px) {
+  .nav {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 30;
+    width: min(280px, 85%);
+    background: var(--color-bg-canvas);
+    box-shadow: var(--shadow-xl);
+    transform: translateX(-100%);
+    visibility: hidden;   /* out of the tab order and the accessibility tree while closed */
+    transition: transform 220ms var(--ease-out, ease-out), visibility 0s linear 220ms;
+  }
+  .nav[data-open] { transform: none; visibility: visible; transition: transform 220ms var(--ease-out, ease-out); }
+  .nav > * { width: 100%; }
+
+  .scrim {
+    display: block !important;
+    position: absolute;
+    inset: 0;
+    z-index: 29;
+    background: color-mix(in srgb, var(--color-bg-inverse) 45%, transparent);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 220ms var(--ease-out, ease-out);
+  }
+  .scrim[data-open] { opacity: 1; pointer-events: auto; }
+
+  .menu { display: inline-flex !important; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nav, .nav[data-open], .scrim { transition: none; }
+}

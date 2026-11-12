@@ -66,7 +66,7 @@ export const HeatmapChart: React.FC<HeatmapChartProps> = ({
 
   return (
     <div ref={chartRef} className={[styles.chart, styles[`chart--${size}`], className ?? ''].filter(Boolean).join(' ')}>
-      <div ref={gridRef} className={styles.grid} style={{ gridTemplateColumns: `auto repeat(${cols}, 1fr)` }}>
+      <div ref={gridRef} className={styles.grid} style={{ gridTemplateColumns: `auto repeat(${cols}, minmax(0, 1fr))` }}>
         {data.map((row, r) => (
           <React.Fragment key={r}>
             <span className={styles.rowLabel}>{rowLabels?.[r] ?? ''}</span>

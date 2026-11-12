@@ -32,6 +32,9 @@ the CartItem actually recompute the subtotal/total below it), not
 static numbers -- same reasoning as every other block's demo state
 being genuinely wired rather than decorative.` } } },
   args: { items },
+  // The block is a size container (it lays itself out by its own width), so it needs a definite width from its
+  // parent; the centered canvas only shrink-wraps. Its Figma width on a desktop; on a phone the canvas caps it to the screen.
+  decorators: [(S) => <div style={{ width: 960, maxWidth: '100%' }}><S /></div>],
 } satisfies Meta<typeof CheckoutFlowBlock>;
 
 export default meta;

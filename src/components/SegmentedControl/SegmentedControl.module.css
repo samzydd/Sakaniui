@@ -7,6 +7,8 @@
   background: var(--color-bg-subtle);
   border-radius: var(--radius-lg);
   font-family: var(--font-sans);
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .segment {
@@ -31,11 +33,15 @@
   line-height: 20px;
   color: var(--color-fg-muted);
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;   /* narrow: a label that no longer fits truncates instead of spilling over its neighbour */
   position: relative;
   z-index: 1;
   transition: color var(--transition-base);
 }
-.segment:hover:not(.segment--active) { color: var(--color-fg-default); }
+@media (hover: hover) {
+  .segment:hover:not(.segment--active) { color: var(--color-fg-default); }
+}
 
 /* Active — colour only; the raised surface is the shared thumb below. */
 .segment--active { color: var(--color-fg-default); }
@@ -71,4 +77,4 @@
   box-sizing: border-box;
 }
 /* Default (hugging) track: keep segments comfortably wide and even. */
-.track:not(.track--fullWidth) .segment { min-width: 88px; }
+.track:not(.track--fullWidth) .segment { min-width: min(88px, 21vw); }   /* 88px from a 420px screen up; four segments still fit a 320px phone */
