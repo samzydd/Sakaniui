@@ -206,6 +206,7 @@
   "src/blocks/AccountOverviewBlock/AccountOverviewBlock.tsx": "0.1.0",
   "src/blocks/ActivityLogBlock/ActivityLogBlock.tsx": "0.1.0",
   "src/blocks/AiChatBlock/AiChatBlock.tsx": "0.15.0",
+  "src/blocks/AiChatBlock/parts/AiNav.tsx": "0.16.0",
   "src/blocks/AiChatBlock/parts/AiSidebar.tsx": "0.15.0",
   "src/blocks/AiChatBlock/parts/ComposerOptions.tsx": "0.15.0",
   "src/blocks/AiWelcomeBlock/AiWelcomeBlock.tsx": "0.15.0",

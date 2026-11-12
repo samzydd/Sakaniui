@@ -2,7 +2,7 @@
 
 All notable changes to `@sakaniui/react` are documented here.
 
-## Unreleased
+## 0.16.0
 
 - **`WorkingIndicator` (and `ChainOfThought`'s working line) shows the `ChatOrb` instead of the sparkle.** While the agent works, the
   orb's eyes read each new line of thought: they turn to the newest step, sweep along its text left to right, and rest, then do the
