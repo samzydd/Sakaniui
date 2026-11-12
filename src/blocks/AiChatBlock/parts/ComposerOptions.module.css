@@ -1,0 +1,12 @@
+.row { display: flex; align-items: center; justify-content: space-between; padding: 0 var(--space-4); font-family: var(--font-sans); }
+.group { display: flex; align-items: center; gap: var(--space-4); }
+.option {
+  display: inline-flex; align-items: center; gap: var(--space-6);
+  padding: var(--space-6) var(--space-8); border: none; border-radius: var(--radius-md); background: none; cursor: pointer;
+  font: inherit; font-size: 14px; font-weight: 500; line-height: 20px; color: var(--color-fg-muted);
+  transition: background-color 120ms ease-out, color 120ms ease-out;
+}
+.option:hover { background: var(--color-bg-subtle); color: var(--color-fg-default); }
+.option:focus-visible { outline: 2px solid var(--color-border-focus); outline-offset: 1px; }
+.accent { color: var(--ai-ember-1); }
+.extra { opacity: 0.6; }

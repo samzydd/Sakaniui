@@ -229,6 +229,23 @@
   --transition-hover: var(--motion-slow) var(--ease-out);
 }
 
+/* ---- AI ember ------------------------------------------------------------
+ * The gradient of everything AI: the ember of `Textarea variant="ai"` and the prompt box. Seven stops, cool tail to hot head:
+ * 0 indigo, 1 violet, 2 magenta (violet and red mixed), 3 red, 4 brand orange, 5 amber, 6 pale gold. Figma: the Semantic
+ * variables ai/ember-0..6. Re-declared on .dark because a custom property that reads other custom properties resolves where
+ * it is declared. */
+:root,
+.dark {
+  --ai-ember-0: var(--color-blue-700);
+  --ai-ember-1: var(--color-violet-500);
+  --ai-ember-2: color-mix(in srgb, var(--color-danger-500) 55%, var(--color-violet-500));
+  --ai-ember-3: var(--color-danger-500);
+  --ai-ember-4: var(--color-primary-500);
+  --ai-ember-5: var(--color-warning-500);
+  --ai-ember-6: var(--color-warning-300);
+  --ai-ember-gradient: linear-gradient(90deg, var(--ai-ember-0), var(--ai-ember-1), var(--ai-ember-2), var(--ai-ember-3), var(--ai-ember-4), var(--ai-ember-5), var(--ai-ember-6));
+}
+
 /* Base font — everything using `font-family: inherit` resolves through here. */
 html, body {
   font-family: var(--font-sans);

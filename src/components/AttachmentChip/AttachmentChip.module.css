@@ -1,0 +1,49 @@
+/* AttachmentChip: Figma "Attachment Chip". 240 wide, radius-lg, border/subtle; the row is padding 6/8/6/6, gap 10, a 32px tile
+   (radius-md); name label/sm, meta 13/18 muted. Uploading adds a 3px ember progress line along the bottom. */
+.chip {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  width: 240px;
+  max-width: 100%;
+  overflow: hidden;
+  font-family: var(--font-sans);
+  background: var(--color-bg-surface);
+  border: var(--border-width-100, 1px) solid var(--color-border-subtle);
+  border-radius: var(--radius-lg);
+}
+.chip--error { border-color: color-mix(in srgb, var(--color-danger-500) 45%, var(--color-border-subtle)); }
+@media (prefers-reduced-motion: no-preference) {
+  .chip { animation: chip-in 180ms ease-out both; }
+}
+@keyframes chip-in { from { opacity: 0; transform: scale(0.96); } to { opacity: 1; transform: none; } }
+
+.row { display: flex; align-items: center; gap: var(--space-10); padding: var(--space-6) var(--space-8) var(--space-6) var(--space-6); }
+.preview {
+  flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center;
+  width: 32px; height: 32px; border-radius: var(--radius-md);
+  background: var(--color-bg-subtle) center / cover no-repeat; color: var(--color-fg-muted);
+}
+.chip--image .preview { color: var(--color-fg-muted); }
+.chip--error .preview { background: color-mix(in srgb, var(--color-danger-500) 12%, var(--color-bg-surface)); color: var(--color-danger-600); }
+
+.text { display: flex; flex-direction: column; flex: 1; min-width: 0; }
+.name { font-size: 13px; font-weight: 500; line-height: 18px; color: var(--color-fg-default); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.meta { font-size: 13px; font-weight: 500; line-height: 18px; color: var(--color-fg-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.chip--error .meta { color: var(--color-danger-600); }
+:global(.dark) .chip--error .preview { color: var(--color-danger-400); }
+:global(.dark) .chip--error .meta { color: var(--color-danger-300); }
+
+.remove {
+  flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center;
+  width: 20px; height: 20px; padding: 0; border: none; border-radius: var(--radius-sm);
+  background: none; color: var(--color-fg-subtle); cursor: pointer;
+  transition: color 120ms ease-out, background-color 120ms ease-out;
+}
+.remove:hover { color: var(--color-fg-default); background: var(--color-bg-subtle); }
+.remove:focus-visible { outline: 2px solid var(--color-border-focus); outline-offset: 1px; }
+
+.track { height: 3px; background: var(--color-bg-muted); }
+.fill { height: 100%; background: var(--ai-ember-gradient); transition: width 160ms ease-out; }
+@media (prefers-reduced-motion: reduce) { .fill { transition: none; } }

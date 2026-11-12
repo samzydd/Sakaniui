@@ -1,0 +1,44 @@
+/* SuggestionChip: Figma "Suggestion Chip". Starter: radius-lg, padding 12/14, gap 10, a 28px icon tile (radius-md), title
+   label/md, hint 13/18 muted. Follow-up: a pill, padding 6/12, gap 6, a 14px arrow, label/md. Hover: bg/subtle fill and the
+   strong border, lifted 1px (120ms). */
+.chip {
+  display: flex;
+  box-sizing: border-box;
+  font-family: var(--font-sans);
+  color: var(--color-fg-default);
+  background: var(--color-bg-surface);
+  border: var(--border-width-100, 1px) solid var(--color-border-subtle);
+  cursor: pointer;
+  text-align: left;
+  transition: transform 120ms ease-out, background-color 120ms ease-out, border-color 120ms ease-out;
+}
+.chip:hover { background: var(--color-bg-subtle); border-color: var(--color-border-strong); transform: translateY(-1px); }
+.chip:active { transform: scale(0.98); }
+.chip:focus-visible { outline: 2px solid var(--color-border-focus); outline-offset: 2px; }
+.chip:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+.chip--starter { flex-direction: column; gap: var(--space-10); padding: var(--space-12) var(--space-14); border-radius: var(--radius-lg); }
+.chip--follow-up { align-items: center; gap: var(--space-6); padding: var(--space-6) var(--space-12); border-radius: var(--radius-full); }
+
+.tile {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 28px; height: 28px; border-radius: var(--radius-md);
+  background: var(--color-bg-subtle); color: var(--color-fg-muted);
+  transition: background-color 120ms ease-out;
+}
+.chip:hover .tile { background: var(--color-bg-surface); }
+.arrow { display: inline-flex; color: var(--color-fg-muted); }
+
+.text { display: flex; flex-direction: column; gap: var(--space-2); min-width: 0; }
+.label { font-size: 14px; font-weight: 500; line-height: 20px; }
+.hint { font-size: 13px; font-weight: 500; line-height: 18px; color: var(--color-fg-muted); }
+
+/* Starters rise 8px and fade in, 50ms apart. */
+@media (prefers-reduced-motion: no-preference) {
+  .chip--starter { animation: chip-rise 360ms cubic-bezier(0.16, 1, 0.3, 1) calc(var(--chip-i, 0) * 50ms) both; }
+}
+@keyframes chip-rise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) {
+  .chip, .tile { transition: none; }
+  .chip:hover, .chip:active { transform: none; }
+}

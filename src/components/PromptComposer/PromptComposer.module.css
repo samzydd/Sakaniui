@@ -1,0 +1,74 @@
+/* PromptComposer: Figma "AI Prompt Composer". A 16px-radius box on surface/bg-subtle with a 1px surface/border; padding
+   16/12/12/20 and a 24px gap (16 with chips); the field is body/md 16/24; the action row is 32px controls. The ember focus
+   border (AiFocusRing, 1.5px, the Textarea's) replaces the plain one while the box has focus. */
+.root {
+  --ai-radius: var(--radius-xl);
+  --ai-ring-opacity: 0.2;   /* the focus border is a soft 20% ember, not the Textarea's full strength (Figma: stroke 20%) */
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-24);
+  box-sizing: border-box;
+  width: 100%;
+  padding: var(--space-16) var(--space-12) var(--space-12) var(--space-20);
+  font-family: var(--font-sans);
+  color: var(--color-fg-default);
+  background: var(--surface-bg-subtle);
+  border: var(--border-width-100, 1px) solid var(--surface-border);
+  border-radius: var(--radius-xl);
+  transition: border-color 160ms ease-out;
+}
+.root--attached { gap: var(--space-16); }
+.root:focus-within { border-color: transparent; }
+.root--disabled { opacity: 0.6; }
+
+.attachments { display: flex; flex-wrap: wrap; gap: var(--space-8); }
+
+.field {
+  display: block;
+  width: 100%;
+  min-height: 24px;
+  margin: 0;
+  padding: 0;
+  resize: none;
+  border: none;
+  outline: none;
+  background: transparent;
+  font: inherit;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 24px;
+  color: var(--color-fg-default);
+  overflow-y: hidden;
+}
+.field::placeholder { color: var(--color-fg-subtle); }
+.field:disabled { cursor: not-allowed; }
+
+.actions { display: flex; align-items: center; justify-content: space-between; min-height: 32px; }
+.left, .right { display: flex; align-items: center; }
+.left { gap: var(--space-8); }
+.right { gap: var(--space-4); }
+
+.attach, .voice, .send {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 32px; height: 32px; padding: 0; border: none; border-radius: var(--radius-full);
+  cursor: pointer; transition: background-color 160ms ease-out, color 160ms ease-out, transform 120ms ease-out;
+}
+.attach { background: var(--color-bg-muted); color: var(--color-fg-muted); }
+.attach:hover:not(:disabled) { color: var(--color-fg-default); }
+.voice { background: transparent; color: var(--color-fg-muted); }
+.voice:hover:not(:disabled) { background: var(--color-bg-muted); color: var(--color-fg-default); }
+.send { position: relative; background: var(--color-bg-muted); color: var(--color-fg-subtle); }
+.send--on { background: var(--color-bg-inverse); color: var(--color-fg-on-inverse); }
+.send:active:not(:disabled) { transform: scale(0.94); }
+.send:disabled { cursor: default; }
+.attach:focus-visible, .voice:focus-visible, .send:focus-visible { outline: 2px solid var(--color-border-focus); outline-offset: 2px; }
+
+/* send and stop morph: the two glyphs cross-fade (180ms) */
+.send__icon { position: absolute; inset: 0; display: inline-flex; align-items: center; justify-content: center; transition: opacity 180ms ease-out, transform 180ms ease-out; }
+.send__icon--out { opacity: 0; transform: scale(0.6); }
+.stop { width: 11px; height: 11px; border-radius: 2px; background: currentColor; }
+
+@media (prefers-reduced-motion: reduce) {
+  .root, .attach, .voice, .send, .send__icon { transition: none; }
+}

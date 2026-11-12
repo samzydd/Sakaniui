@@ -1,0 +1,45 @@
+/* AiMessage: Figma "AI Message". Assistant: a row, gap 12, a 28px avatar (the ChatOrb) and a column, gap 12, of text (Geist Medium 16/24, paragraphs 12px apart) and a 2px-gap row of ghost icon buttons.
+   User: a right-aligned bubble, bg/subtle, radius-2xl, padding 10/16, body/md. */
+.assistant {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-12);
+  width: 100%;
+  font-family: var(--font-sans);
+  color: var(--color-fg-default);
+}
+.avatar {
+  flex-shrink: 0;
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 28px; height: 28px;   /* the ChatOrb */
+}
+.content { display: flex; flex-direction: column; gap: var(--space-12); flex: 1; min-width: 0; }
+.text { font-size: 16px; font-weight: 500; line-height: 24px; color: var(--color-fg-default); }
+.text > * { margin: 0; }
+.text > * + * { margin-top: var(--space-12); }
+.actions { display: flex; gap: var(--space-2); margin-left: calc(var(--space-8) * -1); }
+
+/* the write frontier: a violet caret after the last character */
+.assistant--streaming .text > :last-child::after {
+  content: '';
+  display: inline-block;
+  width: 2px; height: 18px;
+  margin-left: 2px;
+  vertical-align: -3px;
+  background: var(--ai-ember-1);
+  border-radius: 1px;
+  animation: caret 1s steps(1) infinite;
+}
+@keyframes caret { 50% { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .assistant--streaming .text > :last-child::after { animation: none; } }
+
+.user { display: flex; justify-content: flex-end; width: 100%; font-family: var(--font-sans); }
+.bubble {
+  box-sizing: border-box;
+  max-width: 80%;
+  padding: var(--space-10) var(--space-16);
+  border-radius: var(--radius-2xl);
+  background: var(--color-bg-subtle);
+  color: var(--color-fg-default);
+  font-size: 16px; font-weight: 500; line-height: 24px;
+}

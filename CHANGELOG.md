@@ -2,6 +2,35 @@
 
 All notable changes to `@sakaniui/react` are documented here.
 
+## 0.15.0
+
+- **New: the AI conversation parts**, built from the new *AI Components* and *AI Blocks* pages in Figma. Presentational, with no AI SDK:
+  you pass text and state, and they draw it.
+  - **`AiMessage`**: one turn. `role="assistant"` is full-width text beside an ember-ringed avatar, with copy, regenerate and feedback
+    actions once done (`streaming` hides them and ends the text with a slate caret); `role="user"` is a right-aligned bubble.
+  - **`ChatOrb`**: the AI's face, now the assistant avatar in `AiMessage` in place of the ember-ringed sparkles. A soft white sphere with
+    two black eyes that turn toward the pointer anywhere on the page (easing, never snapping) and blink every 3 to 6 seconds. `glance`
+    (AiMessage sets it when the first text arrives) turns the eyes toward the response for 1.4s before they look straight; the eyes squint
+    while the pointer is over the orb (`squintOnHover`). `thinking`
+    makes the eyes sweep side to side, looking a little up, instead of following the pointer (AiMessage sets it while it streams with no text
+    yet). `size`, `look`, `blink`, `label`; decorative by default; still under reduced motion.
+  - **`ReasoningTrace`**: the thinking panel. `status="streaming"` turns a ray spinner, shimmers "Thinking" and counts whole seconds;
+    the reasoning streams in quietly (13/20, muted), each new word fading up out of a soft blur, inside a five-line window that glides
+    up as text arrives with the oldest line fading out at the top. Pass whole paragraphs or a paragraph growing word by word; only new
+    words animate. `status="done"` reads "Thought for 6s", shows a one-line `summary` when closed and folds open to the full reasoning.
+  - **`ToolCall`**: the row an agent leaves when it calls a tool: a running ray spinner, a check or a cross, the call in code, its duration,
+    and Input and Output panels when open.
+  - **`ThinkingLoader`**: the status pill of an AI that is working: a ray spinner and a shimmering label ("Thinking", "Searching the web",
+    "Writing response"). Change `label` and the text crossfades while the pill grows or shrinks to fit.
+  - **`SuggestionChip`**: a suggested prompt, `variant="starter"` (a card with a hint, for the empty screen) or `"follow-up"` (a pill under a reply).
+  - **`PromptComposer`**: the prompt box. It grows with the text up to `maxRows`, Enter sends, send becomes Stop while
+    `status="streaming"`, the ember light of `Textarea variant="ai"` sweeps the border while idle (`glow`) and a soft 20% ember border draws in on focus. The model picker is not inside it: put it in `actions` or in a row under the box.
+  - **`AttachmentChip`**: a file, an image, an upload in progress (an ember ring and progress line) or an error.
+- **New blocks: `AiChatBlock` and `AiWelcomeBlock`**, composition examples built from the Sidebar parts plus the components above. The chat
+  block is live: send a message and it plays a reply (thinking, a tool call, then text arriving) so the streaming states show.
+- **New tokens: `--ai-ember-0` to `--ai-ember-6` and `--ai-ember-gradient`**: the gradient of everything AI, the ember of `Textarea variant="ai"`
+  (indigo, violet, magenta, red, orange, amber, pale gold). Used by the attachment progress, the thinking spinner and the welcome cards.
+
 ## 0.14.2
 
 - **New: `reducedTransparency="ignore"` on `LiquidGlass`.** By default liquid glass turns into a plain opaque surface under
@@ -28,8 +57,8 @@ All notable changes to `@sakaniui/react` are documented here.
   - **Textarea:** a 16px-radius box with the field on top and an actions row underneath (`leading` on the left, `trailing` on the
     right). The field grows with what you type, up to `maxRows` lines (8 by default), then scrolls. Focus swaps the border for a static
     1.5px ember gradient, left to right (not for `error` or `disabled`, which keep their own borders).
-  - **`glow`:** `"pulse"` (default) sweeps the light every 2.5s while idle and once each time the field takes focus; `"focus"` sweeps
-    only on focus; `"off"` draws none. The light is a thin line in an ember gradient (indigo, violet, magenta, red, brand orange,
+  - **`glow`:** `"once"` (default, changed in 0.15.0; it was `"pulse"`) sweeps one lap shortly after the field appears and then stays still, focused or
+    not; `"pulse"` sweeps every 2.5s while idle and once each time the field takes focus; `"focus"` sweeps only on focus; `"off"` draws none. The light is a thin line in an ember gradient (indigo, violet, magenta, red, brand orange,
     amber, pale gold: a cool tail and a hot head) with a faint haze, one lap in about 1.3s, clockwise from the top-left. It follows the
     border's own path at an even speed (CSS `offset-path`), so it works on any box, wide or square. It is hidden under
     `prefers-reduced-motion` and where `offset-path: inset()` is not supported.

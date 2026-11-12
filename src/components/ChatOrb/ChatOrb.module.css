@@ -1,0 +1,64 @@
+/* ChatOrb: a white sphere lit from the top left, two black eyes. Everything is a share of the diameter, so it scales with `size`.
+   The ball is white in both colour modes (it is a face, not a surface), so its colours are fixed here rather than tokens. */
+.orb {
+  --orb-hi: #ffffff;
+  --orb-mid: #f4f4f6;
+  --orb-lo: #d6d6dc;
+  --orb-edge: #a9a9b3;
+  --orb-eye: #0a0a0b;
+  position: relative;
+  flex-shrink: 0;
+  display: inline-block;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 34% 26%, var(--orb-hi) 0%, var(--orb-hi) 14%, transparent 52%),
+    radial-gradient(circle at 42% 38%, var(--orb-mid) 0%, var(--orb-mid) 38%, var(--orb-lo) 78%, var(--orb-edge) 100%);
+  box-shadow: inset 0 -0.06em 0.1em color-mix(in srgb, var(--orb-edge) 55%, transparent);
+  font-size: inherit;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+/* the pair of eyes, a little above the middle, centres 0.29 of the ball apart (box = 0.29 + one eye); --ox/--oy are shares of the diameter */
+.eyes {
+  --ox: 0; --oy: 0; --squeeze: 1;
+  position: absolute; left: 50%; top: 46%;
+  width: 45.5%; height: 16.5%;
+  display: flex; justify-content: space-between; align-items: center;
+  transform: translate(calc(-50% + var(--ox) * 100% / 0.455), calc(-50% + var(--oy) * 100% / 0.165)) scaleX(var(--squeeze));
+}
+.eye {
+  display: block; flex: 0 0 auto;
+  /* each eye is 16.5% of the ball; the pair box is 45.5% wide, so that is 36.3% of it */
+  width: 36.3%; aspect-ratio: 1;
+  border-radius: 50%; background: var(--orb-eye);
+  transform-origin: 50% 50%;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .eyes { transition: transform 140ms cubic-bezier(0.2, 0, 0, 1); }
+  .eye { transition: transform 90ms ease-in; }
+}
+/* the glance at the response turns the eyes a little slower than following the pointer, so it reads as a deliberate look */
+@media (prefers-reduced-motion: no-preference) {
+  .eyes[data-glancing] { transition-duration: 320ms; }
+}
+/* a squint: the pointer is over the orb, the dots narrow to about 65% of their height */
+.eyes[data-squint] .eye { transform: scaleY(0.65); }
+/* a blink: the dot closes to a dash (it wins over a squint) */
+.eyes[data-closed] .eye { transform: scaleY(0.12); }
+
+/* thinking: the eyes look a little up and sweep side to side, pausing at each end, then come back to centre. `translate` is its
+   own property, so it adds to the pointer transform. Percentages are of the eye box (45.5% x 16.5% of the ball): 22% across is
+   about a tenth of the ball, and 40% down is about 0.07 of it. */
+.eyes[data-thinking] { translate: 0 -40%; }
+@media (prefers-reduced-motion: no-preference) {
+  .eyes[data-thinking] { animation: orb-think 3.2s infinite; }
+}
+@keyframes orb-think {
+  0%   { translate: 0 0;        animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1); }
+  18%  { translate: -22% -40%;  animation-timing-function: linear; }
+  30%  { translate: -22% -40%;  animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1); }
+  68%  { translate: 22% -40%;   animation-timing-function: linear; }
+  80%  { translate: 22% -40%;   animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1); }
+  100% { translate: 0 0; }
+}

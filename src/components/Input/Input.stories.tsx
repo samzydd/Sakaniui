@@ -82,7 +82,7 @@ function PromptInput({ size = 'md', initial = '', ...props }: Partial<React.Comp
 }
 
 /** The prompt box of an AI product. A light sweeps once around the border every 2.5s while it is idle (and once each time you click in);
- *  type and the mic becomes a send button. `glow="focus"` sweeps only on focus and `glow="off"` draws none. Reduced motion draws none. */
+ *  type and the mic becomes a send button. `glow="once"` (the default) sweeps one lap when it appears and then rests; `glow="focus"` sweeps only on focus and `glow="off"` draws none. Reduced motion draws none. */
 export const AI: Story = {
   name: 'AI',
   parameters: { layout: 'padded' },
@@ -110,7 +110,8 @@ export const AIGlowModes: Story = {
   name: 'AI glow modes',
   render: () => (
     <div style={{ padding: 40, display: 'grid', gap: 20, justifyItems: 'center' }}>
-      <PromptInput glow="pulse" placeholder="glow=pulse (default)" />
+      <PromptInput glow="once" placeholder="glow=once (default)" />
+      <PromptInput glow="pulse" placeholder="glow=pulse" />
       <PromptInput glow="focus" placeholder="glow=focus" />
       <PromptInput glow="off" placeholder="glow=off" />
     </div>

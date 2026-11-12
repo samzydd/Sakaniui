@@ -54,7 +54,7 @@
   -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor;
   mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
 }
-:focus-within > .ring { opacity: 1; }
+:focus-within > .ring { opacity: var(--ai-ring-opacity, 1); }   /* a host can soften it: PromptComposer sets 0.2 */
 @media (prefers-reduced-motion: no-preference) {
   .ring { transition: opacity 160ms ease-out; }
 }
@@ -100,6 +100,9 @@
   @supports (offset-path: inset(0 round 8px)) {
     .glow { display: block; }
     .glow__light { animation-delay: calc((8 - var(--i)) * 22ms); animation-fill-mode: both; }
+
+    /* once: one lap shortly after the box appears (0.5s, so it is seen), then it rests for good. Focus does not touch it. */
+    .glow--once .glow__light { animation: ai-glow-once 1.3s linear both; animation-delay: calc(500ms + (8 - var(--i)) * 22ms); }
 
     .glow--pulse .glow__light { animation: ai-glow-pulse 2.5s infinite; animation-delay: calc((8 - var(--i)) * 22ms); }
     /* focus takes over: one lap each time the field gains focus, then it rests until focus leaves */
