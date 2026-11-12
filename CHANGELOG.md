@@ -2,6 +2,14 @@
 
 All notable changes to `@sakaniui/react` are documented here.
 
+## Unreleased
+
+- **`WorkingIndicator` (and `ChainOfThought`'s working line) shows the `ChatOrb` instead of the sparkle.** While the agent works, the
+  orb's eyes read each new line of thought: they turn to the newest step, sweep along its text left to right, and rest, then do the
+  same for the next one. `WorkingIndicator` takes `lookAt` (an element) to do this on its own; `ChainOfThought` sets it for you.
+- **`ChatOrb` takes `lookAt`**: an element for the eyes to read instead of following the pointer (pass `null` to go back to it). The
+  orb also has a hairline edge in the text colour now, so a white ball keeps an edge on a light surface.
+
 ## 0.15.0
 
 - **New: the AI conversation parts**, built from the new *AI Components* and *AI Blocks* pages in Figma. Presentational, with no AI SDK:

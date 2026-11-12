@@ -33,7 +33,7 @@ and a live "Working" line.
 - **ChainOfThoughtStep**: \`status\` pending, active or done; an \`icon\`, a \`label\`, an optional monospace \`query\`, a
   \`count\`, and a \`sources\` row (usually a **SourceStack**). The rail stops at the last step by itself.
 - **SourceStack**: overlapping site-icon chips.
-- **WorkingIndicator**: the working line on its own.
+- **WorkingIndicator**: the working line on its own: the Chat Orb (its eyes follow the newest step) and a shimmering "Working" with the time.
 
 Done steps read muted and the active step reads in full. It is presentational: append a step as your agent
 produces it and mark the previous one done.`,

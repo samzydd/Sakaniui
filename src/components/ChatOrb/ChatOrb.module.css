@@ -13,7 +13,8 @@
   background:
     radial-gradient(circle at 34% 26%, var(--orb-hi) 0%, var(--orb-hi) 14%, transparent 52%),
     radial-gradient(circle at 42% 38%, var(--orb-mid) 0%, var(--orb-mid) 38%, var(--orb-lo) 78%, var(--orb-edge) 100%);
-  box-shadow: inset 0 -0.06em 0.1em color-mix(in srgb, var(--orb-edge) 55%, transparent);
+  /* the lower rim shade, and a hairline in the text colour at 12% so a white ball still has an edge on a light surface (on a dark one it is a faint rim light) */
+  box-shadow: inset 0 -0.06em 0.1em color-mix(in srgb, var(--orb-edge) 55%, transparent), 0 0 0 1px color-mix(in srgb, var(--color-fg-default) 12%, transparent);
   font-size: inherit;
   overflow: hidden;
   isolation: isolate;
