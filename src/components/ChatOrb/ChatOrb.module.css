@@ -40,3 +40,19 @@
 }
 /* a blink: the dot closes to a dash */
 .eyes[data-closed] .eye { transform: scaleY(0.12); }
+
+/* thinking: the eyes look a little up and sweep side to side, pausing at each end, then come back to centre. `translate` is its
+   own property, so it adds to the pointer transform. Percentages are of the eye box (45.5% x 16.5% of the ball): 22% across is
+   about a tenth of the ball, and 40% down is about 0.07 of it. */
+.eyes[data-thinking] { translate: 0 -40%; }
+@media (prefers-reduced-motion: no-preference) {
+  .eyes[data-thinking] { animation: orb-think 3.2s infinite; }
+}
+@keyframes orb-think {
+  0%   { translate: 0 0;        animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1); }
+  18%  { translate: -22% -40%;  animation-timing-function: linear; }
+  30%  { translate: -22% -40%;  animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1); }
+  68%  { translate: 22% -40%;   animation-timing-function: linear; }
+  80%  { translate: 22% -40%;   animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1); }
+  100% { translate: 0 0; }
+}

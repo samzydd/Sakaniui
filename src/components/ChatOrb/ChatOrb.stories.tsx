@@ -10,6 +10,7 @@ const meta = {
   parameters: { layout: 'centered', docs: { description: { component: `The AI's face: a soft white sphere with two black eyes, the assistant avatar in AiMessage.
 
 - **look**: the eyes turn toward the pointer anywhere on the page, a little further the further away it is, and ease rather than snap.
+- **thinking**: while the AI works the eyes stop following the pointer and sweep slowly from side to side, looking a little up, pausing at each end.
 - **blink**: every 3 to 6 seconds the eyes close to a dash for about 140ms (now and then twice).
 - Decorative by default; pass \`label\` to expose it as an image. Reduced motion, \`look={false}\` and touch leave the eyes straight ahead.
 - \`size\` is the diameter in px; the default 28 is the AiMessage avatar.` } } },
@@ -29,6 +30,8 @@ export const Sizes: Story = {
     </div>
   ),
 };
+/** The AI is working: the eyes sweep side to side. */
+export const Thinking: Story = { args: { size: 96, thinking: true } };
 export const Still: Story = { args: { size: 96, look: false, blink: false } };
 /** As the assistant avatar. */
 export const InAMessage: Story = {

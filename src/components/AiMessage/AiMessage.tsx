@@ -6,7 +6,7 @@
  *   assistant  full-width text beside the ChatOrb avatar (a white sphere whose eyes follow the pointer); a row of copy, regenerate and feedback actions under it once done
  *   user       a right-aligned bubble
  *
- * `streaming` hides the actions and ends the text with a slate caret. Paragraphs: pass several children (or <p>s) and they sit
+ * `streaming` hides the actions and ends the text with a slate caret; while it is streaming with no text yet, the orb's eyes sweep (its thinking state). Paragraphs: pass several children (or <p>s) and they sit
  * 12px apart; a plain string is one paragraph. The actions are callbacks (`onCopy`, `onRegenerate`, `onFeedback`): it copies
  * and sends nothing itself. Pass `actions={false}` to leave the row out, or a node to replace it.
  */
@@ -49,7 +49,7 @@ export const AiMessage: React.FC<AiMessageProps> = ({
   const paragraphs = React.Children.toArray(children).map((c, i) => (typeof c === 'string' || typeof c === 'number' ? <p key={i}>{c}</p> : c));
   return (
     <div className={[styles.assistant, streaming ? styles['assistant--streaming'] : '', className ?? ''].filter(Boolean).join(' ')}>
-      <span className={styles.avatar} aria-hidden="true"><ChatOrb size={28} /></span>
+      <span className={styles.avatar} aria-hidden="true"><ChatOrb size={28} thinking={streaming && React.Children.count(children) === 0} /></span>
       <div className={styles.content}>
         <div className={styles.text} aria-live={streaming ? 'polite' : undefined} aria-busy={streaming || undefined}>{paragraphs}</div>
         {!streaming && actions !== false && (

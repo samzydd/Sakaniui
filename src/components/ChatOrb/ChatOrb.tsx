@@ -7,9 +7,11 @@
  *   look    the eyes turn toward the pointer anywhere on the page, travelling a little further the further away it is, and
  *           narrowing a touch as they near the edge so they seem to wrap around the ball. They ease (140ms), never snap.
  *   blink   every 3 to 6 seconds both eyes close to a dash for about 140ms.
+ *   thinking  the AI is working: the eyes stop following the pointer and look a little up, sweeping slowly from side to side
+ *           (3.2s a lap, pausing at each end) as if reading. When it ends they ease back to the pointer.
  *
  * Decorative by default (aria-hidden): the message text beside it carries the meaning. Pass `label` to expose it as an image.
- * Reduced motion, `look={false}` and touch with no pointer: the eyes rest straight ahead. `blink={false}` turns blinking off.
+ * Reduced motion, `look={false}` and touch with no pointer: the eyes rest straight ahead (`thinking` then holds them looking up and to one side, with no sweep). `blink={false}` turns blinking off.
  * Sized by `size` (px); everything inside scales with it.
  */
 
@@ -23,6 +25,8 @@ export interface ChatOrbProps {
   look?: boolean;
   /** The eyes blink now and then. Default true. */
   blink?: boolean;
+  /** The AI is thinking: the eyes sweep side to side instead of following the pointer. */
+  thinking?: boolean;
   /** Accessible name. Omit for a decorative orb. */
   label?: string;
   className?: string;
@@ -35,7 +39,7 @@ const REACH_Y = 0.07;
 /** Pointer distance (in orb diameters) at which the eyes are fully turned. */
 const FULL_TURN = 4;
 
-export const ChatOrb: React.FC<ChatOrbProps> = ({ size = 28, look = true, blink = true, label, className, style }) => {
+export const ChatOrb: React.FC<ChatOrbProps> = ({ size = 28, look = true, blink = true, thinking = false, label, className, style }) => {
   const root = React.useRef<HTMLSpanElement>(null);
   const eyes = React.useRef<HTMLSpanElement>(null);
 
@@ -43,7 +47,7 @@ export const ChatOrb: React.FC<ChatOrbProps> = ({ size = 28, look = true, blink 
   React.useEffect(() => {
     const el = root.current;
     const g = eyes.current;
-    if (!look || !el || !g) return;
+    if (!look || thinking || !el || !g) return;
     if (typeof window === 'undefined' || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     let raf = 0;
     let last: { x: number; y: number } | null = null;
@@ -74,7 +78,7 @@ export const ChatOrb: React.FC<ChatOrbProps> = ({ size = 28, look = true, blink 
       document.documentElement.removeEventListener('pointerleave', onLeave);
       if (raf) cancelAnimationFrame(raf);
     };
-  }, [look]);
+  }, [look, thinking]);
 
   // blink: close for ~140ms at a random 3 to 6s interval (a quick double blink now and then)
   const [closed, setClosed] = React.useState(false);
@@ -102,7 +106,7 @@ export const ChatOrb: React.FC<ChatOrbProps> = ({ size = 28, look = true, blink 
       style={{ width: size, height: size, ...style }}
       {...(label ? { role: 'img', 'aria-label': label } : { 'aria-hidden': true })}
     >
-      <span ref={eyes} className={styles.eyes} data-closed={closed || undefined}>
+      <span ref={eyes} className={styles.eyes} data-closed={closed || undefined} data-thinking={thinking || undefined}>
         <span className={styles.eye} />
         <span className={styles.eye} />
       </span>
