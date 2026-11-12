@@ -24,10 +24,18 @@ export interface ThinkingLoaderProps {
 }
 
 export const ThinkingLoader: React.FC<ThinkingLoaderProps> = ({ label = 'Thinking', className }) => {
-  const inner = React.useRef<HTMLSpanElement>(null);
-  // The spinner's beat runs from mount and never restarts; a new label restarts its shimmer, so give it a delay that rejoins the lap.
-  const epoch = React.useRef(typeof performance !== 'undefined' ? performance.now() : 0);
-  const lapDelay = React.useMemo(() => -((performance.now() - epoch.current) % LAP), [label]); // eslint-disable-line react-hooks/exhaustive-deps
+  const inner = React.useRef<HTMLSpanElement | null>(null);
+  // The spinner's beat runs from mount and never restarts; a new label restarts its shimmer, so each new label element is given a
+  // delay that rejoins the lap. It is set when the element mounts (a ref callback), never while rendering, so the server and the
+  // first client render agree and there is no hydration mismatch.
+  const epoch = React.useRef<number | null>(null);
+  const labelRef = React.useCallback((el: HTMLSpanElement | null) => {
+    inner.current = el;
+    if (!el) return;
+    const now = performance.now();
+    if (epoch.current === null) epoch.current = now;
+    el.style.animationDelay = `${-((now - epoch.current) % LAP)}ms, 0ms`;
+  }, []);
   const [width, setWidth] = React.useState<number | undefined>(undefined);
   // the pill follows the text's own width, so a longer label opens it and a shorter one closes it
   React.useLayoutEffect(() => {
@@ -38,7 +46,7 @@ export const ThinkingLoader: React.FC<ThinkingLoaderProps> = ({ label = 'Thinkin
     <div className={[styles.root, className ?? ''].filter(Boolean).join(' ')} role="status" aria-live="polite">
       <RayLoader size={16} beat />
       <span className={styles.text} style={width !== undefined ? { width } : undefined}>
-        <span key={label} ref={inner} className={styles.label} style={{ animationDelay: `${lapDelay}ms, 0ms` }}>{label}</span>
+        <span key={label} ref={labelRef} className={styles.label}>{label}</span>
       </span>
     </div>
   );
