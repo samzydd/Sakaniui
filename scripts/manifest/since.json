@@ -392,7 +392,6 @@
   "src/components/TopBar/TopBar.tsx": "0.1.0",
   "src/components/TopBarMobile/TopBarMobile.tsx": "0.1.0",
   "src/lib/AiGlow.tsx": "0.14.0",
-  "src/lib/AiGlyph.tsx": "0.15.0",
   "src/lib/ChartTooltip.tsx": "0.1.0",
   "src/lib/EmberRing.tsx": "0.15.0",
   "src/lib/LiquidGlass.tsx": "0.4.0",
