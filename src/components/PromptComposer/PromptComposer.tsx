@@ -44,7 +44,7 @@ export interface PromptComposerProps {
   actions?: React.ReactNode;
   /** The most lines the field grows to before it scrolls. Default 8. */
   maxRows?: number;
-  /** The ember light that sweeps the border while idle (Textarea variant="ai"'s): `pulse` every 2.5s, `focus` only on focus, `off` none. Default `pulse`. */
+  /** The ember light round the border (Textarea variant="ai"'s): `once` (default) one lap shortly after it appears, then still; `pulse` every 2.5s while idle; `focus` one lap each time it gains focus; `off` none. */
   glow?: AiGlowMode;
   disabled?: boolean;
   /** Focus the field on mount. */
