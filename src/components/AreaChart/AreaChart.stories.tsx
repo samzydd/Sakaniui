@@ -44,3 +44,4 @@ export const Large: Story = { args: { size: 'lg' } };
 export const DarkMode: Story = {
   decorators: [(S) => <div className="dark" style={{ width: 480, padding: 24, background: 'var(--color-bg-canvas)' }}><S /></div>],
 };
+export const Loading: Story = { args: { loading: true } };

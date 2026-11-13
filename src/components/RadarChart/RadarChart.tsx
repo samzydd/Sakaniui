@@ -38,10 +38,12 @@
 import React from 'react';
 import {
   RadarChart as ReRadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis,
-  ResponsiveContainer, Tooltip, Legend,
+  ResponsiveContainer, Legend,
 } from 'recharts';
 import { useChartTokens } from '../../lib/useChartTokens';
-import { ChartTooltip } from '../../lib/ChartTooltip';
+import { ChartTooltipCard } from '../../lib/ChartTooltip';
+import { ChartSkeleton } from '../../lib/ChartLoading';
+import { useReducedMotion } from '../../lib/useReducedMotion';
 import styles from './RadarChart.module.css';
 
 export type ChartSize = 'sm' | 'md' | 'lg' | 'xl';
@@ -62,6 +64,10 @@ export interface RadarChartProps {
   size?: ChartSize;
   /** Legend labels for `value` / `value2`, shown for "multiple". */
   seriesLabels?: [string, string?];
+  /** Draw the loading state (the radar's own silhouette, breathing) instead of the chart. */
+  loading?: boolean;
+  /** Hover a spoke to see a crosshair, a dot on each series and a card with the values (and the gap between two series). Default true. */
+  interactive?: boolean;
   className?: string;
 }
 
@@ -78,16 +84,13 @@ const NO_GRID = new Set<RadarChartVariant>(['dots-grid-none']);
 // `<Radar>` can't draw -- a measured SVG circle overlay does that job.
 const FILLED_GRID = new Set<RadarChartVariant>(['grid-filled']);
 const isCircleFilled = (v: RadarChartVariant) => v === 'circle-grid-filled';
-// These variants' shape has no stroke around it in Figma -- just the fill.
-const NO_STROKE = new Set<RadarChartVariant>([
-  'default', 'dots', 'dots-grid-none', 'circle-grid', 'circle-grid-no-lines', 'multiple', 'custom-label',
-  'grid-custom', 'grid-filled', 'circle-grid-filled',
-]);
 const RING_LEVELS = [1, 0.8, 0.6, 0.4, 0.2];
 
 export const RadarChart: React.FC<RadarChartProps> = ({
-  data, variant = 'default', size = 'md', seriesLabels = ['Value', 'Value 2'], className,
+  data, variant = 'default', size = 'md', seriesLabels = ['Value', 'Value 2'], loading = false, interactive = true, className,
 }) => {
+  const reduced = useReducedMotion();
+  const uid = React.useId().replace(/[^a-zA-Z0-9]/g, '');
   const containerRef = React.useRef<HTMLDivElement>(null);
   const cssVar = useChartTokens(containerRef);
   const chart1 = cssVar('--color-chart-1') ?? '#ff4700';
@@ -120,12 +123,23 @@ export const RadarChart: React.FC<RadarChartProps> = ({
   // via `heights[size]`, only width needs a runtime measurement.
   const [containerWidth, setContainerWidth] = React.useState(0);
   React.useEffect(() => {
-    if (!circleFilled || !containerRef.current) return;
+    if (loading || !containerRef.current) return;
     const el = containerRef.current;
     const observer = new ResizeObserver(([entry]) => setContainerWidth(entry.contentRect.width));
     observer.observe(el);
     return () => observer.disconnect();
-  }, [circleFilled]);
+  }, [loading]);
+
+  // The value axis is given its domain here (a round number just above the data's maximum) rather than left to
+  // Recharts' "auto", so the hover overlay can place a dot on each series with the same arithmetic.
+  const niceMax = React.useMemo(() => {
+    const max = Math.max(1, ...data.flatMap((d) => [d.value, d.value2 ?? 0]));
+    const step = 10 ** Math.floor(Math.log10(max)) / 2;
+    return Math.ceil(max / step) * step;
+  }, [data]);
+
+  const [hover, setHover] = React.useState<{ index: number; x: number; y: number } | null>(null);
+  const n = data.length;
 
   // grid-filled/circle-grid-filled: augment the shared dataset with N extra
   // fields, each a fixed fraction of the real data's max value, so a
@@ -198,11 +212,44 @@ export const RadarChart: React.FC<RadarChartProps> = ({
   };
 
   const height = heights[size];
+  if (loading) return <ChartSkeleton kind="radar" height={height} className={className} label="Loading radar chart" />;
   const maxRadius = containerWidth > 0 ? Math.min(containerWidth, height) / 2 - 5 : 0;
   const outerR = maxRadius * 0.7;
+  const cx = containerWidth / 2;
+  const cy = height / 2;
+
+  const onMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!interactive || n < 3 || containerWidth === 0) return;
+    const box = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX - box.left, y = e.clientY - box.top;
+    const dx = x - cx, dy = y - cy;
+    if (Math.hypot(dx, dy) > outerR * 1.3) { setHover(null); return; }
+    const turn = (Math.atan2(dx, -dy) + Math.PI * 2) % (Math.PI * 2);
+    setHover({ index: Math.round(turn / ((Math.PI * 2) / n)) % n, x, y });
+  };
+
+  // where a value sits on a spoke
+  const at = (k: number, v: number) => {
+    const a = (Math.PI * 2 * k) / n - Math.PI / 2;
+    const r = (v / niceMax) * outerR;
+    return { x: cx + r * Math.cos(a), y: cy + r * Math.sin(a) };
+  };
+  const row = hover ? data[hover.index] : null;
+  const series = [
+    { name: seriesLabels[0] ?? 'Value', color: chart2, key: 'value' as const },
+    ...(showSecondSeries ? [{ name: seriesLabels[1] ?? 'Value 2', color: chart1, key: 'value2' as const }] : []),
+  ];
+  const gap = row && showSecondSeries && row.value2 !== undefined ? row.value2 - row.value : undefined;
+  const fillFor = (id: string) => `url(#${uid}${id})`;
 
   return (
-    <div ref={containerRef} className={[styles.chart, className ?? ''].filter(Boolean).join(' ')}>
+    <div
+      ref={containerRef}
+      className={[styles.chart, className ?? ''].filter(Boolean).join(' ')}
+      style={{ ['--radar-1' as string]: chart2, ['--radar-2' as string]: chart1 }}
+      onMouseMove={onMove}
+      onMouseLeave={() => setHover(null)}
+    >
       {/* "circle-grid-filled": concentric filled circles, measured to align
           pixel-for-pixel with Recharts' own circle grid/spokes underneath
           (see the module doc comment). Rendered before ResponsiveContainer
@@ -244,8 +291,18 @@ export const RadarChart: React.FC<RadarChartProps> = ({
               rings, no radial spokes. tickCount=2 on a [0, max] domain
               collapses PolarGrid's auto-generated rings down to just the
               zero-radius point and the outer one. */}
-          <PolarRadiusAxis tick={false} axisLine={false} tickCount={isMinimalGrid ? 2 : undefined} />
-          <Tooltip content={<ChartTooltip />} wrapperStyle={{ zIndex: 50 }} />
+          <PolarRadiusAxis tick={false} axisLine={false} domain={[0, niceMax]} tickCount={isMinimalGrid ? 2 : undefined} />
+          <defs>
+            {/* Each shape fades from a faint core to a stronger rim, so the grid shows through its middle. */}
+            <radialGradient id={`${uid}a`} cx="50%" cy="50%" r="60%">
+              <stop offset="0%" stopColor={chart2} stopOpacity={0.06} />
+              <stop offset="100%" stopColor={chart2} stopOpacity={isMinimalGrid ? 0.55 : 0.42} />
+            </radialGradient>
+            <radialGradient id={`${uid}b`} cx="50%" cy="50%" r="60%">
+              <stop offset="0%" stopColor={chart1} stopOpacity={0.06} />
+              <stop offset="100%" stopColor={chart1} stopOpacity={0.4} />
+            </radialGradient>
+          </defs>
           {isMultiple && <Legend wrapperStyle={{ fontSize: 12, fontFamily: 'var(--font-sans)' }} />}
           {isFilledGrid && RING_LEVELS.map((_, i) => (
             <Radar
@@ -268,31 +325,75 @@ export const RadarChart: React.FC<RadarChartProps> = ({
           <Radar
             name={isMultiple ? (seriesLabels[0] ?? 'Value') : undefined}
             dataKey="value"
-            stroke={NO_STROKE.has(variant) ? 'none' : chart2}
-            fill={showFill ? chart2 : 'none'}
-            fillOpacity={showFill ? (isMinimalGrid ? 1 : showSecondSeries ? 0.45 : 0.5) : 0}
-            strokeWidth={NO_STROKE.has(variant) ? 0 : 2}
-            // Recharts' dot markers default to the parent Radar's own
-            // stroke color -- with that set to "none" above, plain
-            // `dot={true}` would render invisible dots. Giving them their
-            // own explicit fill keeps them visible regardless.
+            className={styles.shape1}
+            stroke={chart2}
+            fill={showFill ? fillFor('a') : 'none'}
+            fillOpacity={1}
+            strokeWidth={1.75}
+            // Recharts' dot markers default to the parent Radar's own stroke color; they get their own explicit fill.
             dot={showDots ? { r: 4, fill: chart2, stroke: 'none' } : false}
-            isAnimationActive={false}
+            // the shape grows out of the centre on mount and morphs when the data changes
+            isAnimationActive={!reduced}
+            animationDuration={760}
+            animationEasing="ease-out"
           />
           {showSecondSeries && (
             <Radar
               name={isMultiple ? (seriesLabels[1] ?? 'Value 2') : undefined}
               dataKey="value2"
-              stroke={isLinesOnly ? chart1 : 'none'}
-              fill={isLinesOnly ? 'none' : chart1}
-              fillOpacity={isLinesOnly ? 0 : 0.8}
-              strokeWidth={isLinesOnly ? 2 : 0}
+              className={styles.shape2}
+              stroke={chart1}
+              fill={isLinesOnly ? 'none' : fillFor('b')}
+              fillOpacity={1}
+              strokeWidth={1.75}
               dot={showDots ? { r: 4, fill: chart1, stroke: 'none' } : false}
-              isAnimationActive={false}
+              isAnimationActive={!reduced}
+              animationDuration={760}
+              animationBegin={90}
+              animationEasing="ease-out"
             />
           )}
         </ReRadarChart>
       </ResponsiveContainer>
+
+      {hover && row && containerWidth > 0 && (
+        <>
+          <svg className={styles.overlay} width={containerWidth} height={height} aria-hidden="true">
+            <defs>
+              <linearGradient id={`${uid}x`} gradientUnits="userSpaceOnUse" x1={cx} y1={cy} x2={at(hover.index, niceMax).x} y2={at(hover.index, niceMax).y}>
+                <stop offset="0" stopColor={label} stopOpacity={0.05} />
+                <stop offset="1" stopColor={label} stopOpacity={0.75} />
+              </linearGradient>
+            </defs>
+            <line className={styles.crosshair} x1={cx} y1={cy} x2={at(hover.index, niceMax).x} y2={at(hover.index, niceMax).y} stroke={`url(#${uid}x)`} strokeWidth={1.25} />
+            {series.map((sr) => {
+              const v = row[sr.key];
+              if (v === undefined) return null;
+              const pt = at(hover.index, v);
+              return (
+                <g key={sr.key} className={styles.hit} style={{ transformOrigin: `${pt.x}px ${pt.y}px` }}>
+                  <circle cx={pt.x} cy={pt.y} r={9} fill={sr.color} fillOpacity={0.18} />
+                  <circle cx={pt.x} cy={pt.y} r={4.5} fill={sr.color} stroke={cssVar('--color-bg-canvas') ?? '#fff'} strokeWidth={2} />
+                </g>
+              );
+            })}
+          </svg>
+          <ChartTooltipCard
+            title={row.label}
+            rows={series.flatMap((sr, k) => {
+              const v = row[sr.key];
+              if (v === undefined) return [];
+              return [{ color: sr.color, label: sr.name, value: v, delta: k === 1 && gap !== undefined && gap !== 0 ? `${gap > 0 ? '+' : '\u2212'}${Math.abs(gap)}` : undefined }];
+            })}
+            style={{
+              position: 'absolute', zIndex: 20, pointerEvents: 'none',
+              left: hover.x > containerWidth * 0.6 ? hover.x - 16 : hover.x + 16,
+              top: hover.y - 12,
+              transform: hover.x > containerWidth * 0.6 ? 'translate(-100%, -100%)' : 'translate(0, -100%)',
+            }}
+          />
+        </>
+      )}
     </div>
   );
 };

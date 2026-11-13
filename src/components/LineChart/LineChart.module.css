@@ -23,3 +23,11 @@
 .chart :global(.recharts-active-dot) {
   transition: r var(--transition-hover), fill var(--transition-hover), opacity var(--transition-hover);
 }
+
+/* ---- each line glows faintly in its own colour ---- */
+.s0 :global(.recharts-line-curve) { filter: drop-shadow(0 4px 8px color-mix(in srgb, var(--s0) 40%, transparent)); }
+.s1 :global(.recharts-line-curve) { filter: drop-shadow(0 4px 8px color-mix(in srgb, var(--s1) 40%, transparent)); }
+.s2 :global(.recharts-line-curve) { filter: drop-shadow(0 4px 8px color-mix(in srgb, var(--s2) 40%, transparent)); }
+.s3 :global(.recharts-line-curve) { filter: drop-shadow(0 4px 8px color-mix(in srgb, var(--s3) 40%, transparent)); }
+.s4 :global(.recharts-line-curve) { filter: drop-shadow(0 4px 8px color-mix(in srgb, var(--s4) 40%, transparent)); }
+.chart :global(.recharts-line-curve) { stroke-linecap: round; stroke-linejoin: round; }

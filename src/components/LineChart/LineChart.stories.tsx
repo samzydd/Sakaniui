@@ -57,3 +57,4 @@ export const DarkMode: Story = {
   args: { series: ['revenue', 'cost'], showLegend: true },
   decorators: [(S) => <div className="dark" style={{ width: 560, padding: 24, background: 'var(--color-bg-canvas)' }}><S /></div>],
 };
+export const Loading: Story = { args: { loading: true } };

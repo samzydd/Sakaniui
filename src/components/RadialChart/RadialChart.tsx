@@ -27,6 +27,7 @@
 import React from 'react';
 import { RadialBarChart, RadialBar, Cell, Sector, ResponsiveContainer, PolarAngleAxis } from 'recharts';
 import { useChartTokens } from '../../lib/useChartTokens';
+import { ChartSkeleton } from '../../lib/ChartLoading';
 import { CHART_PALETTE_FALLBACK } from '../../lib/chartPalette';
 import styles from './RadialChart.module.css';
 
@@ -42,6 +43,8 @@ export interface RadialChartProps {
   size?: ChartSize;
   centerValue?: string;
   centerCaption?: string;
+  /** Draw the loading state (the chart's own silhouette, breathing) instead of the chart. */
+  loading?: boolean;
   className?: string;
 }
 
@@ -169,7 +172,7 @@ const ArcGauge: React.FC<{
 };
 
 export const RadialChart: React.FC<RadialChartProps> = ({
-  data, variant = 'multi', size = 'md', centerValue, centerCaption, className,
+  data, variant = 'multi', size = 'md', centerValue, centerCaption, loading = false, className,
 }) => {
   const chartRef = React.useRef<HTMLDivElement>(null);
   const cssVar = useChartTokens(chartRef);
@@ -179,6 +182,8 @@ export const RadialChart: React.FC<RadialChartProps> = ({
   const labelColor = cssVar('--color-fg-default') ?? '#141414';
   const captionColor = cssVar('--color-fg-muted') ?? '#78716a';
   const h = dims[size];
+
+  if (loading) return <ChartSkeleton kind="ring" height={h} className={className} label="Loading radial chart" />;
 
   if (variant === 'gauge-tick') {
     const d = data[0];

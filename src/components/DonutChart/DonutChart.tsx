@@ -11,6 +11,7 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 import { useChartTokens } from '../../lib/useChartTokens';
 import { CHART_PALETTE_FALLBACK } from '../../lib/chartPalette';
 import { ChartTooltip } from '../../lib/ChartTooltip';
+import { ChartSkeleton } from '../../lib/ChartLoading';
 import styles from './DonutChart.module.css';
 
 export type ChartSize = 'sm' | 'md' | 'lg' | 'xl';
@@ -26,6 +27,8 @@ export interface DonutChartProps {
   centerCaption?: string;
   /** Pixel height override, takes precedence over `size`'s preset. */
   height?: number;
+  /** Draw the loading state (the chart's own silhouette, breathing) instead of the chart. */
+  loading?: boolean;
   className?: string;
 }
 
@@ -37,7 +40,7 @@ const dims: Record<ChartSize, { h: number; inner: number; outer: number }> = {
 };
 
 export const DonutChart: React.FC<DonutChartProps> = ({
-  data, size = 'md', centerValue, centerCaption, height, className,
+  data, size = 'md', centerValue, centerCaption, height, loading = false, className,
 }) => {
   const [activeIndex, setActiveIndex] = React.useState<number | null>(null);
   // Recharts anchors a Pie slice's tooltip at polarToCartesian(cx, cy,
@@ -60,6 +63,8 @@ export const DonutChart: React.FC<DonutChartProps> = ({
   // that was the starting point, backed off 4px then another 3px (7 total)
   // per subsequent adjustment requests.
   const cornerRadius = (d.outer - d.inner) / 2 - 7;
+
+  if (loading) return <ChartSkeleton kind="ring" height={d.h} className={className} label="Loading donut chart" />;
 
   return (
     <div
@@ -98,6 +103,7 @@ export const DonutChart: React.FC<DonutChartProps> = ({
                 key={i}
                 fill={palette[i % palette.length]}
                 fillOpacity={activeIndex !== null && i !== activeIndex ? 0.45 : 1}
+                className={activeIndex === i ? styles.hot : undefined}
               />
             ))}
           </Pie>

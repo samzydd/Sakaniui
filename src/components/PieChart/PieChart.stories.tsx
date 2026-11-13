@@ -68,3 +68,4 @@ export const DarkMode: Story = {
   args: { variant: 'donut' },
   decorators: [(S) => <div className="dark" style={{ width: 360, padding: 24, background: 'var(--color-bg-canvas)' }}><S /></div>],
 };
+export const Loading: Story = { args: { loading: true } };

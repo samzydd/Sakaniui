@@ -2,6 +2,29 @@
 
 All notable changes to `@sakaniui/react` are documented here.
 
+## Unreleased
+
+### Charts: loading states, motion and hover
+
+- **Every chart takes `loading`.** It draws the chart's own silhouette instead (a radar web, a funnel band, bars, a line,
+  a ring, a heatmap grid) in the surface's subtle fill, breathing in a soft stagger, with a light gliding through the
+  funnel and sweeping round the radar and the rings. It keeps the chart's height, so nothing below moves when the data
+  arrives, and it is announced as a busy status.
+- **Entrances.** Bars grow out of their baseline in a stagger, lines and areas draw in, the radar's shapes grow out of the
+  centre (and morph when the data changes), pies, donuts and radials turn into place, heatmap cells arrive as a wave and
+  the funnel wipes in. All of it is off for `prefers-reduced-motion`.
+- **`RadarChart`:** hover a spoke for a crosshair, a dot on each series and a card with the values and the gap between
+  two series ("Berlin 46 −20"). Shapes have a soft gradient fill, a crisp edge and a glow in their own colour.
+  `interactive={false}` turns the hover off.
+- **`FunnelChart`:** a header with each stage's value and share of the start, a drop-off chip at every step, and `flow`:
+  dots streaming through the band, thinning where the funnel does (the share that carries on past a step is the data's).
+  The stream runs only while the chart is on screen. `formatValue` sets how values are written (compact by default).
+- **Hover everywhere:** the hovered bar, slice or cell lifts with a soft shadow; line and area points get a halo; the
+  cursor line is dashed; bars get a faint column behind them. Lines and area edges glow faintly in their own colour.
+- **Tooltips** are a frosted card with a hairline edge, and the new `ChartTooltipCard` gives the charts that place their
+  own card the same look.
+- `AreaChart`'s gradients are per chart, so two area charts on one page no longer share (and repaint) each other's fills.
+
 ## 0.16.0
 
 - **`WorkingIndicator` (and `ChainOfThought`'s working line) shows the `ChatOrb` instead of the sparkle.** While the agent works, the

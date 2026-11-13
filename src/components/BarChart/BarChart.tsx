@@ -22,6 +22,7 @@ import {
 import { useChartTokens } from '../../lib/useChartTokens';
 import { CHART_PALETTE_FALLBACK } from '../../lib/chartPalette';
 import { ChartTooltip } from '../../lib/ChartTooltip';
+import { ChartSkeleton } from '../../lib/ChartLoading';
 import styles from './BarChart.module.css';
 
 export type ChartSize = 'sm' | 'md' | 'lg' | 'xl';
@@ -40,6 +41,8 @@ export interface BarChartProps {
   size?: ChartSize;
   /** Legend labels for `value` / `value2`, shown for "multiple" and "stacked". */
   seriesLabels?: [string, string?];
+  /** Draw the loading state (the chart's own silhouette, breathing) instead of the chart. */
+  loading?: boolean;
   className?: string;
 }
 
@@ -63,7 +66,7 @@ const niceCeil = (value: number) => {
 };
 
 export const BarChart: React.FC<BarChartProps> = ({
-  data, variant = 'default', size = 'md', seriesLabels = ['Value', 'Value 2'], className,
+  data, variant = 'default', size = 'md', seriesLabels = ['Value', 'Value 2'], loading = false, className,
 }) => {
   const [hoverIndex, setHoverIndex] = React.useState<number | null>(null);
   // Recharts anchors a Bar's tooltip coordinate to the bar's own vertical
@@ -105,7 +108,7 @@ export const BarChart: React.FC<BarChartProps> = ({
   // left/right edge (a full {x, y} `position` bypasses that clamping
   // entirely and let the tooltip get cut off by an ancestor's overflow).
   const tooltip = (
-    <Tooltip cursor={false} content={<ChartTooltip />} wrapperStyle={{ zIndex: 50 }} position={hoverPos ? { y: hoverPos.y } : undefined} />
+    <Tooltip cursor={{ fill: cssVar('--color-bg-subtle') ?? '#f5f4f2', fillOpacity: 0.6, radius: CORNER_RADIUS }} content={<ChartTooltip />} wrapperStyle={{ zIndex: 50 }} position={hoverPos ? { y: hoverPos.y } : undefined} />
   );
 
   // Hovering never recolors a bar -- only "active" (categorical, every bar
@@ -183,8 +186,12 @@ export const BarChart: React.FC<BarChartProps> = ({
     </ul>
   );
 
+  if (loading) {
+    return <ChartSkeleton kind={variant === 'horizontal' ? 'bars-horizontal' : 'bars'} height={heights[size]} className={className} label="Loading bar chart" />;
+  }
+
   return (
-    <div ref={chartRef} className={[styles.chart, className ?? ''].filter(Boolean).join(' ')}>
+    <div ref={chartRef} className={[styles.chart, variant === 'horizontal' ? styles.horizontal : variant === 'negative' ? styles.negative : '', className ?? ''].filter(Boolean).join(' ')}>
       <ResponsiveContainer width="100%" height={heights[size]}>
         <ReBarChart
           data={data}
@@ -227,7 +234,7 @@ export const BarChart: React.FC<BarChartProps> = ({
                 onMouseLeave={handleBarLeave}
               >
                 {data.map((_, i) => (
-                  <Cell key={i} fill={chartDefault} fillOpacity={hoverIndex !== null && i !== hoverIndex ? 0.45 : 1} />
+                  <Cell key={i} fill={chartDefault} fillOpacity={hoverIndex !== null && i !== hoverIndex ? 0.45 : 1} className={hoverIndex === i ? styles.hot : undefined} />
                 ))}
               </Bar>
               {hasSecondSeries && (
@@ -243,7 +250,7 @@ export const BarChart: React.FC<BarChartProps> = ({
                   onMouseLeave={handleBarLeave}
                 >
                   {data.map((_, i) => (
-                    <Cell key={i} fill={chartSecondary} fillOpacity={hoverIndex !== null && i !== hoverIndex ? 0.45 : 1} />
+                    <Cell key={i} fill={chartSecondary} fillOpacity={hoverIndex !== null && i !== hoverIndex ? 0.45 : 1} className={hoverIndex === i ? styles.hot : undefined} />
                   ))}
                 </Bar>
               )}
@@ -264,7 +271,7 @@ export const BarChart: React.FC<BarChartProps> = ({
               onMouseLeave={handleBarLeave}
             >
               {data.map((_, i) => (
-                <Cell key={i} fill={singleSeriesFill(i)} fillOpacity={singleSeriesOpacity(i)} />
+                <Cell key={i} fill={singleSeriesFill(i)} fillOpacity={singleSeriesOpacity(i)} className={hoverIndex === i ? styles.hot : undefined} />
               ))}
             </Bar>
           )}

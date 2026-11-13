@@ -1,0 +1,74 @@
+/* ChartLoading: the quiet loading state every chart shares. Shapes in the chart's own silhouette, in the surface's
+   subtle fill, that breathe in a soft stagger; nothing flashes and nothing is brighter than the chart will be. */
+
+.skeleton {
+  position: relative;
+  display: block;
+  width: 100%;
+  animation: fadeIn 320ms var(--ease-out) both;
+}
+.svg { display: block; width: 100%; height: 100%; overflow: visible; }
+.col { display: flex; flex-direction: column; }
+.col .svg { flex: 1 1 auto; min-height: 0; }
+
+.skel {
+  fill: var(--color-bg-subtle);
+  animation: breathe 1.9s ease-in-out infinite;
+  animation-delay: calc(var(--i, 0) * 90ms);
+}
+.skelLine {
+  fill: none;
+  stroke: var(--color-bg-subtle);
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+  animation: breathe 1.9s ease-in-out infinite;
+  animation-delay: calc(var(--i, 0) * 90ms);
+}
+.skelGrid {
+  fill: none;
+  stroke: var(--color-border-subtle);
+  vector-effect: non-scaling-stroke;
+  opacity: 0.7;
+}
+
+/* a soft band of light that travels through a shape (funnel, radar sweep) */
+.glide { animation: glide 2.1s cubic-bezier(0.45, 0, 0.25, 1) infinite; }
+.spin { transform-box: view-box; transform-origin: 50% 50%; animation: spin 3.4s linear infinite; }
+
+/* HTML skeletons (bars, heatmap): the same fill, sized by the layout */
+.bars { display: flex; align-items: flex-end; gap: var(--space-12); height: 100%; padding: 0 var(--space-8) var(--space-24); box-sizing: border-box; border-bottom: 1px solid var(--color-border-subtle); }
+.bar {
+  flex: 1 1 0; min-width: 0;
+  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+  background: var(--color-bg-subtle);
+  transform-origin: bottom;
+  animation: breathe 1.9s ease-in-out infinite;
+  animation-delay: calc(var(--i, 0) * 90ms);
+}
+.rows { display: flex; flex-direction: column; justify-content: center; gap: var(--space-12); height: 100%; padding: 0 var(--space-8); box-sizing: border-box; }
+.row {
+  height: 14%; max-height: 28px; min-height: 12px;
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  background: var(--color-bg-subtle);
+  animation: breathe 1.9s ease-in-out infinite;
+  animation-delay: calc(var(--i, 0) * 90ms);
+}
+.cells { display: grid; gap: var(--space-4); height: 100%; }
+.cell {
+  border-radius: var(--radius-sm);
+  background: var(--color-bg-subtle);
+  animation: breathe 1.9s ease-in-out infinite;
+  animation-delay: calc(var(--i, 0) * 70ms);
+}
+.labels { display: grid; gap: var(--space-12); padding: var(--space-8) var(--space-4) 0; }
+.label { height: 8px; border-radius: var(--radius-full); background: var(--color-bg-subtle); opacity: 0.8; }
+
+@keyframes breathe { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes glide { from { transform: translateX(-30%); } to { transform: translateX(130%); } }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton, .skel, .skelLine, .bar, .row, .cell, .glide, .spin { animation: none; }
+}

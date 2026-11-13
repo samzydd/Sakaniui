@@ -91,3 +91,13 @@
 }
 .tooltip__label { color: var(--color-fg-subtle); }
 .tooltip__value { color: var(--color-fg-default); margin-left: auto; }
+
+/* ---- motion: the cells arrive as a wave from the top-left on mount; the hovered one lifts ---- */
+.cell {
+  animation: cellIn 520ms var(--ease-out) backwards;
+  animation-delay: calc(var(--d, 0) * 32ms);
+  transition: opacity var(--transition-hover), transform var(--transition-hover), box-shadow var(--transition-hover);
+}
+.cell--hot { transform: scale(1.12); box-shadow: 0 6px 14px color-mix(in srgb, var(--color-fg-default) 22%, transparent); position: relative; z-index: 1; }
+@keyframes cellIn { from { transform: scale(0.4); } to { transform: scale(1); } }
+@media (prefers-reduced-motion: reduce) { .cell { animation: none; } .cell--hot { transform: none; } }

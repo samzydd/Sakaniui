@@ -32,6 +32,7 @@ import { PieChart as RePieChart, Pie, Cell, Sector, ResponsiveContainer, Tooltip
 import { useChartTokens } from '../../lib/useChartTokens';
 import { CHART_PALETTE_FALLBACK } from '../../lib/chartPalette';
 import { ChartTooltip } from '../../lib/ChartTooltip';
+import { ChartSkeleton } from '../../lib/ChartLoading';
 import styles from './PieChart.module.css';
 
 export type ChartSize = 'sm' | 'md' | 'lg' | 'xl';
@@ -48,6 +49,8 @@ export interface PieChartProps {
   /** Big number shown in the center. Only rendered for "donut-with-text". */
   centerValue?: string;
   centerCaption?: string;
+  /** Draw the loading state (the chart's own silhouette, breathing) instead of the chart. */
+  loading?: boolean;
   className?: string;
 }
 
@@ -65,7 +68,7 @@ const HAS_CENTER = new Set<PieChartVariant>(['donut-with-text']);
 const RAD = Math.PI / 180;
 
 export const PieChart: React.FC<PieChartProps> = ({
-  data, variant = 'donut', size = 'md', centerValue, centerCaption, className,
+  data, variant = 'donut', size = 'md', centerValue, centerCaption, loading = false, className,
 }) => {
   const chartRef = React.useRef<HTMLDivElement>(null);
   const cssVar = useChartTokens(chartRef);
@@ -182,6 +185,8 @@ export const PieChart: React.FC<PieChartProps> = ({
   // data/colors. Not the single-ring + exploded-slice shape every other
   // variant here uses, so it's handled as its own branch rather than
   // folded into the shared shape/label plumbing below.
+  if (loading) return <ChartSkeleton kind={hasHole ? 'ring' : 'pie'} height={d.h} className={className} label="Loading pie chart" />;
+
   if (variant === 'stacked') {
     const ringFillOpacity = (i: number) => (hoverIdx !== undefined && hoverIdx !== i ? 0.45 : 1);
     return (
@@ -260,7 +265,7 @@ export const PieChart: React.FC<PieChartProps> = ({
             onMouseLeave={() => setHoverIdx(undefined)}
           >
             {data.map((_, i) => (
-              <Cell key={i} fill={palette[i % palette.length]} />
+              <Cell key={i} fill={palette[i % palette.length]} className={hoverIdx === i ? styles.hot : undefined} />
             ))}
           </Pie>
           <Tooltip content={<ChartTooltip />} wrapperStyle={{ zIndex: 50 }} />
