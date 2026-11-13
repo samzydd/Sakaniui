@@ -37,7 +37,7 @@ there's no way to force a *default* active slice without a real hover) --
 both are built via a custom \`shape\` render function using the exported
 \`Sector\` primitive, driven by this component's own hover/default-active
 state instead.` } } },
-  argTypes: {
+  argTypes: { appearance: { control: 'inline-radio', options: ['default', 'rich'] }, loading: { control: 'boolean' },
     variant: {
       control: 'select',
       options: ['pie', 'pie-no-separator', 'label', 'custom-label', 'label-list', 'donut', 'donut-active', 'donut-with-text', 'stacked', 'interactive'],
@@ -69,3 +69,5 @@ export const DarkMode: Story = {
   decorators: [(S) => <div className="dark" style={{ width: 360, padding: 24, background: 'var(--color-bg-canvas)' }}><S /></div>],
 };
 export const Loading: Story = { args: { loading: true } };
+export const Rich: Story = { args: { appearance: 'rich' } };
+export const RichLoading: Story = { args: { appearance: 'rich', loading: true } };

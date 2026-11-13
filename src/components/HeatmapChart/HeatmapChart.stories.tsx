@@ -22,7 +22,7 @@ higher values get a more saturated fill. On hover, the hovered cell goes
 fully solid and every other cell dims to 45% opacity (a flat dim, not its
 own value-based shade) -- matching Figma's hover state exactly, and the
 same "highlight one, dim the rest" pattern used by BarChart.` } } },
-  argTypes: { size: { control: 'select', options: ['sm', 'md', 'lg', 'xl'] } },
+  argTypes: { appearance: { control: 'inline-radio', options: ['default', 'rich'] }, loading: { control: 'boolean' }, size: { control: 'select', options: ['sm', 'md', 'lg', 'xl'] } },
   args: { data, rowLabels, colLabels, valueLabel: 'Revenue', size: 'md' },
   decorators: [(S) => <div style={{ width: 560 }}><S /></div>],
 } satisfies Meta<typeof HeatmapChart>;
@@ -36,3 +36,5 @@ export const DarkMode: Story = {
   decorators: [(S) => <div className="dark" style={{ width: 560, padding: 24, background: 'var(--color-bg-canvas)' }}><S /></div>],
 };
 export const Loading: Story = { args: { loading: true } };
+export const Rich: Story = { args: { appearance: 'rich' } };
+export const RichLoading: Story = { args: { appearance: 'rich', loading: true } };

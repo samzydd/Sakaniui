@@ -11,7 +11,7 @@ import { RadarChart } from './RadarChart';
 import { RadialChart } from './RadialChart';
 
 /**
- * Every chart side by side, for checking the loading state and the entrance together: "Reload data" shows each chart's
+ * Every chart side by side in appearance="rich", for checking the loading state and the entrance together: "Reload data" shows each chart's
  * loading state for a moment, then the chart arrives and plays its entrance. Hover any of them for its interaction.
  */
 
@@ -63,7 +63,7 @@ const Card: React.FC<{ title: string; wide?: boolean; children: React.ReactNode 
   </section>
 );
 
-const Overview: React.FC<{ dark?: boolean }> = ({ dark }) => {
+const Overview: React.FC<{ dark?: boolean; appearance?: 'default' | 'rich' }> = ({ dark, appearance = 'rich' }) => {
   const [loading, setLoading] = React.useState(false);
   const [run, setRun] = React.useState(0);
   const reload = () => {
@@ -96,15 +96,15 @@ const Overview: React.FC<{ dark?: boolean }> = ({ dark }) => {
         </button>
       </div>
       <div key={run} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: 16 }}>
-        <Card title="Funnel chart" wide><FunnelChart data={funnel} loading={loading} /></Card>
-        <Card title="Radar chart"><RadarChart data={radar} variant="multiple" seriesLabels={['Lisbon', 'Berlin']} size="lg" loading={loading} /></Card>
-        <Card title="Bar chart"><BarChart data={series} loading={loading} /></Card>
-        <Card title="Line chart"><LineChart data={series} series={['value', 'value2']} variant="multiple" loading={loading} /></Card>
-        <Card title="Area chart"><AreaChart data={series} variant="stacked" seriesLabels={['Costs', 'Revenue']} loading={loading} /></Card>
-        <Card title="Donut chart"><DonutChart data={slices} centerValue="925" centerCaption="Visitors" loading={loading} /></Card>
-        <Card title="Pie chart"><PieChart data={slices} variant="interactive" loading={loading} /></Card>
-        <Card title="Radial chart"><RadialChart data={slices.slice(0, 4).map((s) => ({ ...s, max: 300 }))} variant="multi" loading={loading} /></Card>
-        <Card title="Heatmap chart"><HeatmapChart data={heat} rowLabels={['Mon', 'Tue', 'Wed', 'Thu', 'Fri']} colLabels={['8a', '10a', '12p', '2p', '4p', '6p', '8p']} valueLabel="Orders" loading={loading} /></Card>
+        <Card title="Funnel chart" wide><FunnelChart appearance={appearance} data={funnel} loading={loading} /></Card>
+        <Card title="Radar chart"><RadarChart appearance={appearance} data={radar} variant="multiple" seriesLabels={['Lisbon', 'Berlin']} size="lg" loading={loading} /></Card>
+        <Card title="Bar chart"><BarChart appearance={appearance} data={series} loading={loading} /></Card>
+        <Card title="Line chart"><LineChart appearance={appearance} data={series} series={['value', 'value2']} variant="multiple" loading={loading} /></Card>
+        <Card title="Area chart"><AreaChart appearance={appearance} data={series} variant="stacked" seriesLabels={['Costs', 'Revenue']} loading={loading} /></Card>
+        <Card title="Donut chart"><DonutChart appearance={appearance} data={slices} centerValue="925" centerCaption="Visitors" loading={loading} /></Card>
+        <Card title="Pie chart"><PieChart appearance={appearance} data={slices} variant="interactive" loading={loading} /></Card>
+        <Card title="Radial chart"><RadialChart appearance={appearance} data={slices.slice(0, 4).map((s) => ({ ...s, max: 300 }))} variant="multi" loading={loading} /></Card>
+        <Card title="Heatmap chart"><HeatmapChart appearance={appearance} data={heat} rowLabels={['Mon', 'Tue', 'Wed', 'Thu', 'Fri']} colLabels={['8a', '10a', '12p', '2p', '4p', '6p', '8p']} valueLabel="Orders" loading={loading} /></Card>
       </div>
     </div>
   );
@@ -121,3 +121,5 @@ type Story = StoryObj<typeof meta>;
 
 export const Light: Story = {};
 export const Dark: Story = { args: { dark: true } };
+/** The same charts in their default (Figma) look, for comparison. */
+export const DefaultLook: Story = { args: { dark: true, appearance: 'default' } };

@@ -1,6 +1,10 @@
 /**
  * FunnelChart
  *
+ * Two looks (`appearance`):
+ *   default -- the Figma funnel: each stage's share printed in the band, the stage names under it, a card on hover.
+ *   rich    -- everything below.
+ *
  * Stages run left to right, narrowing through smooth curved transitions rather than straight diagonal edges (Figma's
  * "Funnel chart" / "Funnel chart hover"). Recharts' native `<Funnel>` only renders a vertical, straight-edged funnel,
  * so this is a hand-rolled SVG, the same "no native fit" call as HeatmapChart.
@@ -24,6 +28,7 @@ import { useReducedMotion } from '../../lib/useReducedMotion';
 import styles from './FunnelChart.module.css';
 
 export type ChartSize = 'sm' | 'md' | 'lg' | 'xl';
+export type ChartAppearance = 'default' | 'rich';
 
 export interface FunnelDatum { label: string; value: number; }
 
@@ -36,10 +41,15 @@ export interface FunnelChartProps {
   loading?: boolean;
   /** How a stage's value is written in the header and the card. Defaults to a compact number (61.2K). */
   formatValue?: (value: number) => string;
+  /** `rich`: the header, the drop-off chips, the stream of dots, the wipe-in and a frosted card. `default` is the Figma funnel. `flow` and `formatValue` apply to `rich` only. */
+  appearance?: ChartAppearance;
   className?: string;
 }
 
 const heights: Record<ChartSize, number> = { sm: 120, md: 168, lg: 232, xl: 320 };
+const classicHeights: Record<ChartSize, number> = { sm: 180, md: 240, lg: 320, xl: 420 };
+const CLASSIC_W = 560;
+const CLASSIC_MIN_OPACITY = 0.3;
 const VIEW_W = 560;
 const STAGE_MIN_OPACITY = 0.3;
 // How far the final stage tapers past its own left edge, for the pointed tip rather than a flat edge.
@@ -53,7 +63,8 @@ const smooth = (t: number) => t * t * (3 - 2 * t);
 
 interface Dot { x: number; lane: number; speed: number; end: number; size: number; }
 
-export const FunnelChart: React.FC<FunnelChartProps> = ({
+/** appearance="rich". */
+const FunnelRich: React.FC<FunnelChartProps> = ({
   data, size = 'md', flow = true, loading = false, formatValue = defaultFormat, className,
 }) => {
   const [hoverIndex, setHoverIndex] = React.useState<number | null>(null);
@@ -142,7 +153,7 @@ export const FunnelChart: React.FC<FunnelChartProps> = ({
   return (
     <div
       ref={chartRef}
-      className={[styles.chart, className ?? ''].filter(Boolean).join(' ')}
+      className={[styles.chart, 'sk-chart-rich', className ?? ''].filter(Boolean).join(' ')}
       style={{ ['--funnel' as string]: chart1 }}
     >
       <div className={styles.stats} style={{ gridTemplateColumns: `repeat(${n}, minmax(0, 1fr))` }}>
@@ -223,5 +234,103 @@ export const FunnelChart: React.FC<FunnelChartProps> = ({
     </div>
   );
 };
+
+/** appearance="default": the Figma funnel, as it was. */
+const FunnelClassic: React.FC<FunnelChartProps> = ({ data, size = 'md', loading = false, className }) => {
+  const [hoverIndex, setHoverIndex] = React.useState<number | null>(null);
+  const chartRef = React.useRef<HTMLDivElement>(null);
+  const cssVar = useChartTokens(chartRef);
+  const chart1 = cssVar('--color-chart-1') ?? '#ff4700';
+  const canvasBg = cssVar('--color-bg-canvas') ?? '#fafaf9';
+  const total = data[0]?.value || 1;
+  const h = classicHeights[size];
+  const plotH = h * 0.66;
+  const centerY = plotH / 2 + 8;
+  const segW = CLASSIC_W / data.length;
+  const maxVal = data[0]?.value || 1;
+
+  const heightFor = (v: number) => (v / maxVal) * plotH;
+  // One boundary height per stage edge (N+1 for N stages): boundaries[i] is
+  // shared between stage i-1's right edge and stage i's left edge, so the
+  // funnel narrows continuously with no flat plateaus.
+  const boundaries = data.map((d) => heightFor(d.value));
+  boundaries.push(heightFor(data[data.length - 1]?.value ?? 0) * TIP_TAPER);
+
+  const stageOpacity = (i: number) =>
+    data.length <= 1 ? 1 : CLASSIC_MIN_OPACITY + (i / (data.length - 1)) * (1 - CLASSIC_MIN_OPACITY);
+
+  if (loading) return <ChartSkeleton kind="funnel" height={h} stages={Math.max(3, data.length)} className={className} label="Loading funnel chart" />;
+
+  const hovered = hoverIndex !== null ? data[hoverIndex] : null;
+  const hoveredTopY = hoverIndex !== null ? centerY - boundaries[hoverIndex] / 2 : 0;
+  const hoveredMidX = hoverIndex !== null ? hoverIndex * segW + segW / 2 : 0;
+
+  return (
+    <div ref={chartRef} className={[styles.chart, className ?? ''].filter(Boolean).join(' ')} style={{ height: h }}>
+      <svg viewBox={`0 0 ${CLASSIC_W} ${h}`} width="100%" height={h} className={styles.svg}>
+        {data.map((d, i) => {
+          const xLeft = i * segW;
+          const xRight = (i + 1) * segW;
+          const midX = (xLeft + xRight) / 2;
+          const hLeft = boundaries[i] / 2;
+          const hRight = boundaries[i + 1] / 2;
+          const topLeftY = centerY - hLeft;
+          const topRightY = centerY - hRight;
+          const bottomLeftY = centerY + hLeft;
+          const bottomRightY = centerY + hRight;
+          const path = [
+            `M ${xLeft} ${topLeftY}`,
+            `C ${midX} ${topLeftY} ${midX} ${topRightY} ${xRight} ${topRightY}`,
+            `L ${xRight} ${bottomRightY}`,
+            `C ${midX} ${bottomRightY} ${midX} ${bottomLeftY} ${xLeft} ${bottomLeftY}`,
+            'Z',
+          ].join(' ');
+          const opacity = hoverIndex !== null ? (i === hoverIndex ? 1 : 0.45) : stageOpacity(i);
+          const pct = Math.round((d.value / total) * 100);
+          return (
+            <g
+              key={i}
+              className={styles.segment}
+              onMouseEnter={() => setHoverIndex(i)}
+              onMouseLeave={() => setHoverIndex(null)}
+            >
+              <path d={path} fill={chart1} fillOpacity={opacity} />
+              <text x={midX} y={centerY} textAnchor="middle" dominantBaseline="middle" className={styles.pctLabel}>
+                {pct}%
+              </text>
+            </g>
+          );
+        })}
+      </svg>
+
+      <div className={styles.labels} style={{ gridTemplateColumns: `repeat(${data.length}, 1fr)` }}>
+        {data.map((d, i) => (
+          <span key={i} className={styles.labelItem}>{d.label}</span>
+        ))}
+      </div>
+
+      {hovered && (
+        <div
+          className={styles.tooltip}
+          style={{
+            left: `${(hoveredMidX / CLASSIC_W) * 100}%`,
+            top: `${(hoveredTopY / h) * 100}%`,
+            background: canvasBg,
+          }}
+        >
+          <span className={styles.tooltip__title}>{hovered.label}</span>
+          <div className={styles.tooltip__row}>
+            <span className={styles.tooltip__dot} style={{ background: chart1 }} />
+            <span className={styles.tooltip__label}>Share</span>
+            <span className={styles.tooltip__value}>{Math.round((hovered.value / total) * 100)}%</span>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export const FunnelChart: React.FC<FunnelChartProps> = (props) =>
+  props.appearance === 'rich' ? <FunnelRich {...props} /> : <FunnelClassic {...props} />;
 
 export default FunnelChart;

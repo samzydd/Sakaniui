@@ -35,20 +35,21 @@
 .center__value { font-size: 18px; font-weight: 600; color: var(--color-fg-default); line-height: 1.2; font-family: var(--font-sans); }
 .center__caption { font-size: 12px; color: var(--color-fg-muted); font-family: var(--font-sans); }
 
-/* ---- motion: the ring turns into place on mount (CSS; Recharts' own sector animation can stall on an empty frame) ---- */
-.chart :global(.recharts-pie), .chart :global(.recharts-radial-bar-sectors) {
+/* ---- appearance="rich": the ring turns into place once, on mount (CSS; Recharts' own sector animation can stall on
+   an empty frame). Keyed on data-entering, so a slice Recharts remounts on hover never replays it. ---- */
+.rich[data-entering] :global(.recharts-pie), .rich[data-entering] :global(.recharts-radial-bar-sectors) {
   transform-box: view-box;
   transform-origin: 50% 50%;
   animation: ringIn 820ms var(--ease-out) backwards;
 }
-.chart :global(.recharts-sector) { transition: fill-opacity var(--transition-hover), filter var(--transition-hover); }
+.rich :global(.recharts-sector) { transition: fill-opacity var(--transition-hover), filter var(--transition-hover); }
 /* the hovered slice lifts off the page a little */
-.hot { filter: drop-shadow(0 6px 14px color-mix(in srgb, var(--color-fg-default) 22%, transparent)); }
+.rich .hot { filter: drop-shadow(0 6px 14px color-mix(in srgb, var(--color-fg-default) 22%, transparent)); }
 @keyframes ringIn { from { opacity: 0; transform: rotate(-50deg) scale(0.86); } to { opacity: 1; transform: none; } }
 @media (prefers-reduced-motion: reduce) {
-  .chart :global(.recharts-pie), .chart :global(.recharts-radial-bar-sectors) { animation: none; }
+  .rich :global(.recharts-pie), .rich :global(.recharts-radial-bar-sectors) { animation: none !important; }
 }
 
-.center { animation: centerIn 600ms var(--ease-out) 260ms backwards; }
+.rich[data-entering] .center { animation: centerIn 600ms var(--ease-out) 260ms backwards; }
 @keyframes centerIn { from { opacity: 0; transform: translateY(4px); } }
-@media (prefers-reduced-motion: reduce) { .center { animation: none; } }
+@media (prefers-reduced-motion: reduce) { .rich .center { animation: none !important; } }

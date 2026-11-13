@@ -22,7 +22,7 @@
   transition: r var(--transition-hover), fill var(--transition-hover), opacity var(--transition-hover);
 }
 
-/* ---- the edge of each area glows faintly in its own colour ---- */
-.s0 :global(.recharts-area-curve) { filter: drop-shadow(0 4px 8px color-mix(in srgb, var(--s0) 40%, transparent)); }
-.s1 :global(.recharts-area-curve) { filter: drop-shadow(0 4px 8px color-mix(in srgb, var(--s1) 40%, transparent)); }
-.chart :global(.recharts-area-curve) { stroke-linecap: round; stroke-linejoin: round; }
+/* ---- appearance="rich": the edge of each area glows faintly in its own colour ---- */
+.rich .s0 :global(.recharts-area-curve) { filter: drop-shadow(0 4px 8px color-mix(in srgb, var(--s0) 40%, transparent)); }
+.rich .s1 :global(.recharts-area-curve) { filter: drop-shadow(0 4px 8px color-mix(in srgb, var(--s1) 40%, transparent)); }
+.rich :global(.recharts-area-curve) { stroke-linecap: round; stroke-linejoin: round; }

@@ -29,7 +29,7 @@ chart" component set:
 
 A thin wrapper throughout -- every variant is a Recharts \`type\`/\`dot\`/
 \`label\` prop combination, no hand-rolled SVG needed.` } } },
-  argTypes: {
+  argTypes: { appearance: { control: 'inline-radio', options: ['default', 'rich'] }, loading: { control: 'boolean' },
     variant: {
       control: 'select',
       options: ['default', 'linear', 'step', 'multiple', 'dots', 'custom-dots', 'dots-colors', 'label', 'custom-label'],
@@ -58,3 +58,5 @@ export const DarkMode: Story = {
   decorators: [(S) => <div className="dark" style={{ width: 560, padding: 24, background: 'var(--color-bg-canvas)' }}><S /></div>],
 };
 export const Loading: Story = { args: { loading: true } };
+export const Rich: Story = { args: { appearance: 'rich' } };
+export const RichLoading: Story = { args: { appearance: 'rich', loading: true } };

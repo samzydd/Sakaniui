@@ -15,7 +15,7 @@ const meta = {
   parameters: { docs: { description: { component: `Recharts wrapper styled with Sakani chart tokens. Matches Figma "Donut Chart"
 (Size sm|md|lg|xl, with center value + caption). Segments cycle through the 5
 chart tokens so they re-theme in dark mode.` } } },
-  argTypes: { size: { control: 'select', options: ['sm', 'md', 'lg', 'xl'] } },
+  argTypes: { appearance: { control: 'inline-radio', options: ['default', 'rich'] }, loading: { control: 'boolean' }, size: { control: 'select', options: ['sm', 'md', 'lg', 'xl'] } },
   args: { data, size: 'md', centerValue: '100%', centerCaption: 'Traffic' },
   decorators: [(S) => <div style={{ width: 360 }}><S /></div>],
 } satisfies Meta<typeof DonutChart>;
@@ -30,3 +30,5 @@ export const DarkMode: Story = {
   decorators: [(S) => <div className="dark" style={{ width: 360, padding: 24, background: 'var(--color-bg-canvas)' }}><S /></div>],
 };
 export const Loading: Story = { args: { loading: true } };
+export const Rich: Story = { args: { appearance: 'rich' } };
+export const RichLoading: Story = { args: { appearance: 'rich', loading: true } };

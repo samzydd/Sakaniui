@@ -1,16 +1,12 @@
-/* The hover card every chart shares. A frosted card in the surface colour with a hairline edge: it reads over a grid or a
-   filled shape without hiding what is under it, and it follows the theme through the tokens. */
+/* Matches Figma's "Chart Tooltip" spec exactly: bg/canvas, no border,
+   shadow/lg, 8px radius, 12px padding, 6px internal gap. */
 .tooltip {
   display: flex;
   flex-direction: column;
   gap: var(--space-6);
-  min-width: 120px;
-  padding: var(--space-10) var(--space-12);
-  border-radius: var(--radius-lg);
-  background: color-mix(in srgb, var(--color-bg-canvas) 86%, transparent);
-  -webkit-backdrop-filter: blur(12px) saturate(1.2);
-  backdrop-filter: blur(12px) saturate(1.2);
-  border: 1px solid color-mix(in srgb, var(--color-border-default) 70%, transparent);
+  padding: var(--space-12);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-canvas);
   box-shadow: var(--shadow-lg);
   font-family: var(--font-sans);
   font-size: 13px;
@@ -22,16 +18,10 @@
      element's height regardless of content (1 series vs many), then the
      extra 8px in each axis is the actual gap from the pointer. */
   transform: translate(8px, calc(-100% - 8px));
-  animation: tipIn 140ms var(--ease-out) both;
 }
-/* a card that sits where it is told (the radar, the funnel, the heatmap place their own) */
-.tooltip--placed { transform: none; }
 
 .title {
   color: var(--color-fg-muted);
-  font-size: 12px;
-  font-weight: 500;
-  letter-spacing: 0.01em;
 }
 
 .row {
@@ -46,14 +36,32 @@
   width: 8px;
   height: 8px;
   border-radius: var(--radius-full);
-  box-shadow: 0 0 0 3px color-mix(in srgb, currentColor 18%, transparent);
 }
 
 .label { color: var(--color-fg-subtle); }
-.value { color: var(--color-fg-default); font-weight: 600; margin-left: auto; padding-left: var(--space-12); font-variant-numeric: tabular-nums; }
+.value { color: var(--color-fg-default); font-weight: 500; margin-left: auto; }
+
+/* ---- appearance="rich": the chart's root carries `sk-chart-rich`, and its card turns frosted: the surface colour with
+   a hairline edge, so it reads over a grid or a filled shape without hiding what is under it. ---- */
+:global(.sk-chart-rich) .tooltip,
+.tooltip--placed {
+  min-width: 120px;
+  padding: var(--space-10) var(--space-12);
+  border-radius: var(--radius-lg);
+  background: color-mix(in srgb, var(--color-bg-canvas) 86%, transparent);
+  -webkit-backdrop-filter: blur(12px) saturate(1.2);
+  backdrop-filter: blur(12px) saturate(1.2);
+  border: 1px solid color-mix(in srgb, var(--color-border-default) 70%, transparent);
+  animation: tipIn 140ms var(--ease-out) both;
+}
+:global(.sk-chart-rich) .title, .tooltip--placed .title { font-size: 12px; font-weight: 500; letter-spacing: 0.01em; }
+:global(.sk-chart-rich) .dot, .tooltip--placed .dot { box-shadow: 0 0 0 3px color-mix(in srgb, currentColor 18%, transparent); }
+:global(.sk-chart-rich) .value, .tooltip--placed .value { font-weight: 600; padding-left: var(--space-12); font-variant-numeric: tabular-nums; }
+/* a card that sits where it is told (the rich radar and funnel place their own) */
+.tooltip--placed { transform: none; }
 .delta { font-size: 12px; font-weight: 500; color: var(--color-fg-subtle); font-variant-numeric: tabular-nums; }
-.delta--up { color: var(--color-success-fg, #12b76a); }
-.delta--down { color: var(--color-danger-fg, #f04438); }
+.delta--up { color: var(--color-success-fg); }
+.delta--down { color: var(--color-danger-fg); }
 
 @keyframes tipIn { from { opacity: 0; } to { opacity: 1; } }
-@media (prefers-reduced-motion: reduce) { .tooltip { animation: none; } }
+@media (prefers-reduced-motion: reduce) { :global(.sk-chart-rich) .tooltip, .tooltip--placed { animation: none; } }

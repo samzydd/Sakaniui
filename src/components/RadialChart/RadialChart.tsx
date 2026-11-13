@@ -28,10 +28,12 @@ import React from 'react';
 import { RadialBarChart, RadialBar, Cell, Sector, ResponsiveContainer, PolarAngleAxis } from 'recharts';
 import { useChartTokens } from '../../lib/useChartTokens';
 import { ChartSkeleton } from '../../lib/ChartLoading';
+import { useChartEntrance } from '../../lib/useChartEntrance';
 import { CHART_PALETTE_FALLBACK } from '../../lib/chartPalette';
 import styles from './RadialChart.module.css';
 
 export type ChartSize = 'sm' | 'md' | 'lg' | 'xl';
+export type ChartAppearance = 'default' | 'rich';
 export type RadialChartVariant =
   | 'multi' | 'grid' | 'text' | 'shape' | 'gauge-tick' | 'stacked' | 'stacked-3-layers' | 'stacked-label';
 
@@ -45,6 +47,8 @@ export interface RadialChartProps {
   centerCaption?: string;
   /** Draw the loading state (the chart's own silhouette, breathing) instead of the chart. */
   loading?: boolean;
+  /** `rich`: the livelier look (turns into place on mount, the rings and gauges rise in). `default` is the Figma look. */
+  appearance?: ChartAppearance;
   className?: string;
 }
 
@@ -172,8 +176,10 @@ const ArcGauge: React.FC<{
 };
 
 export const RadialChart: React.FC<RadialChartProps> = ({
-  data, variant = 'multi', size = 'md', centerValue, centerCaption, loading = false, className,
+  data, variant = 'multi', size = 'md', centerValue, centerCaption, loading = false, appearance = 'default', className,
 }) => {
+  const rich = appearance === 'rich';
+  const entering = useChartEntrance(rich && !loading);
   const chartRef = React.useRef<HTMLDivElement>(null);
   const cssVar = useChartTokens(chartRef);
   const palette = [1, 2, 3, 4, 5].map((n) => cssVar(`--color-chart-${n}`) ?? CHART_PALETTE_FALLBACK[n - 1]);
@@ -188,7 +194,7 @@ export const RadialChart: React.FC<RadialChartProps> = ({
   if (variant === 'gauge-tick') {
     const d = data[0];
     return (
-      <div ref={chartRef} className={[styles.chart, className ?? ''].filter(Boolean).join(' ')} style={{ height: h }}>
+      <div ref={chartRef} className={[styles.chart, rich ? `${styles.rich} sk-chart-rich` : '', className ?? ''].filter(Boolean).join(' ')} data-entering={entering || undefined} style={{ height: h }}>
         <GaugeTick
           value={d?.value ?? 0}
           max={d?.max ?? 100}
@@ -205,7 +211,7 @@ export const RadialChart: React.FC<RadialChartProps> = ({
 
   if (variant === 'shape' || variant === 'stacked' || variant === 'stacked-3-layers') {
     return (
-      <div ref={chartRef} className={[styles.chart, className ?? ''].filter(Boolean).join(' ')} style={{ height: h }}>
+      <div ref={chartRef} className={[styles.chart, rich ? `${styles.rich} sk-chart-rich` : '', className ?? ''].filter(Boolean).join(' ')} data-entering={entering || undefined} style={{ height: h }}>
         <ArcGauge
           data={data}
           palette={palette}
@@ -223,7 +229,7 @@ export const RadialChart: React.FC<RadialChartProps> = ({
   const showCenter = (variant === 'stacked-label' || variant === 'text') && (centerValue || centerCaption);
 
   return (
-    <div ref={chartRef} className={[styles.chart, className ?? ''].filter(Boolean).join(' ')} style={{ height: h }}>
+    <div ref={chartRef} className={[styles.chart, rich ? `${styles.rich} sk-chart-rich` : '', className ?? ''].filter(Boolean).join(' ')} data-entering={entering || undefined} style={{ height: h }}>
       {variant === 'grid' && <PolarGrid rings={8} spokes={12} color={gridColor} />}
       <ResponsiveContainer width="100%" height="100%">
         <RadialBarChart

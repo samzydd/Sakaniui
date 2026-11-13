@@ -24,7 +24,7 @@ const meta = {
 - The band wipes in on mount. \`loading\` draws the funnel's silhouette with a soft light gliding through it.
 
 Each stage is shaded chart/1 at increasing saturation (first stage palest, last stage full color).` } } },
-  argTypes: { size: { control: 'select', options: ['sm', 'md', 'lg', 'xl'] }, flow: { control: 'boolean' }, loading: { control: 'boolean' } },
+  argTypes: { appearance: { control: 'inline-radio', options: ['default', 'rich'] }, loading: { control: 'boolean' }, size: { control: 'select', options: ['sm', 'md', 'lg', 'xl'] }, flow: { control: 'boolean' } },
   args: { data, size: 'md' },
   decorators: [(S) => <div style={{ width: 560 }}><S /></div>],
 } satisfies Meta<typeof FunnelChart>;
@@ -39,3 +39,5 @@ export const NoFlow: Story = { args: { flow: false } };
 export const DarkMode: Story = {
   decorators: [(S) => <div className="dark" style={{ width: 560, padding: 24, background: 'var(--color-bg-canvas)' }}><S /></div>],
 };
+export const Rich: Story = { args: { appearance: 'rich' } };
+export const RichLoading: Story = { args: { appearance: 'rich', loading: true } };

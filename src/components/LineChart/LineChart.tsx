@@ -31,6 +31,7 @@ import { useReducedMotion } from '../../lib/useReducedMotion';
 import styles from './LineChart.module.css';
 
 export type ChartSize = 'sm' | 'md' | 'lg' | 'xl';
+export type ChartAppearance = 'default' | 'rich';
 export type LineChartVariant =
   | 'default' | 'linear' | 'step' | 'multiple' | 'dots' | 'custom-dots' | 'dots-colors' | 'label' | 'custom-label';
 
@@ -54,6 +55,8 @@ export interface LineChartProps {
   showLegend?: boolean;
   /** Draw the loading state (the chart's own silhouette, breathing) instead of the chart. */
   loading?: boolean;
+  /** `rich`: the livelier look (an entrance on mount, a soft glow and lift on hover, a frosted card). `default` is the Figma look. */
+  appearance?: ChartAppearance;
   className?: string;
 }
 
@@ -62,9 +65,10 @@ const heights: Record<ChartSize, number> = { sm: 180, md: 240, lg: 320, xl: 420 
 const ALWAYS_DOTS = new Set<LineChartVariant>(['dots', 'custom-dots', 'dots-colors', 'label', 'custom-label']);
 
 export const LineChart: React.FC<LineChartProps> = ({
-  data, series, xKey = 'label', variant = 'default', labelKey, size = 'md', height, showLegend, loading = false, className,
+  data, series, xKey = 'label', variant = 'default', labelKey, size = 'md', height, showLegend, loading = false, appearance = 'default', className,
 }) => {
   const reduced = useReducedMotion();
+  const rich = appearance === 'rich';
   const chartRef = React.useRef<HTMLDivElement>(null);
   const cssVar = useChartTokens(chartRef);
   const palette = [1, 2, 3, 4, 5].map((n) => cssVar(`--color-chart-${n}`) ?? CHART_PALETTE_FALLBACK[n - 1]);
@@ -133,7 +137,7 @@ export const LineChart: React.FC<LineChartProps> = ({
   return (
     <div
       ref={chartRef}
-      className={[styles.chart, className ?? ''].filter(Boolean).join(' ')}
+      className={[styles.chart, rich ? `${styles.rich} sk-chart-rich` : '', className ?? ''].filter(Boolean).join(' ')}
       style={Object.fromEntries(seriesPalette.map((c, k) => [`--s${k}`, c])) as React.CSSProperties}
     >
       <ResponsiveContainer width="100%" height={height ?? heights[size]}>
@@ -141,7 +145,9 @@ export const LineChart: React.FC<LineChartProps> = ({
           <CartesianGrid strokeDasharray="3 3" stroke={grid} vertical={false} />
           <XAxis dataKey={xKey} stroke={axis} fontSize={12} tickLine={false} axisLine={false} interval={0} />
           <Tooltip
-            cursor={{ stroke: cssVar('--color-border-strong') ?? '#a8a29b', strokeWidth: 1, strokeDasharray: '4 4' }}
+            cursor={rich
+              ? { stroke: cssVar('--color-border-strong') ?? '#a8a29b', strokeWidth: 1, strokeDasharray: '4 4' }
+              : { stroke: cssVar('--color-border-default') ?? '#dbdad7', strokeWidth: 1 }}
             content={<ChartTooltip />}
             wrapperStyle={{ zIndex: 50 }}
           />
@@ -160,12 +166,10 @@ export const LineChart: React.FC<LineChartProps> = ({
                 stroke={color}
                 strokeWidth={2}
                 dot={dot}
-                activeDot={haloDot(color)}
-                className={styles[`s${i % 5}`]}
-                // draws itself in from the left on mount
-                isAnimationActive={!reduced}
-                animationDuration={1100}
-                animationEasing="ease-out"
+                activeDot={rich ? haloDot(color) : { r: 4, fill: color, stroke: canvasBg, strokeWidth: 1.5 }}
+                className={rich ? styles[`s${i % 5}`] : undefined}
+                // rich: draws itself in from the left, a little quicker and softer than Recharts' default
+                {...(rich ? { isAnimationActive: !reduced, animationDuration: 1100, animationEasing: 'ease-out' as const } : {})}
                 label={variant === 'label' || variant === 'custom-label' ? renderPointLabel : undefined}
               />
             );

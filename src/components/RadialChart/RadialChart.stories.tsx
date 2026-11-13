@@ -33,7 +33,7 @@ four are hand-rolled SVG using the exported \`Sector\` primitive, same
 call as HeatmapChart/FunnelChart. "multi"/"grid"/"text"/"stacked-label"
 are genuine concentric-ring cases, so those stay thin RadialBarChart
 wrappers.` } } },
-  argTypes: {
+  argTypes: { appearance: { control: 'inline-radio', options: ['default', 'rich'] }, loading: { control: 'boolean' },
     variant: {
       control: 'select',
       options: ['multi', 'grid', 'text', 'shape', 'gauge-tick', 'stacked', 'stacked-3-layers', 'stacked-label'],
@@ -97,3 +97,5 @@ export const DarkMode: Story = {
   decorators: [(S) => <div className="dark" style={{ width: 320, padding: 24, background: 'var(--color-bg-canvas)' }}><S /></div>],
 };
 export const Loading: Story = { args: { loading: true } };
+export const Rich: Story = { args: { appearance: 'rich' } };
+export const RichLoading: Story = { args: { appearance: 'rich', loading: true } };

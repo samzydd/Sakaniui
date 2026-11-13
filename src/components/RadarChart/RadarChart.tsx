@@ -38,15 +38,16 @@
 import React from 'react';
 import {
   RadarChart as ReRadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis,
-  ResponsiveContainer, Legend,
+  ResponsiveContainer, Tooltip, Legend,
 } from 'recharts';
 import { useChartTokens } from '../../lib/useChartTokens';
-import { ChartTooltipCard } from '../../lib/ChartTooltip';
+import { ChartTooltip, ChartTooltipCard } from '../../lib/ChartTooltip';
 import { ChartSkeleton } from '../../lib/ChartLoading';
 import { useReducedMotion } from '../../lib/useReducedMotion';
 import styles from './RadarChart.module.css';
 
 export type ChartSize = 'sm' | 'md' | 'lg' | 'xl';
+export type ChartAppearance = 'default' | 'rich';
 export type RadarChartVariant =
   | 'default' | 'dots' | 'dots-grid-none' | 'lines-only' | 'circle-grid' | 'circle-grid-no-lines'
   | 'grid-custom' | 'grid-filled' | 'circle-grid-filled' | 'multiple' | 'custom-label';
@@ -66,7 +67,13 @@ export interface RadarChartProps {
   seriesLabels?: [string, string?];
   /** Draw the loading state (the radar's own silhouette, breathing) instead of the chart. */
   loading?: boolean;
-  /** Hover a spoke to see a crosshair, a dot on each series and a card with the values (and the gap between two series). Default true. */
+  /**
+   * `rich`: the livelier look. Shapes get a soft gradient fill, a crisp edge and a glow, grow out of the centre on mount
+   * and morph when the data changes, and hovering a spoke draws a crosshair, a dot on each series and a card with the
+   * values and the gap between two series. `default` is the Figma look.
+   */
+  appearance?: ChartAppearance;
+  /** appearance="rich" only: the spoke crosshair and its card. Default true. */
   interactive?: boolean;
   className?: string;
 }
@@ -84,11 +91,17 @@ const NO_GRID = new Set<RadarChartVariant>(['dots-grid-none']);
 // `<Radar>` can't draw -- a measured SVG circle overlay does that job.
 const FILLED_GRID = new Set<RadarChartVariant>(['grid-filled']);
 const isCircleFilled = (v: RadarChartVariant) => v === 'circle-grid-filled';
+// These variants' shape has no stroke around it in Figma -- just the fill.
+const NO_STROKE = new Set<RadarChartVariant>([
+  'default', 'dots', 'dots-grid-none', 'circle-grid', 'circle-grid-no-lines', 'multiple', 'custom-label',
+  'grid-custom', 'grid-filled', 'circle-grid-filled',
+]);
 const RING_LEVELS = [1, 0.8, 0.6, 0.4, 0.2];
 
 export const RadarChart: React.FC<RadarChartProps> = ({
-  data, variant = 'default', size = 'md', seriesLabels = ['Value', 'Value 2'], loading = false, interactive = true, className,
+  data, variant = 'default', size = 'md', seriesLabels = ['Value', 'Value 2'], loading = false, appearance = 'default', interactive = true, className,
 }) => {
+  const rich = appearance === 'rich';
   const reduced = useReducedMotion();
   const uid = React.useId().replace(/[^a-zA-Z0-9]/g, '');
   const containerRef = React.useRef<HTMLDivElement>(null);
@@ -219,7 +232,7 @@ export const RadarChart: React.FC<RadarChartProps> = ({
   const cy = height / 2;
 
   const onMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!interactive || n < 3 || containerWidth === 0) return;
+    if (!rich || !interactive || n < 3 || containerWidth === 0) return;
     const box = e.currentTarget.getBoundingClientRect();
     const x = e.clientX - box.left, y = e.clientY - box.top;
     const dx = x - cx, dy = y - cy;
@@ -245,7 +258,7 @@ export const RadarChart: React.FC<RadarChartProps> = ({
   return (
     <div
       ref={containerRef}
-      className={[styles.chart, className ?? ''].filter(Boolean).join(' ')}
+      className={[styles.chart, rich ? 'sk-chart-rich' : '', className ?? ''].filter(Boolean).join(' ')}
       style={{ ['--radar-1' as string]: chart2, ['--radar-2' as string]: chart1 }}
       onMouseMove={onMove}
       onMouseLeave={() => setHover(null)}
@@ -291,7 +304,8 @@ export const RadarChart: React.FC<RadarChartProps> = ({
               rings, no radial spokes. tickCount=2 on a [0, max] domain
               collapses PolarGrid's auto-generated rings down to just the
               zero-radius point and the outer one. */}
-          <PolarRadiusAxis tick={false} axisLine={false} domain={[0, niceMax]} tickCount={isMinimalGrid ? 2 : undefined} />
+          <PolarRadiusAxis tick={false} axisLine={false} domain={rich ? [0, niceMax] : undefined} tickCount={isMinimalGrid ? 2 : undefined} />
+          {!rich && <Tooltip content={<ChartTooltip />} wrapperStyle={{ zIndex: 50 }} />}
           <defs>
             {/* Each shape fades from a faint core to a stronger rim, so the grid shows through its middle. */}
             <radialGradient id={`${uid}a`} cx="50%" cy="50%" r="60%">
@@ -325,15 +339,17 @@ export const RadarChart: React.FC<RadarChartProps> = ({
           <Radar
             name={isMultiple ? (seriesLabels[0] ?? 'Value') : undefined}
             dataKey="value"
-            className={styles.shape1}
-            stroke={chart2}
-            fill={showFill ? fillFor('a') : 'none'}
-            fillOpacity={1}
-            strokeWidth={1.75}
+            className={rich ? styles.shape1 : undefined}
+            // default (Figma): most variants are fill only, "default" fully opaque, the rest translucent so a second
+            // series or the grid shows through. rich: a gradient fill under a crisp edge.
+            stroke={rich ? chart2 : NO_STROKE.has(variant) ? 'none' : chart2}
+            fill={!showFill ? 'none' : rich ? fillFor('a') : chart2}
+            fillOpacity={rich ? 1 : showFill ? (isMinimalGrid ? 1 : showSecondSeries ? 0.45 : 0.5) : 0}
+            strokeWidth={rich ? 1.75 : NO_STROKE.has(variant) ? 0 : 2}
             // Recharts' dot markers default to the parent Radar's own stroke color; they get their own explicit fill.
             dot={showDots ? { r: 4, fill: chart2, stroke: 'none' } : false}
-            // the shape grows out of the centre on mount and morphs when the data changes
-            isAnimationActive={!reduced}
+            // rich: the shape grows out of the centre on mount and morphs when the data changes
+            isAnimationActive={rich && !reduced}
             animationDuration={760}
             animationEasing="ease-out"
           />
@@ -341,13 +357,13 @@ export const RadarChart: React.FC<RadarChartProps> = ({
             <Radar
               name={isMultiple ? (seriesLabels[1] ?? 'Value 2') : undefined}
               dataKey="value2"
-              className={styles.shape2}
-              stroke={chart1}
-              fill={isLinesOnly ? 'none' : fillFor('b')}
-              fillOpacity={1}
-              strokeWidth={1.75}
+              className={rich ? styles.shape2 : undefined}
+              stroke={rich || isLinesOnly ? chart1 : 'none'}
+              fill={isLinesOnly ? 'none' : rich ? fillFor('b') : chart1}
+              fillOpacity={isLinesOnly ? 0 : rich ? 1 : 0.8}
+              strokeWidth={rich ? 1.75 : isLinesOnly ? 2 : 0}
               dot={showDots ? { r: 4, fill: chart1, stroke: 'none' } : false}
-              isAnimationActive={!reduced}
+              isAnimationActive={rich && !reduced}
               animationDuration={760}
               animationBegin={90}
               animationEasing="ease-out"
