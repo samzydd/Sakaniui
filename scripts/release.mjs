@@ -96,6 +96,9 @@ if (PUBLISH) {
   if (who.ok) check(true, `logged in to npm as ${who.out}`); else warn('not logged in to npm', 'Run `npm login` before --publish; the dry run does not need it.');
 }
 
+// a real publish needs a login and a clean start: say so now, not after a minute-long build
+if (PUBLISH && failures.length) { console.log(c.red(`\n${failures.length} check(s) failed. Fix them and run again.\n`)); process.exit(1); }
+
 // 5. build, with the manifest verified; then what would go in each tarball
 if (flag('--skip-build')) warn('build skipped (--skip-build): publishing whatever dist/ holds');
 else {
