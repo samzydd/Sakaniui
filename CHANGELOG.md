@@ -15,7 +15,7 @@ All notable changes to `@sakaniui/react` are documented here.
     areas draw in, the radar grows out of the centre (and morphs when the data changes), pies, donuts and radials turn
     into place, heatmap cells arrive as a wave, the funnel wipes in. Hovering never replays them. Off for
     `prefers-reduced-motion`.
-  - Hover: the hovered bar, slice or cell lifts with a soft shadow; line and area points get a halo; the cursor line is
+  - Hover: the hovered bar, slice or cell lifts with a soft shadow (the other bars no longer dim or flicker as the pointer crosses between bars); line and area points get a halo; the cursor line is
     dashed; bars get a faint column behind them. Lines, area edges and radar shapes glow faintly in their own colour.
   - A frosted tooltip card with a hairline edge.
   - `RadarChart`: hover a spoke for a crosshair, a dot on each series and a card with the values and the gap between two

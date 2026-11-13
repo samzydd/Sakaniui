@@ -126,8 +126,10 @@ export const BarChart: React.FC<BarChartProps> = ({
     if (variant === 'negative' && data[i].value < 0) return chartNegative;
     return chartDefault;
   };
-  const singleSeriesOpacity = (i: number) =>
-    hoverIndex !== null && i !== hoverIndex ? 0.45 : 1;
+  // default (Figma): every OTHER bar dims to 45%. rich: the other bars never change at all -- the hovered bar lifts
+  // and the tooltip names it, and nothing around it flickers as the pointer crosses from bar to bar.
+  const dims = (i: number) => !rich && hoverIndex !== null && i !== hoverIndex;
+  const singleSeriesOpacity = (i: number) => (dims(i) ? 0.45 : 1);
 
   // Figma's hover state adds a small ring-stroked dot at the tip of the
   // hovered bar (the same marker AreaChart/LineChart use at their active
@@ -245,7 +247,7 @@ export const BarChart: React.FC<BarChartProps> = ({
                 onMouseLeave={handleBarLeave}
               >
                 {data.map((_, i) => (
-                  <Cell key={i} fill={chartDefault} fillOpacity={hoverIndex !== null && i !== hoverIndex ? 0.45 : 1} className={rich && hoverIndex === i ? styles.hot : undefined} />
+                  <Cell key={i} fill={chartDefault} fillOpacity={dims(i) ? 0.45 : 1} className={rich && hoverIndex === i ? styles.hot : undefined} />
                 ))}
               </Bar>
               {hasSecondSeries && (
@@ -261,7 +263,7 @@ export const BarChart: React.FC<BarChartProps> = ({
                   onMouseLeave={handleBarLeave}
                 >
                   {data.map((_, i) => (
-                    <Cell key={i} fill={chartSecondary} fillOpacity={hoverIndex !== null && i !== hoverIndex ? 0.45 : 1} className={rich && hoverIndex === i ? styles.hot : undefined} />
+                    <Cell key={i} fill={chartSecondary} fillOpacity={dims(i) ? 0.45 : 1} className={rich && hoverIndex === i ? styles.hot : undefined} />
                   ))}
                 </Bar>
               )}
