@@ -82,7 +82,8 @@
     "preview": "vite preview",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
-    "chromatic": "npx chromatic"
+    "chromatic": "npx chromatic",
+    "release": "node scripts/release.mjs"
   },
   "peerDependencies": {
     "react": "^19.0.0",

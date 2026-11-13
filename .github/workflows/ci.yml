@@ -1,0 +1,25 @@
+name: CI
+
+# Every PR and every push to main: types, lint, and the library build with its manifest verification
+# (the same checks `npm run release` runs before publishing, so a release does not find a problem for the first time).
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # the manifest reads release history from git
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      # `prepare` runs build:lib (build + manifest verification) as part of the install
+      - run: npm ci
+      - run: npx tsc -p tsconfig.app.json --noEmit
+      - run: npm run lint
