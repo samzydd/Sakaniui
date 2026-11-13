@@ -251,7 +251,12 @@ lists its other names under `aliases` in `manifest.json`, and `search_components
   `get_component("Table")` for code that does). **StatCard** — one headline metric with trend. **ListItem** — a
   row in a list. **Charts** — pick by question: trend over time → Line/Area; compare categories → Bar;
   part of whole → Pie/Donut (few slices only); progress to a target → Radial; compare several measures →
-  Radar; drop-off → Funnel; intensity across two dimensions → Heatmap.
+  Radar; drop-off → Funnel; intensity across two dimensions → Heatmap. Every chart takes `loading` (pass it
+  while the data is on its way: the chart draws its own silhouette and keeps its height, so nothing below
+  moves) and `appearance="rich"` (an entrance when it appears, a soft lift and glow on hover, a frosted
+  tooltip; the radar gets a spoke crosshair, the funnel a stat header, drop-off chips and a stream of dots).
+  `appearance` defaults to the Figma look: reach for `rich` on a marketing or dashboard surface, not in a
+  dense table cell.
 - **Map / MapMarker / MapPopup / MapClusterLayer** — an interactive tile map with no map library. Put `MapMarker`
   (`pin`, `dot`, `cluster`) and `MapPopup` children inside `Map`, placed by `[latitude, longitude]` (latitude
   first). Give every marker a `label`; a marker with `onClick` is a button and `selected` is yours to set. The

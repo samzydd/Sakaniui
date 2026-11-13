@@ -2,7 +2,7 @@
 
 All notable changes to `@sakaniui/react` are documented here.
 
-## Unreleased
+## 0.17.0
 
 ### Charts: loading states, and a richer look you opt into
 
