@@ -16,6 +16,10 @@ A change is not done when the code is merged. For anything a visitor or a design
 | **AGENTS.md** | If an AI assistant should now choose or write something differently, say so here (it ships in the MCP server). |
 | **Docs site** (sakani-docs) | The component's page shows it (props table row, a live preview), **and every other place the site shows that component** (the homepage wall and its cards, dashboard showcases, other pages' examples). Search for the component name across `src/`: the page you changed is rarely the only one. |
 
+If you changed how a block or component sizes itself, open every docs page that previews it at desktop width **against the
+local package** before you merge: the docs scale blocks inside a shrink-to-fit wrapper, which is where a
+percentage-width block collapses (0.16.0 shipped that way; 0.17.1 fixed it).
+
 Do the docs work on a branch in sakani-docs and build it against the local package (`npm pack` here, then
 `npm i --no-save <tarball>` there). **Do not push it to docs `main` yet**: the docs site installs `@sakaniui/react` from
 npm, and a build that uses a prop npm does not have yet fails the production deploy.

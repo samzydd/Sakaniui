@@ -2,6 +2,17 @@
 
 All notable changes to `@sakaniui/react` are documented here.
 
+## 0.17.1
+
+- **Fixed: the marketing and e-commerce blocks collapsed inside a shrink-to-fit parent.** In 0.16.0 the blocks that follow their
+  container (`HeroBlock`, `FeatureGridBlock`, `LogoCloudBlock`, `CtaBannerBlock`, `PricingTableBlock`, `TestimonialBlock`,
+  `FaqBlock`, `BlogListingBlock`, `CareersBlock`, `TeamSectionBlock`, `ProductDetailBlock`, `ProductGridBlock`,
+  `CheckoutFlowBlock`) had their width changed from the Figma frame width to `100%` up to it. That is right in a page, but where the
+  parent sizes itself to its content (a docs preview that scales a block to fit, a flex child, a centred story) a percentage
+  width with container sizing resolves to nothing: the hero became a one-word-wide column and the section previews were
+  mis-aligned and unlike Figma. The root is the Figma width again (`width: <frame width>`), capped by its container
+  (`max-width: 100%`), so it keeps its design size where it can and still narrows on a phone.
+
 ## 0.17.0
 
 ### Charts: loading states, and a richer look you opt into

@@ -2,8 +2,8 @@
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  width: 100%;
-  max-width: 1263px;
+  width: 1263px;   /* the Figma width: a definite size even where the parent shrinks to fit (a docs preview, a flex child) */
+  max-width: 100%;
   container: ctabanner / inline-size;
   box-sizing: border-box;
   padding: clamp(var(--space-16), 4vw, var(--space-48));   /* 48px on a desktop, 16px at the sides on a phone */
