@@ -33,7 +33,7 @@ NOT ported: "Label" / "custom label" (value-annotation variants) and "Mixed"
 gauge-tick variant.
 
 Colors come from --color-chart-1..5 so they re-theme in dark mode automatically.` } } },
-  argTypes: {
+  argTypes: { appearance: { control: 'inline-radio', options: ['default', 'rich'] }, loading: { control: 'boolean' },
     variant: { control: 'select', options: ['default', 'active', 'multiple', 'stacked', 'negative', 'horizontal'] },
     size: { control: 'select', options: ['sm', 'md', 'lg', 'xl'] },
   },
@@ -58,3 +58,6 @@ export const Large: Story = { args: { size: 'lg' } };
 export const DarkMode: Story = {
   decorators: [(S) => <div className="dark" style={{ width: 560, padding: 24, background: 'var(--color-bg-canvas)' }}><S /></div>],
 };
+export const Loading: Story = { args: { loading: true } };
+export const Rich: Story = { args: { appearance: 'rich' } };
+export const RichLoading: Story = { args: { appearance: 'rich', loading: true } };

@@ -15,9 +15,12 @@
 
 import React from 'react';
 import { useChartTokens } from '../../lib/useChartTokens';
+import { ChartSkeleton } from '../../lib/ChartLoading';
+import { useChartEntrance } from '../../lib/useChartEntrance';
 import styles from './HeatmapChart.module.css';
 
 export type ChartSize = 'sm' | 'md' | 'lg' | 'xl';
+export type ChartAppearance = 'default' | 'rich';
 
 export interface HeatmapChartProps {
   /** Row-major matrix of values; every row must be the same length. */
@@ -27,6 +30,10 @@ export interface HeatmapChartProps {
   /** Legend label for the tooltip's value row (Figma: "Revenue"). */
   valueLabel?: string;
   size?: ChartSize;
+  /** Draw the loading state (the chart's own silhouette, breathing) instead of the chart. */
+  loading?: boolean;
+  /** `rich`: the livelier look (the cells arrive as a wave on mount, the hovered one lifts). `default` is the Figma look. */
+  appearance?: ChartAppearance;
   className?: string;
 }
 
@@ -38,8 +45,10 @@ const DIM_OPACITY = 0.45;
 interface HoverState { row: number; col: number; value: number; left: number; top: number; }
 
 export const HeatmapChart: React.FC<HeatmapChartProps> = ({
-  data, rowLabels, colLabels, valueLabel = 'Value', size = 'md', className,
+  data, rowLabels, colLabels, valueLabel = 'Value', size = 'md', loading = false, appearance = 'default', className,
 }) => {
+  const rich = appearance === 'rich';
+  const entering = useChartEntrance(rich && !loading);
   const chartRef = React.useRef<HTMLDivElement>(null);
   const cssVar = useChartTokens(chartRef);
   const gridRef = React.useRef<HTMLDivElement>(null);
@@ -64,8 +73,13 @@ export const HeatmapChart: React.FC<HeatmapChartProps> = ({
     });
   };
 
+  if (loading) {
+    const rows = Math.max(3, data.length || 5), cellH = { sm: 14, md: 20, lg: 28, xl: 36 }[size];
+    return <ChartSkeleton kind="heatmap" rows={rows} cols={Math.max(4, cols || 7)} height={rows * (cellH + 6)} className={className} label="Loading heatmap" />;
+  }
+
   return (
-    <div ref={chartRef} className={[styles.chart, styles[`chart--${size}`], className ?? ''].filter(Boolean).join(' ')}>
+    <div ref={chartRef} className={[styles.chart, styles[`chart--${size}`], rich ? styles.rich : '', className ?? ''].filter(Boolean).join(' ')} data-entering={entering || undefined}>
       <div ref={gridRef} className={styles.grid} style={{ gridTemplateColumns: `auto repeat(${cols}, minmax(0, 1fr))` }}>
         {data.map((row, r) => (
           <React.Fragment key={r}>
@@ -77,8 +91,9 @@ export const HeatmapChart: React.FC<HeatmapChartProps> = ({
               return (
                 <div
                   key={c}
-                  className={styles.cell}
-                  style={{ background: chart1, opacity: dimmed ? DIM_OPACITY : opacity }}
+                  className={[styles.cell, rich && isHovered ? styles['cell--hot'] : ''].filter(Boolean).join(' ')}
+                  // `--d` staggers the entrance as a wave from the top-left corner
+                  style={{ background: chart1, opacity: dimmed ? DIM_OPACITY : opacity, ['--d' as string]: r + c }}
                   onMouseEnter={handleEnter(r, c, value)}
                   onMouseLeave={() => setHover(null)}
                 />

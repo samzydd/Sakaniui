@@ -19,3 +19,16 @@
   inset: 0;
   pointer-events: none;
 }
+
+/* The shapes glow in their own colour: a soft halo that does not change their edges. */
+.shape1 :global(.recharts-radar-polygon) { filter: drop-shadow(0 0 7px color-mix(in srgb, var(--radar-1) 55%, transparent)); }
+.shape2 :global(.recharts-radar-polygon) { filter: drop-shadow(0 0 7px color-mix(in srgb, var(--radar-2) 55%, transparent)); }
+.shape1 :global(.recharts-radar-polygon), .shape2 :global(.recharts-radar-polygon) { stroke-linejoin: round; }
+
+/* the hover layer: a spoke from the centre to the axis under the pointer, a dot per series on it */
+.overlay { position: absolute; inset: 0; pointer-events: none; overflow: visible; z-index: 10; }
+.crosshair { stroke-linecap: round; animation: spokeIn 180ms var(--ease-out) both; }
+.hit { animation: hitIn 200ms var(--ease-out) both; }
+@keyframes spokeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes hitIn { from { opacity: 0; transform: scale(0.4); } to { opacity: 1; transform: scale(1); } }
+@media (prefers-reduced-motion: reduce) { .crosshair, .hit { animation: none; } }

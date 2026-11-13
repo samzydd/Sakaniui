@@ -54,7 +54,7 @@ cx/cy/outerRadius="70%" math (confirmed against its PolarUtils source)
 via a ResizeObserver, with PolarGrid left enabled on top of it for the
 spokes/ring outlines. Both give the "denser toward center" look for
 free, via ordinary alpha compositing of same-color layers.` } } },
-  argTypes: {
+  argTypes: { appearance: { control: 'inline-radio', options: ['default', 'rich'] }, loading: { control: 'boolean' },
     variant: {
       control: 'select',
       options: [
@@ -88,3 +88,6 @@ export const Large: Story = { args: { size: 'lg' } };
 export const DarkMode: Story = {
   decorators: [(S) => <div className="dark" style={{ width: 420, padding: 24, background: 'var(--color-bg-canvas)' }}><S /></div>],
 };
+export const Loading: Story = { args: { loading: true } };
+export const Rich: Story = { args: { appearance: 'rich' } };
+export const RichLoading: Story = { args: { appearance: 'rich', loading: true } };

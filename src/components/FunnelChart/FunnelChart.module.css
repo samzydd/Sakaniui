@@ -73,3 +73,57 @@
 }
 .tooltip__label { color: var(--color-fg-subtle); }
 .tooltip__value { color: var(--color-fg-default); margin-left: auto; }
+
+/* ======== appearance="rich" ======== */
+
+/* ---- header: each stage's value and share of the start ---- */
+.stats { display: grid; gap: var(--space-8); padding: 0 var(--space-4) var(--space-16); }
+.stat { display: flex; flex-direction: column; gap: 2px; min-width: 0; transition: opacity var(--transition-hover); }
+.stat--dim { opacity: 0.45; }
+.stat__label { font-size: 12px; line-height: 16px; color: var(--color-fg-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.stat__value { font-size: 20px; line-height: 26px; font-weight: 600; letter-spacing: -0.01em; color: var(--color-fg-default); font-variant-numeric: tabular-nums; }
+.stat__sub { font-size: 12px; line-height: 16px; color: var(--color-fg-subtle); white-space: nowrap; }
+
+/* ---- the band ---- */
+.plot {
+  position: relative;
+  /* wipes in left to right on mount; the generous insets keep the glow and the card from being cut */
+  animation: reveal 1000ms var(--ease-out) both;
+}
+.plot .svg { filter: drop-shadow(0 10px 22px color-mix(in srgb, var(--funnel) 26%, transparent)); }
+
+.fill { transition: fill-opacity var(--transition-hover); }
+.sheen { pointer-events: none; }
+.dots circle { filter: drop-shadow(0 0 3px rgba(255, 255, 255, 0.7)); }
+
+/* ---- drop-off chips at each step ---- */
+.drops { position: relative; height: 28px; margin-top: var(--space-8); }
+.drop {
+  position: absolute;
+  top: 0;
+  transform: translateX(-50%);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-4);
+  padding: 2px var(--space-8);
+  border-radius: var(--radius-full);
+  background: var(--color-bg-subtle);
+  color: var(--color-fg-muted);
+  font-size: 12px;
+  line-height: 18px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  animation: chipIn 520ms var(--ease-out) 620ms both;
+}
+.drop__arrow { color: var(--color-fg-subtle); }
+
+@keyframes reveal {
+  from { clip-path: inset(-30% 100% -30% -4%); }
+  to { clip-path: inset(-30% -6% -30% -4%); }
+}
+@keyframes chipIn { from { opacity: 0; transform: translate(-50%, -4px); } to { opacity: 1; transform: translate(-50%, 0); } }
+
+@media (prefers-reduced-motion: reduce) {
+  .plot, .drop { animation: none; }
+}

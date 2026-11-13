@@ -40,3 +40,28 @@
 
 .label { color: var(--color-fg-subtle); }
 .value { color: var(--color-fg-default); font-weight: 500; margin-left: auto; }
+
+/* ---- appearance="rich": the chart's root carries `sk-chart-rich`, and its card turns frosted: the surface colour with
+   a hairline edge, so it reads over a grid or a filled shape without hiding what is under it. ---- */
+:global(.sk-chart-rich) .tooltip,
+.tooltip--placed {
+  min-width: 120px;
+  padding: var(--space-10) var(--space-12);
+  border-radius: var(--radius-lg);
+  background: color-mix(in srgb, var(--color-bg-canvas) 86%, transparent);
+  -webkit-backdrop-filter: blur(12px) saturate(1.2);
+  backdrop-filter: blur(12px) saturate(1.2);
+  border: 1px solid color-mix(in srgb, var(--color-border-default) 70%, transparent);
+  animation: tipIn 140ms var(--ease-out) both;
+}
+:global(.sk-chart-rich) .title, .tooltip--placed .title { font-size: 12px; font-weight: 500; letter-spacing: 0.01em; }
+:global(.sk-chart-rich) .dot, .tooltip--placed .dot { box-shadow: 0 0 0 3px color-mix(in srgb, currentColor 18%, transparent); }
+:global(.sk-chart-rich) .value, .tooltip--placed .value { font-weight: 600; padding-left: var(--space-12); font-variant-numeric: tabular-nums; }
+/* a card that sits where it is told (the rich radar and funnel place their own) */
+.tooltip--placed { transform: none; }
+.delta { font-size: 12px; font-weight: 500; color: var(--color-fg-subtle); font-variant-numeric: tabular-nums; }
+.delta--up { color: var(--color-success-fg); }
+.delta--down { color: var(--color-danger-fg); }
+
+@keyframes tipIn { from { opacity: 0; } to { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { :global(.sk-chart-rich) .tooltip, .tooltip--placed { animation: none; } }

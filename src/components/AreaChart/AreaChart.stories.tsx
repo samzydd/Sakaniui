@@ -22,7 +22,7 @@ SVG port.
 
 Hover shows Recharts' own tooltip + cursor line, matching Figma's
 "Indicator line" + "Chart Tooltip" atoms.` } } },
-  argTypes: {
+  argTypes: { appearance: { control: 'inline-radio', options: ['default', 'rich'] }, loading: { control: 'boolean' },
     variant: { control: 'select', options: ['default', 'stacked', 'step', 'linear'] },
     size: { control: 'select', options: ['sm', 'md', 'lg', 'xl'] },
   },
@@ -44,3 +44,6 @@ export const Large: Story = { args: { size: 'lg' } };
 export const DarkMode: Story = {
   decorators: [(S) => <div className="dark" style={{ width: 480, padding: 24, background: 'var(--color-bg-canvas)' }}><S /></div>],
 };
+export const Loading: Story = { args: { loading: true } };
+export const Rich: Story = { args: { appearance: 'rich' } };
+export const RichLoading: Story = { args: { appearance: 'rich', loading: true } };

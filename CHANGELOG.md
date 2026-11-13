@@ -2,6 +2,30 @@
 
 All notable changes to `@sakaniui/react` are documented here.
 
+## Unreleased
+
+### Charts: loading states, and a richer look you opt into
+
+- **Every chart takes `loading`.** It draws the chart's own silhouette instead (a radar web, a funnel band, bars, a line,
+  a ring, a heatmap grid) in the surface's subtle fill, breathing in a soft stagger, with a light gliding through the
+  funnel and sweeping round the radar and the rings. It keeps the chart's height, so nothing below moves when the data
+  arrives, and it is announced as a busy status.
+- **`appearance="rich"` on every chart** (the default stays the Figma look, unchanged):
+  - Entrances, once, when the chart appears or its loading ends: bars grow out of their baseline in a stagger, lines and
+    areas draw in, the radar grows out of the centre (and morphs when the data changes), pies, donuts and radials turn
+    into place, heatmap cells arrive as a wave, the funnel wipes in. Hovering never replays them. Off for
+    `prefers-reduced-motion`.
+  - Hover: the hovered bar, slice or cell lifts with a soft shadow (the other bars no longer dim or flicker as the pointer crosses between bars); line and area points get a halo; the cursor line is
+    dashed; bars get a faint column behind them. Lines, area edges and radar shapes glow faintly in their own colour.
+  - A frosted tooltip card with a hairline edge.
+  - `RadarChart`: hover a spoke for a crosshair, a dot on each series and a card with the values and the gap between two
+    series ("Berlin 46 −20"); `interactive={false}` turns it off.
+  - `FunnelChart`: a header with each stage's value and share of the start, a drop-off chip at every step, and `flow`:
+    dots streaming through the band, thinning where the funnel does (the share that carries on past a step is the
+    data's), running only while on screen. `formatValue` sets how values are written (compact by default).
+- `ChartAppearance` is exported. `AreaChart`'s gradients are per chart, so two area charts on one page no longer share
+  (and repaint) each other's fills.
+
 ## 0.16.0
 
 - **`WorkingIndicator` (and `ChainOfThought`'s working line) shows the `ChatOrb` instead of the sparkle.** While the agent works, the

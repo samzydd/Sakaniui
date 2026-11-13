@@ -63,7 +63,7 @@ export * from './components/Avatar';
 export * from './components/AvatarGroup';
 export * from './components/Badge';
 export { BarChart } from './components/BarChart';
-export type { BarChartProps, BarChartDatum, BarChartVariant, ChartSize } from './components/BarChart';
+export type { BarChartProps, BarChartDatum, BarChartVariant, ChartSize, ChartAppearance } from './components/BarChart';
 export * from './components/BoardCard';
 export * from './components/BoardColumn';
 export * from './components/Breadcrumb';

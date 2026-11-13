@@ -11,9 +11,12 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 import { useChartTokens } from '../../lib/useChartTokens';
 import { CHART_PALETTE_FALLBACK } from '../../lib/chartPalette';
 import { ChartTooltip } from '../../lib/ChartTooltip';
+import { ChartSkeleton } from '../../lib/ChartLoading';
+import { useChartEntrance } from '../../lib/useChartEntrance';
 import styles from './DonutChart.module.css';
 
 export type ChartSize = 'sm' | 'md' | 'lg' | 'xl';
+export type ChartAppearance = 'default' | 'rich';
 
 export interface DonutDatum { label: string; value: number; }
 
@@ -26,6 +29,10 @@ export interface DonutChartProps {
   centerCaption?: string;
   /** Pixel height override, takes precedence over `size`'s preset. */
   height?: number;
+  /** Draw the loading state (the chart's own silhouette, breathing) instead of the chart. */
+  loading?: boolean;
+  /** `rich`: the livelier look (turns into place on mount, the hovered slice lifts, a frosted card). `default` is the Figma look. */
+  appearance?: ChartAppearance;
   className?: string;
 }
 
@@ -37,8 +44,10 @@ const dims: Record<ChartSize, { h: number; inner: number; outer: number }> = {
 };
 
 export const DonutChart: React.FC<DonutChartProps> = ({
-  data, size = 'md', centerValue, centerCaption, height, className,
+  data, size = 'md', centerValue, centerCaption, height, loading = false, appearance = 'default', className,
 }) => {
+  const rich = appearance === 'rich';
+  const entering = useChartEntrance(rich && !loading);
   const [activeIndex, setActiveIndex] = React.useState<number | null>(null);
   // Recharts anchors a Pie slice's tooltip at polarToCartesian(cx, cy,
   // middleRadius, midAngle) -- the sector's own geometric middle, not the
@@ -61,10 +70,13 @@ export const DonutChart: React.FC<DonutChartProps> = ({
   // per subsequent adjustment requests.
   const cornerRadius = (d.outer - d.inner) / 2 - 7;
 
+  if (loading) return <ChartSkeleton kind="ring" height={d.h} className={className} label="Loading donut chart" />;
+
   return (
     <div
       ref={chartRef}
-      className={[styles.chart, className ?? ''].filter(Boolean).join(' ')}
+      className={[styles.chart, rich ? `${styles.rich} sk-chart-rich` : '', className ?? ''].filter(Boolean).join(' ')}
+      data-entering={entering || undefined}
       style={{ height: d.h }}
       onMouseMove={handleMouseMove}
     >
@@ -98,6 +110,7 @@ export const DonutChart: React.FC<DonutChartProps> = ({
                 key={i}
                 fill={palette[i % palette.length]}
                 fillOpacity={activeIndex !== null && i !== activeIndex ? 0.45 : 1}
+                className={rich && activeIndex === i ? styles.hot : undefined}
               />
             ))}
           </Pie>

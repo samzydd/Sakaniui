@@ -26,9 +26,12 @@ import {
 import { useChartTokens } from '../../lib/useChartTokens';
 import { CHART_PALETTE_FALLBACK } from '../../lib/chartPalette';
 import { ChartTooltip } from '../../lib/ChartTooltip';
+import { ChartSkeleton } from '../../lib/ChartLoading';
+import { useReducedMotion } from '../../lib/useReducedMotion';
 import styles from './LineChart.module.css';
 
 export type ChartSize = 'sm' | 'md' | 'lg' | 'xl';
+export type ChartAppearance = 'default' | 'rich';
 export type LineChartVariant =
   | 'default' | 'linear' | 'step' | 'multiple' | 'dots' | 'custom-dots' | 'dots-colors' | 'label' | 'custom-label';
 
@@ -50,6 +53,10 @@ export interface LineChartProps {
    * on an ancestor. */
   height?: number;
   showLegend?: boolean;
+  /** Draw the loading state (the chart's own silhouette, breathing) instead of the chart. */
+  loading?: boolean;
+  /** `rich`: the livelier look (an entrance on mount, a soft glow and lift on hover, a frosted card). `default` is the Figma look. */
+  appearance?: ChartAppearance;
   className?: string;
 }
 
@@ -58,8 +65,10 @@ const heights: Record<ChartSize, number> = { sm: 180, md: 240, lg: 320, xl: 420 
 const ALWAYS_DOTS = new Set<LineChartVariant>(['dots', 'custom-dots', 'dots-colors', 'label', 'custom-label']);
 
 export const LineChart: React.FC<LineChartProps> = ({
-  data, series, xKey = 'label', variant = 'default', labelKey, size = 'md', height, showLegend, className,
+  data, series, xKey = 'label', variant = 'default', labelKey, size = 'md', height, showLegend, loading = false, appearance = 'default', className,
 }) => {
+  const reduced = useReducedMotion();
+  const rich = appearance === 'rich';
   const chartRef = React.useRef<HTMLDivElement>(null);
   const cssVar = useChartTokens(chartRef);
   const palette = [1, 2, 3, 4, 5].map((n) => cssVar(`--color-chart-${n}`) ?? CHART_PALETTE_FALLBACK[n - 1]);
@@ -115,14 +124,30 @@ export const LineChart: React.FC<LineChartProps> = ({
     );
   };
 
+  // the active point: a solid dot in a soft halo of its own colour
+  const haloDot = (color: string) => (p: any) => (
+    <g key={`halo-${p.index}`}>
+      <circle cx={p.cx} cy={p.cy} r={11} fill={color} fillOpacity={0.16} />
+      <circle cx={p.cx} cy={p.cy} r={4.5} fill={color} stroke={canvasBg} strokeWidth={2} />
+    </g>
+  );
+
+  if (loading) return <ChartSkeleton kind="line" height={height ?? heights[size]} className={className} label="Loading line chart" />;
+
   return (
-    <div ref={chartRef} className={[styles.chart, className ?? ''].filter(Boolean).join(' ')}>
+    <div
+      ref={chartRef}
+      className={[styles.chart, rich ? `${styles.rich} sk-chart-rich` : '', className ?? ''].filter(Boolean).join(' ')}
+      style={Object.fromEntries(seriesPalette.map((c, k) => [`--s${k}`, c])) as React.CSSProperties}
+    >
       <ResponsiveContainer width="100%" height={height ?? heights[size]}>
         <ReLineChart data={data} margin={{ top: 8, right: 8, bottom: 8, left: 12 }}>
           <CartesianGrid strokeDasharray="3 3" stroke={grid} vertical={false} />
           <XAxis dataKey={xKey} stroke={axis} fontSize={12} tickLine={false} axisLine={false} interval={0} />
           <Tooltip
-            cursor={{ stroke: cssVar('--color-border-default') ?? '#dbdad7', strokeWidth: 1 }}
+            cursor={rich
+              ? { stroke: cssVar('--color-border-strong') ?? '#a8a29b', strokeWidth: 1, strokeDasharray: '4 4' }
+              : { stroke: cssVar('--color-border-default') ?? '#dbdad7', strokeWidth: 1 }}
             content={<ChartTooltip />}
             wrapperStyle={{ zIndex: 50 }}
           />
@@ -141,7 +166,10 @@ export const LineChart: React.FC<LineChartProps> = ({
                 stroke={color}
                 strokeWidth={2}
                 dot={dot}
-                activeDot={{ r: 4, fill: color, stroke: canvasBg, strokeWidth: 1.5 }}
+                activeDot={rich ? haloDot(color) : { r: 4, fill: color, stroke: canvasBg, strokeWidth: 1.5 }}
+                className={rich ? styles[`s${i % 5}`] : undefined}
+                // rich: draws itself in from the left, a little quicker and softer than Recharts' default
+                {...(rich ? { isAnimationActive: !reduced, animationDuration: 1100, animationEasing: 'ease-out' as const } : {})}
                 label={variant === 'label' || variant === 'custom-label' ? renderPointLabel : undefined}
               />
             );

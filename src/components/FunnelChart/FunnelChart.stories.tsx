@@ -14,17 +14,17 @@ const meta = {
   title: 'Charts/Funnel Chart',
   component: FunnelChart,
   tags: ['autodocs'],
-  parameters: { docs: { description: { component: `Matches Figma's new "Other charts" set ("Funnel chart" / "Funnel chart
-hover") exactly: stages run left to right (not top to bottom), narrowing
-via smooth curved transitions rather than straight diagonal edges.
-Recharts' native \`<Funnel>\` only renders a vertical, straight-edged
-funnel, so this is a hand-rolled SVG -- the same "no native fit" call as
-HeatmapChart, flagged the same way.
+  parameters: { docs: { description: { component: `Stages run left to right, narrowing through smooth curved transitions (Figma's "Funnel chart" /
+"Funnel chart hover"). A hand-rolled SVG: Recharts' native \`<Funnel>\` only draws a vertical, straight-edged funnel.
 
-Each stage is shaded chart/1 at increasing saturation (first stage
-palest, last stage full color). Hover: the hovered stage goes full
-opacity, every other stage dims to 45%, matching Figma's hover state.` } } },
-  argTypes: { size: { control: 'select', options: ['sm', 'md', 'lg', 'xl'] } },
+- A header gives each stage's value and its share of the start; a chip at every step gives the drop-off.
+- \`flow\` streams dots through the band. Each dot is a visitor, and the share that carries on past a step is the share of the
+  data that does, so the stream thins where the funnel does. It runs only while on screen, and not at all for reduced motion.
+- Hover a stage: it goes full strength, the rest dim, and a card gives its count, share of the start and drop-off.
+- The band wipes in on mount. \`loading\` draws the funnel's silhouette with a soft light gliding through it.
+
+Each stage is shaded chart/1 at increasing saturation (first stage palest, last stage full color).` } } },
+  argTypes: { appearance: { control: 'inline-radio', options: ['default', 'rich'] }, loading: { control: 'boolean' }, size: { control: 'select', options: ['sm', 'md', 'lg', 'xl'] }, flow: { control: 'boolean' } },
   args: { data, size: 'md' },
   decorators: [(S) => <div style={{ width: 560 }}><S /></div>],
 } satisfies Meta<typeof FunnelChart>;
@@ -34,6 +34,10 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {};
 export const Large: Story = { args: { size: 'lg' } };
+export const Loading: Story = { args: { loading: true } };
+export const NoFlow: Story = { args: { flow: false } };
 export const DarkMode: Story = {
   decorators: [(S) => <div className="dark" style={{ width: 560, padding: 24, background: 'var(--color-bg-canvas)' }}><S /></div>],
 };
+export const Rich: Story = { args: { appearance: 'rich' } };
+export const RichLoading: Story = { args: { appearance: 'rich', loading: true } };
