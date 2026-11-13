@@ -43,6 +43,7 @@
 
 .imageCentered {
   display: block;
+  box-sizing: border-box;   /* the 1px border sits inside the 1184 x 560 frame, as in Figma */
   width: 100%;
   height: 560px;
   object-fit: cover;
@@ -97,6 +98,7 @@
 
 .imageSplit {
   display: block;
+  box-sizing: border-box;
   width: 560px;
   height: 400px;
   flex-shrink: 0;

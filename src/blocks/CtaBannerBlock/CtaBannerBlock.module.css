@@ -25,7 +25,7 @@
 
 .bannerNeutral {
   background: var(--color-bg-surface);
-  border: var(--border-width-100) solid var(--color-border-default);
+  box-shadow: inset 0 0 0 var(--border-width-100) var(--color-border-default);   /* an inside stroke, as in Figma: it does not add to the 264px frame */
 }
 
 /* accent/default and fg/on-accent are a matched pair that both flip

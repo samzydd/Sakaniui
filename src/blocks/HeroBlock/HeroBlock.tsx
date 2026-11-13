@@ -103,7 +103,7 @@ export const HeroBlock: React.FC<HeroBlockProps> = ({
       <Button variant="primary" size="lg" onClick={primaryAction.onClick}>{primaryAction.label}</Button>
       {secondaryAction && (
         <Button
-          variant="secondary"
+          variant="outline"   // Figma's hero pairs Primary with the Outline button (the CTA banners use Secondary)
           size="lg"
           onClick={secondaryAction.onClick}
           leftIcon={secondaryActionIcon ? <GithubIcon /> : undefined}

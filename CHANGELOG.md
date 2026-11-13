@@ -2,6 +2,17 @@
 
 All notable changes to `@sakaniui/react` are documented here.
 
+## 0.17.2
+
+Marketing blocks now match Figma to the pixel. Each of these was measured against its Figma frame (padding, gaps, sizes, type) and corrected:
+
+- **`Button` size `lg` is 44px tall**, as in Figma (a 10px pad, a 24px line, 10px). It was 42px. Every large button grows 2px.
+- **`Badge` is 20px tall** (12/16 text with 2px above and below). It was 16px.
+- **`HeroBlock`:** the image no longer overflows its frame by 2px (the 1px border sat outside the 100% width: it is 1184 x 560 now, and 560 x 400 in the split layout), the page is 1280 x 976 as in Figma, and the second button is the Outline variant, not Secondary.
+- **`CtaBannerBlock` and `InlineCtaBlock`:** the stroke sits inside the frame, as Figma strokes do, so the banner is 264px and the inline CTA 76px (it was 78); the inline CTA's icon is 40 x 40 (it was 42 x 42).
+- **`LogoCloudBlock`:** the label has no letter-spacing (153px wide in Figma).
+- Checked and already matching: `FeatureGridBlock` (every column count) and `SectionFooterBlock`.
+
 ## 0.17.1
 
 - **Fixed: the marketing and e-commerce blocks collapsed inside a shrink-to-fit parent.** In 0.16.0 the blocks that follow their

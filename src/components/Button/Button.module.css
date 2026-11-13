@@ -254,7 +254,7 @@
  * Maps to Figma: Size=lg (padding 12px 20px, font 16px)
  */
 .button--lg {
-  padding: var(--space-12) var(--space-20);
+  padding: calc(var(--space-12) + 1px) var(--space-20);   /* Figma: 44px tall (10 + a 24px line + 10), border included */
   font-size: 16px;
   gap: var(--space-8);
 }

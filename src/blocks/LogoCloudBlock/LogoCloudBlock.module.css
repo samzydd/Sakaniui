@@ -19,7 +19,7 @@
   font-weight: 500;
   color: var(--color-fg-subtle);
   text-transform: uppercase;
-  letter-spacing: 0.04em;
+  letter-spacing: 0;   /* Figma sets the label with no tracking (153px wide) */
   white-space: nowrap;
 }
 

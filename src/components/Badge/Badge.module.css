@@ -10,7 +10,7 @@
   font-family: var(--font-sans);
   font-weight: 500;
   font-size: 12px;
-  line-height: 1;
+  line-height: 16px;   /* Figma: 12/16 text with 2px above and below = a 20px badge */
   white-space: nowrap;
   padding: var(--space-2) var(--space-8);
   border-radius: var(--radius-full);
