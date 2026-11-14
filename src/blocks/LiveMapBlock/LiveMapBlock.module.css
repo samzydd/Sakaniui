@@ -77,6 +77,7 @@
 /* the card on a city (renderMarkerCard) */
 .card { display: flex; flex-direction: column; gap: 8px; box-sizing: border-box; width: max-content; padding: 10px 12px; white-space: nowrap; background: var(--color-bg-surface); border: 1px solid var(--color-border-subtle); border-radius: 8px; box-shadow: var(--shadow-md); }
 .cardHead { display: flex; flex-direction: column; }
+.cardTitle { display: flex; align-items: center; gap: 4px; }
 .cardName { font-size: 14px; line-height: 20px; font-weight: 500; color: var(--color-fg-default); }
 .cardSub { font-size: 10px; line-height: 14px; font-weight: 400; color: var(--color-fg-muted); }
 .cardStats { display: flex; gap: 16px; }
@@ -134,6 +135,7 @@
 .tone_success { color: var(--color-success-fg); }
 .tone_warning { color: var(--color-warning-fg); }
 .rowMobile { align-items: center; gap: 10px; width: 100%; }
+.rowName { display: flex; align-items: center; gap: 4px; }
 .rowText { display: flex; flex-direction: column; flex: 1 1 0; min-width: 0; }
 .rowText .meta { justify-content: flex-start; }
 

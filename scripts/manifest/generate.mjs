@@ -480,6 +480,7 @@ const ALIASES = {
   AiChatBlock: ['ai chat', 'chatgpt layout', 'ai assistant screen', 'chat with ai', 'ai conversation page', 'copilot chat', 'llm chat ui'],
   AiWelcomeBlock: ['ai welcome', 'ai home', 'ai empty state', 'ask anything screen', 'ai landing screen', 'good afternoon greeting'],
   MapClusterLayer: ['marker clustering', 'cluster markers', 'supercluster', 'many markers', 'point clustering', 'heatmap markers'],
+  Flag: ['country flag', 'flag icon', 'nation flag', 'flag emoji', 'country icon', 'region flag'],
   LiveMapBlock: ['live map', 'payments map', 'live payments globe', 'revenue by city', 'geo dashboard', 'world map dashboard', 'city leaderboard', 'real time map', 'map with ranked list', 'globe dashboard'],
   MapGlobe: ['globe', '3d globe', 'world globe', 'earth', 'dotted globe', 'spinning globe', 'world map', 'dot globe'],
   Menu: ['dropdown', 'dropdown menu', 'context menu', 'actions menu', 'kebab menu'],

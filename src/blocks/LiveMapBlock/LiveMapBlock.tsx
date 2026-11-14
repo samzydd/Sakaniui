@@ -8,7 +8,7 @@
  *   header         title + description, and the metric SegmentedControl (Revenue, Payments, Approval rate)
  *   region row     FilterChips (All regions, Americas, EMEA, APAC) and Reset view
  *   map area       the stage: MapGlobe (markers sized by the metric, ranked, a dashed ring for "watch"),
- *                  the "Right now" insight or the "Showing: <city>" chip, the legend, the zoom buttons, and a card on
+ *                  the "Right now" insight or the "Showing: Tokyo, Japan" chip, the legend, the zoom buttons, and a card on
  *                  the hovered or selected city; below it the playback row (Replay today, Pause, the volume by hour,
  *                  the UTC clock, Live)
  *   cities panel  Tabs (Top cities, Regions) + the ranked list; picking a city turns the panel into that city's detail
@@ -35,6 +35,7 @@ import { Badge } from '../../components/Badge';
 import { Button } from '../../components/Button';
 import { ChatOrb } from '../../components/ChatOrb';
 import { FilterChip } from '../../components/FilterChip';
+import { Flag } from '../../components/Flag';
 import { IconButton } from '../../components/IconButton';
 import { SegmentedControl } from '../../components/SegmentedControl';
 import { Tabs } from '../../components/Tabs';
@@ -83,7 +84,7 @@ export interface LiveMapBlockProps {
   autoRotate?: boolean;
   /** Show the atmosphere glow around the globe. Defaults to true. */
   atmosphere?: boolean;
-  /** "View <city> payments" in the city detail. */
+  /** The primary button in a city's detail ("View Tokyo payments"). */
   onViewCity?: (city: LiveMapCity) => void;
   /** "View all cities" under the list. */
   onViewAll?: () => void;
@@ -269,7 +270,7 @@ export const LiveMapBlock: React.FC<LiveMapBlockProps> = ({
     return (
       <div className={styles.card}>
         <div className={styles.cardHead}>
-          <span className={styles.cardName}>{c.name}</span>
+          <span className={styles.cardTitle}><Flag country={c.country} /><span className={styles.cardName}>{c.name}</span></span>
           <span className={styles.cardSub}>{regionLabel(c.region)} · {localTime(now, c.timeZone)} local</span>
         </div>
         <div className={styles.cardStats}>
@@ -559,6 +560,7 @@ export const LiveMapBlock: React.FC<LiveMapBlockProps> = ({
                         >
                           <span className={cx(styles.rowTop, styles.onlyDesktop)}>
                             <span className={styles.rank}>{rankOf(c.id)}</span>
+                            <Flag country={c.country} />
                             <span className={styles.name}>{c.name}</span>
                             <span className={styles.country}>{c.country}</span>
                             <span className={styles.value}>{metric.format(v)}</span>
@@ -571,7 +573,7 @@ export const LiveMapBlock: React.FC<LiveMapBlockProps> = ({
                           <span className={cx(styles.rowMobile, styles.onlyMobile)}>
                             <span className={cx(styles.rank, styles.rankLg)}>{rankOf(c.id)}</span>
                             <span className={styles.rowText}>
-                              <span className={styles.name}>{c.name}</span>
+                              <span className={styles.rowName}><Flag country={c.country} /><span className={styles.name}>{c.name}</span></span>
                               <span className={cx(styles.meta, styles[`tone_${forecastTone(c.vsForecast)}`])}>{c.country} · {vsForecast(c.vsForecast)}</span>
                             </span>
                             <span className={styles.value}>{metric.format(v)}</span>
@@ -617,6 +619,7 @@ const CityDetail: React.FC<CityDetailProps> = ({ city, rank, totals, metric, reg
       <Button className={styles.back} variant="ghost" size="sm" leftIcon={<IconArrowLeft size={16} />} onClick={onBack}>All cities</Button>
       <div className={styles.cityHeader}>
         <div className={styles.nameRow}>
+          <Flag country={city.country} size={32} />
           <h3 className={styles.cityName}>{city.name}</h3>
           <Badge variant="neutral">{regionLabel}</Badge>
           <Badge variant={watch ? 'warning' : 'success'}>{watch ? 'Watch' : 'Healthy'}</Badge>

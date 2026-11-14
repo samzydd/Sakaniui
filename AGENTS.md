@@ -275,6 +275,9 @@ lists its other names under `aliases` in `manifest.json`, and `search_components
   Change `center` and the globe turns to face the new place; `zoom` scales it; `renderMarkerCard` puts your own card
   on the hovered or selected marker (`cardPlacement="side"` puts it beside the marker). `markerScale={1}` keeps the
   markers at design size on a small globe.
+  **Flag** — a country flag (`country="JP"`, an ISO alpha-2 code; 16px beside text, 32px beside a heading). Not an emoji:
+  it is the Figma flag artwork, so use it instead of a flag emoji. Only the flags the library uses are imported; any other
+  code draws a neutral placeholder. Put the country's name in text beside it.
 - **CommandMenu / CommandMenuTrigger / CommandMenuAnswer** — the ⌘K search and command palette: search pages, people,
   files and actions in one place. Use it instead of building a modal with an `Input` and a list. Pass `groups` of
   `items` and handle `onSelect`; it opens on ⌘K by itself and filters as you type (`filter={false}` for server
