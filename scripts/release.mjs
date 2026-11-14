@@ -85,7 +85,19 @@ if (latestLive && latestLive !== version && !releases[latestLive]) {
 // 3. what is left to publish
 const todo = pkgs.filter((p) => !onRegistry(p.name, version));
 for (const p of pkgs) console.log(`  ${onRegistry(p.name, version) ? c.dim('•') : c.green('→')} ${p.name}@${version} ${onRegistry(p.name, version) ? c.dim('is already on the registry, will be skipped') : 'will be published'}`);
-check(todo.length > 0, 'something to publish', 'Both packages are already live at this version: bump it for a new release.');
+if (todo.length === 0) {
+  // Not a failure: the release already happened. Say so, and (with --docs) still run the idempotent docs bump,
+  // which is the step people re-run when the publish worked but the docs update did not.
+  console.log(c.green(`\n${version} is already live on npm (both packages). Nothing to publish.`));
+  console.log(c.dim('To release something new: bump the version in package.json and mcp/package.json, and add a CHANGELOG section for it.\n'));
+  if (docsAt && PUBLISH) {
+    console.log(c.bold('Docs'));
+    const r = spawnSync('node', ['scripts/bump-library.mjs', version], { cwd: path.resolve(docsAt), stdio: 'inherit' });
+    process.exit(r.status ?? 0);
+  }
+  process.exit(0);
+}
+check(true, 'something to publish');
 
 // 4. npm login
 if (PUBLISH) {
