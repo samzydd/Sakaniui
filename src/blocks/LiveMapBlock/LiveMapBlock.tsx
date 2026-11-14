@@ -79,7 +79,7 @@ export interface LiveMapBlockProps {
   defaultMetric?: LiveMapMetric;
   /** The moment to show. Left out, the clock runs on real time and ticks. Given, it is frozen there. */
   now?: Date;
-  /** Spin the globe slowly. Defaults to false, so the markers stay where the list says they are. */
+  /** Turn the globe slowly (about 6 degrees a second). Defaults to true. It holds still while the pointer is on the globe, and while a city is selected so the globe keeps facing it; under reduced motion it never turns. */
   autoRotate?: boolean;
   /** Show the atmosphere glow around the globe. Defaults to true. */
   atmosphere?: boolean;
@@ -183,7 +183,7 @@ export const LiveMapBlock: React.FC<LiveMapBlockProps> = ({
   hoveredId,
   defaultMetric = 'revenue',
   now: nowProp,
-  autoRotate = false,
+  autoRotate = true,
   atmosphere = true,
   onViewCity,
   onViewAll,
@@ -362,7 +362,7 @@ export const LiveMapBlock: React.FC<LiveMapBlockProps> = ({
                   arcs={arcs}
                   center={center}
                   zoom={zoom}
-                  autoRotate={autoRotate}
+                  autoRotate={autoRotate && !selected}
                   atmosphere={atmosphere}
                   markerScale={1}
                   cardPlacement="side"

@@ -5,7 +5,8 @@ import { SAMPLE_NOW } from './sample';
 
 /**
  * The Figma "Live Map" set: Device (Desktop 1120, Mobile 390) x State. Each story pins the same moment as the
- * Figma block (13:42:03 UTC) so they can be compared with it; leave `now` out and the clock runs.
+ * Figma block (13:42:03 UTC) so they can be compared with it; leave `now` out and the clock runs. The globe turns slowly
+ * and holds still while a city is selected. The desktop stories are held at 1120px wide (they scroll sideways in a narrow pane).
  */
 const meta = {
   title: 'Blocks/Application/Live Map',
@@ -26,8 +27,11 @@ Built from Map Globe (with the \`size\`, \`rank\` and \`status\` marker fields, 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-const light = (S: React.ComponentType) => <div style={{ padding: 24, background: 'var(--color-bg-canvas)', minHeight: '100vh', boxSizing: 'border-box' }}><S /></div>;
-const dark = (S: React.ComponentType) => <div className="dark" style={{ padding: 24, background: 'var(--color-bg-canvas)', minHeight: '100vh', boxSizing: 'border-box' }}><S /></div>;
+/* The block reads its own width, so in a narrow pane (the docs column, a small canvas) it would drop to the phone
+   layout. The desktop stories are held at the block's design width instead and scroll sideways when the pane is smaller. */
+const desk = { padding: 24, background: 'var(--color-bg-canvas)', boxSizing: 'border-box', width: '100%', minWidth: 1168 } as const;   // 1120 + the 24px padding each side
+const light = (S: React.ComponentType) => <div style={{ ...desk, minHeight: '100vh' }}><S /></div>;
+const dark = (S: React.ComponentType) => <div className="dark" style={{ ...desk, minHeight: '100vh' }}><S /></div>;
 const phone = (S: React.ComponentType) => <div style={{ padding: 24, background: 'var(--color-bg-canvas)', minHeight: '100vh', boxSizing: 'border-box' }}><div style={{ width: 390 }}><S /></div></div>;
 
 /** Device=Desktop, State=Overview. London is hovered, so its row is lit and its card is up. */
