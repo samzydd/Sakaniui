@@ -38,6 +38,7 @@ import { LiveMapBlock } from '@sakaniui/react/blocks';
 
 - **`Button` is the same height with an icon as without one.** A 16px (or 18px) icon was taller than the label's 14px line, so every `sm` button with an icon was 34px tall (Figma: 32) and `md` 38px (Figma: 36). The icon now overflows its box evenly and the button keeps its size.
 - **`FilterChip` is 26px tall**, as in Figma (4px + an 18px line + 4px, with the 1px stroke inside). It was 28px, and 2 to 4px wider.
+- **The active `SidebarItem` has no hover state.** It is where you are, not something to point at, so the pointer no longer changes it. The "Active - Indicator" item keeps shadow/xs under the pointer (it used to strengthen to shadow/sm), the "Active - Default" item keeps its bg/subtle tint (it used to lighten toward bg/canvas, expanded only), and the Sidebar's gliding hover highlight skips the active item (`data-hover-item="off"`, also on the active `SidebarSubItem`). Every other item still reacts as before. The Figma Sidebar Item set no longer has the three "Active Hover" variants either. Nothing to change in your code; blocks that use `SidebarItem` (the CRM dashboard, the chat and AI chat blocks) follow automatically.
 
 ## 0.17.3
 

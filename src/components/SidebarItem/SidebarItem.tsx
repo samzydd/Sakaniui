@@ -2,8 +2,7 @@
  * SidebarItem
  *
  * Primary nav item. Matches Figma "Sidebar Item":
- *   State (Default|Hover|Active - Indicator|Active - Default|Active Hover - Indicator|
- *     Active Hover - Default|Focus|Disabled) x Collapsed (No|Yes),
+ *   State (Default|Hover|Active - Indicator|Active - Default|Focus|Disabled) x Collapsed (No|Yes),
  *   with Badge + Submenu-chevron toggles and a swappable Lucide icon (default: house).
  *
  * Figma spec (read from the component, expanded AND collapsed):
@@ -11,18 +10,14 @@
  *   - LEFT ACCENT BAR: 3x20px brand/default rounded pill — present in BOTH expanded
  *     and collapsed layouts, shown when active AND indicator-styled
  *   - Default/Hover: icon+label fg/muted->fg/default, badge bg/muted + fg/muted text
- *   - Active states (re-read 2026-09-28 — Figma now gives collapsed the same
- *     Indicator/Default split as expanded, and gives each flavor its own hover look):
+ *   - Active states (Figma gives collapsed the same Indicator/Default split as expanded; neither has a hover look,
+ *     the active item does not react to the pointer):
  *       "- Indicator": bg/surface card + the left accent bar, opt-in via
  *         `activeIndicator` (default true, so existing `active` usages render
- *         unchanged). Shadow is now two-tier: shadow/xs (0 1px 1px rgba(16,15,12,.05))
- *         at rest, strengthening to shadow/sm (0 1px 1px rgba(16,15,12,.06),
- *         0 1px 1.5px rgba(16,15,12,.1)) on hover — in BOTH collapsed and expanded.
+ *         unchanged). shadow/xs (0 1px 1px rgba(16,15,12,.05)), the same under the pointer,
+ *         in BOTH collapsed and expanded.
  *       "- Default": flat bg/subtle tint, no bar, no shadow. Used by passing
- *         `activeIndicator={false}` — now available collapsed too (Figma added
- *         Collapsed=Yes, State=Active - Default), not just expanded. Expanded-only,
- *         hovering lightens the tint to bg/canvas (no collapsed hover variant exists
- *         in Figma for this flavor, so collapsed stays flat on hover).
+ *         `activeIndicator={false}`, collapsed or expanded. Also the same under the pointer.
  *     Both flavors: icon+label fg/default, badge bg accent/default + fg/on-accent
  *     text, chevron accent-tinted.
  *   - Disabled: fg/subtle
@@ -96,7 +91,8 @@ export const SidebarItem: React.FC<SidebarItemProps> = ({
 
   const common = {
     className: cls,
-    'data-hover-item': '',
+    // the active item is where you are, so it has no hover: the shared gliding highlight skips it
+    'data-hover-item': active ? 'off' : '',
     title: collapsed && nativeTooltip ? label : undefined,
     // Collapsed items have no visible text — keep an accessible name for
     // screen readers even when the native title tooltip is suppressed in
