@@ -22,17 +22,23 @@ export interface MapControlButtonProps {
   /** Accessible name; the button has no visible text. */
   'aria-label': string;
   disabled?: boolean;
+  /** A toggle that is on: a filled background and `aria-pressed`. Leave it out for a plain button. */
+  pressed?: boolean;
+  /** A native tooltip. */
+  title?: string;
   /** Shows the hover appearance without a pointer (documentation and visual tests). */
   hovered?: boolean;
   onClick?: () => void;
   className?: string;
 }
 
-export const MapControlButton: React.FC<MapControlButtonProps> = ({ icon: Icon, hovered, className, onClick, disabled, ...rest }) => (
+export const MapControlButton: React.FC<MapControlButtonProps> = ({ icon: Icon, hovered, pressed, className, onClick, disabled, ...rest }) => (
   <button
     type="button"
     className={[styles.button, className ?? ''].filter(Boolean).join(' ')}
     data-hovered={hovered ? '' : undefined}
+    data-pressed={pressed ? '' : undefined}
+    aria-pressed={pressed}
     disabled={disabled}
     onClick={onClick}
     {...rest}

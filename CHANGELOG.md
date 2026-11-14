@@ -17,6 +17,7 @@ All additions are optional; a globe that uses none of them draws and behaves as 
 - **Arrow keys** move between the markers' keyboard buttons.
 - New type export `MapGlobeMarkerSize`.
 - **`cardPlacement`** (`"above"` | `"side"`, default `"above"`): `renderMarkerCard` can sit beside the marker, on the side with room, instead of above it.
+- **`MapControlButton` takes `pressed`** (a toggle that is on: a bg/muted fill and `aria-pressed`) and `title`. Figma's Map Control Button set has a matching `Pressed` state.
 - **`markerScale`**: how big the markers are drawn (dots, rings, halos and rank chips together). It follows the globe's size by default; pass `1` to keep the design size on a small globe, so the rank numbers stay readable on a phone.
 - A marker pinned with `hovered` now shows its `renderMarkerCard` too. Markers stay solid until the very edge of the disc instead of fading a little early, and the rank chip is Geist Regular 10px as in Figma.
 
@@ -26,7 +27,7 @@ A country flag from the Figma "Flags" set: `<Flag country="JP" />`, by ISO 3166-
 
 ### New block: Live Map (`LiveMapBlock`)
 
-A live payments map from the Figma "Live Map" set (Device x State). A dotted globe whose dots are sized by the metric and ranked, a ranked list of cities that turns into a city's detail when you pick one, region filters, a Revenue / Payments / Approval rate switch, a hover card (with the city's `Flag`), a legend, zoom buttons, and a playback row (Replay today, Pause, the volume by hour, a UTC clock). Under 720px of its own width it is the phone layout, with the list as a bottom sheet. States: `default`, `loading` (skeletons), `empty` (no payments yet today). It is a composition example: the data is plain props (`cities`, `regions`, `hourly`, `totals`, `insight`) with the Figma block's figures as the default, and it is built from Map Globe, Flag, Segmented control, Filter chip, Tabs, Badge, Button, Icon button and Location dot. Each city's `country` is its two-letter code, which shows as its flag in the list, the hover card, the city detail and the phone rows.
+A live payments map from the Figma "Live Map" set (Device x State). A dotted globe whose dots are sized by the metric and ranked, a ranked list of cities that turns into a city's detail when you pick one, region filters, a Revenue / Payments / Approval rate switch, a hover card (with the city's `Flag`), a legend, zoom buttons, and a playback row (Replay today, Pause, the volume by hour, a UTC clock). A rotate button in the map controls stops and restarts the globe's slow spin. Under 720px of its own width it is the phone layout, with the list as a bottom sheet. States: `default`, `loading` (skeletons), `empty` (no payments yet today). It is a composition example: the data is plain props (`cities`, `regions`, `hourly`, `totals`, `insight`) with the Figma block's figures as the default, and it is built from Map Globe, Flag, Segmented control, Filter chip, Tabs, Badge, Button, Icon button and Location dot. Each city's `country` is its two-letter code, which shows as its flag in the list, the hover card, the city detail and the phone rows.
 
 ```tsx
 import { LiveMapBlock } from '@sakaniui/react/blocks';

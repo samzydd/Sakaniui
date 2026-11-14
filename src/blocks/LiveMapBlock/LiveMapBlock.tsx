@@ -30,6 +30,7 @@ import { IconPlayerPause } from '../../icons/outline/player-pause';
 import { IconPlayerPlay } from '../../icons/outline/player-play';
 import { IconPlus } from '../../icons/outline/plus';
 import { IconRefresh } from '../../icons/outline/refresh';
+import { IconRotate360 } from '../../icons/outline/rotate-360';
 import { IconSparkles } from '../../icons/outline/sparkles';
 import { Badge } from '../../components/Badge';
 import { Button } from '../../components/Button';
@@ -42,6 +43,7 @@ import { Tabs } from '../../components/Tabs';
 import { MapControlButton } from '../../components/Map/MapControls';
 import { MapGlobe, type MapGlobeArc, type MapGlobeMarker, type MapGlobeMarkerSize } from '../../components/Map/MapGlobe';
 import type { LatLng } from '../../components/Map/geo';
+import { useReducedMotion } from '../../lib/useReducedMotion';
 import { LocationDot } from '../../components/MarketingComponents/LocationDot';
 import { SAMPLE_CITIES, SAMPLE_HOURLY, SAMPLE_INSIGHT, SAMPLE_REGIONS, SAMPLE_TOTALS } from './sample';
 import type { LiveMapCity, LiveMapInsight, LiveMapMetric, LiveMapRegion, LiveMapState, LiveMapTotals } from './types';
@@ -80,7 +82,7 @@ export interface LiveMapBlockProps {
   defaultMetric?: LiveMapMetric;
   /** The moment to show. Left out, the clock runs on real time and ticks. Given, it is frozen there. */
   now?: Date;
-  /** Turn the globe slowly (about 6 degrees a second). Defaults to true. It holds still while the pointer is on the globe, and while a city is selected so the globe keeps facing it; under reduced motion it never turns. */
+  /** Turn the globe slowly (about 6 degrees a second) and offer a rotate button that stops and restarts it. Defaults to true. It holds still while the pointer is on the globe, and while a city is selected so the globe keeps facing it; under reduced motion it never turns (and the button is not shown). */
   autoRotate?: boolean;
   /** Show the atmosphere glow around the globe. Defaults to true. */
   atmosphere?: boolean;
@@ -204,6 +206,9 @@ export const LiveMapBlock: React.FC<LiveMapBlockProps> = ({
   const [paused, setPaused] = React.useState(false);
   const [replayHour, setReplayHour] = React.useState<number | null>(null);
   const [legendOpen, setLegendOpen] = React.useState(false);
+  // the viewer can stop the spin (and start it again) with the rotate button; `autoRotate` only says whether it is offered
+  const [spinning, setSpinning] = React.useState(true);
+  const reducedMotion = useReducedMotion();
 
   const now = useNow(nowProp, paused);
   const hour = now.getUTCHours();
@@ -363,7 +368,7 @@ export const LiveMapBlock: React.FC<LiveMapBlockProps> = ({
                   arcs={arcs}
                   center={center}
                   zoom={zoom}
-                  autoRotate={autoRotate && !selected}
+                  autoRotate={autoRotate && spinning && !selected}
                   atmosphere={atmosphere}
                   markerScale={1}
                   cardPlacement="side"
@@ -416,6 +421,9 @@ export const LiveMapBlock: React.FC<LiveMapBlockProps> = ({
                 <MapControlButton className={styles.zoomBtn} icon={IconPlus} aria-label="Zoom in" onClick={() => setZoom((z) => Math.min(1.15, +(z + 0.05).toFixed(2)))} disabled={zoom >= 1.15} />
                 <MapControlButton className={styles.zoomBtn} icon={IconMinus} aria-label="Zoom out" onClick={() => setZoom((z) => Math.max(0.8, +(z - 0.05).toFixed(2)))} disabled={zoom <= 0.8} />
                 <MapControlButton icon={IconCurrentLocation} aria-label="Recentre the map" onClick={recenter} />
+                {autoRotate && !reducedMotion && (
+                  <MapControlButton icon={IconRotate360} aria-label="Auto-rotate the globe" title={spinning ? 'Stop rotating' : 'Rotate the globe'} pressed={spinning} onClick={() => setSpinning((v) => !v)} />
+                )}
               </div>
             )}
 

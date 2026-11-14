@@ -218,12 +218,12 @@ export const MarkerStatesBoard: Story = {
 };
 
 export const ControlStates: Story = {
-  name: 'Controls: button states (Figma Map Control Button)',
+  name: 'Controls: button states (Figma Map Control Button: Default, Hover, Disabled, Pressed)',
   render: () => (
     <div style={{ display: 'flex', gap: 32, alignItems: 'flex-start' }}>
       {[false, true].map((dark) => (
         <div key={String(dark)} className={dark ? 'dark' : undefined} style={{ ...sheet(dark), display: 'flex', gap: 28, alignItems: 'flex-start' }}>
-          {([['Default', {}], ['Hover', { hovered: true }], ['Disabled', { disabled: true }]] as const).map(([name, props]) => (
+          {([['Default', {}], ['Hover', { hovered: true }], ['Disabled', { disabled: true }], ['Pressed', { pressed: true }]] as const).map(([name, props]) => (
             <div key={name} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
               <div style={{ border: '1px solid var(--color-border-default)', borderRadius: 8, background: 'var(--color-bg-surface)', boxShadow: 'var(--shadow-md)', overflow: 'hidden' }}>
                 <MapControlButton icon={IconPlus} aria-label={`${name} button`} {...props} />

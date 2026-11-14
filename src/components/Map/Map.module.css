@@ -70,6 +70,8 @@
   transition: background-color var(--transition-base), color var(--transition-base);
 }
 .button[data-hovered]:not(:disabled) { background: var(--color-bg-subtle); }
+/* a toggle that is on (MapControlButton `pressed`) */
+.button[data-pressed]:not(:disabled) { background: var(--color-bg-muted); }
 @media (hover: hover) {
   .button:hover:not(:disabled) { background: var(--color-bg-subtle); }
 }
