@@ -19,7 +19,7 @@
  * chip that matches a ranked list beside the globe), Status (watch adds a dashed amber ring, so a warning is never only
  * a colour) and State: default, hover (a soft halo, the marker grows a little), selected (a larger halo) and active
  * (a pulse). Change `center` and the globe turns to face the new place; `zoom` scales the sphere; `renderMarkerCard`
- * puts your own card on the hovered or selected marker. Hovering one stops the spin so it can be clicked, and a marker with a `label`
+ * puts your own card on the hovered (or pinned with `hovered`) or selected marker. Hovering one stops the spin so it can be clicked, and a marker with a `label`
  * shows it in a small card while hovered or selected. `theme="dark"` makes just this globe dark, like Figma's
  * explicit Dark mode.
  */
@@ -73,6 +73,14 @@ export interface MapGlobeProps {
    * Replaces the small text label.
    */
   renderMarkerCard?: (index: number, marker: MapGlobeMarker) => React.ReactNode;
+  /** Where the card sits on its marker: "above" it (default; below when there is no room) or "side", beside it (on the side with room), a little above the marker's centre. */
+  cardPlacement?: 'above' | 'side';
+  /**
+   * How big the markers are drawn: dots, rings, halos and rank chips scale together. By default they follow the globe
+   * (its box width over 480), so they shrink with a small globe. Pass 1 to keep them at their design size whatever the
+   * globe's size, which keeps the rank numbers readable on a phone.
+   */
+  markerScale?: number;
   markers?: MapGlobeMarker[];
   arcs?: MapGlobeArc[];
   /** Spin on its own. Defaults to true (off under reduced motion). */
@@ -117,6 +125,8 @@ export const MapGlobe: React.FC<MapGlobeProps> = ({
   center = [15, 90],
   zoom = 1,
   renderMarkerCard,
+  cardPlacement = 'above',
+  markerScale,
   markers = [],
   arcs = [],
   autoRotate = true,
@@ -140,14 +150,18 @@ export const MapGlobe: React.FC<MapGlobeProps> = ({
     glide: null as null | { fromRot: number; fromTilt: number; dRot: number; dTilt: number; t0: number; dur: number },
   });
   const state = React.useRef({ rgb: '20,20,20', surface: '255,255,255', border: '230,230,230', font: 'sans-serif', visible: true, size: 0, hits: [] as { i: number; x: number; y: number; k: number; r: number }[], warning: '247,144,9' });
-  const live = React.useRef({ markers, arcPts, variant, atmosphere, autoRotate, rotationSpeed, zoom: clamp(zoom, 0.7, 2.2), card: !!renderMarkerCard });
-  live.current = { markers, arcPts, variant, atmosphere, autoRotate, rotationSpeed, zoom: clamp(zoom, 0.7, 2.2), card: !!renderMarkerCard };
+  const live = React.useRef({ markers, arcPts, variant, atmosphere, autoRotate, rotationSpeed, zoom: clamp(zoom, 0.7, 2.2), card: !!renderMarkerCard, side: cardPlacement === 'side', markerScale });
+  live.current = { markers, arcPts, variant, atmosphere, autoRotate, rotationSpeed, zoom: clamp(zoom, 0.7, 2.2), card: !!renderMarkerCard, side: cardPlacement === 'side', markerScale };
   const callbacks = React.useRef({ onMarkerClick, onMarkerHover });
   callbacks.current = { onMarkerClick, onMarkerHover };
   /** The marker under the pointer or keyboard focus, or null. */
   const hover = React.useRef<number | null>(null);
   // the marker the card sits on: the hovered one, else the selected one
-  const selectedIndex = markers.findIndex((m) => m.selected);
+  const restIndex = (list: MapGlobeMarker[]) => {
+    const pinned = list.findIndex((m) => m.hovered);
+    return pinned >= 0 ? pinned : list.findIndex((m) => m.selected);
+  };
+  const selectedIndex = restIndex(markers);
   const [cardIdx, setCardIdx] = React.useState<number | null>(null);
   const cardIdxRef = React.useRef<number | null>(null);
   cardIdxRef.current = renderMarkerCard ? cardIdx : null;
@@ -155,7 +169,7 @@ export const MapGlobe: React.FC<MapGlobeProps> = ({
   const setHover = (i: number | null) => {
     if (hover.current === i) return;
     hover.current = i;
-    if (live.current.card) setCardIdx(i ?? (live.current.markers.findIndex((m) => m.selected) >= 0 ? live.current.markers.findIndex((m) => m.selected) : null));
+    if (live.current.card) { const rest = restIndex(live.current.markers); setCardIdx(i ?? (rest >= 0 ? rest : null)); }
     if (wrap.current) wrap.current.style.cursor = i != null ? 'pointer' : '';
     callbacks.current.onMarkerHover?.(i);
   };
@@ -271,43 +285,44 @@ export const MapGlobe: React.FC<MapGlobeProps> = ({
 
       // markers, matching Map Marker Dot: core, 2px ring in the background colour, a halo when hovered or
       // selected (Hover, Selected), a pulse when active
+      const mk = L.markerScale ?? px;
       const hits: { i: number; x: number; y: number; k: number; r: number }[] = [];
       const tips: { x: number; y: number; label: string; k: number }[] = [];
       L.markers.forEach((m, i) => {
         const s = sphere(m.position), p = P(s.cp, s.sp, s.lam);
-        if (p.z <= 0.06) return;
-        const x = cx + R * p.x, y = cy - R * p.y, k = Math.min(1, (p.z - 0.06) / 0.2);
+        if (p.z <= 0.02) return;
+        const x = cx + R * p.x, y = cy - R * p.y, k = Math.min(1, (p.z - 0.02) / 0.05);
         const sz = SIZE_SCALE[m.size ?? 'sm'];
-        hits.push({ i, x, y, k, r: 15 * sz * px });
+        hits.push({ i, x, y, k, r: 15 * sz * mk });
         const picked = !!m.selected, hot = !!m.hovered || hover.current === i;
         if (picked || hot) {
           g.fillStyle = `rgba(${rgb},${(picked ? 0.2 : 0.14) * k})`;
-          g.beginPath(); g.arc(x, y, (picked ? 15 : 11) * sz * px, 0, Math.PI * 2); g.fill();
+          g.beginPath(); g.arc(x, y, (picked ? 15 : 11) * sz * mk, 0, Math.PI * 2); g.fill();
           if (m.label && !L.card) tips.push({ x, y, label: m.label, k });
         }
         if (m.active) {
           const pulse = (time % 2) / 2;
-          g.strokeStyle = `rgba(${rgb},${0.5 * (1 - pulse) * k})`; g.lineWidth = 1.5 * px;
-          g.beginPath(); g.arc(x, y, (5 + 14 * pulse) * sz * px, 0, Math.PI * 2); g.stroke();
-          g.fillStyle = `rgba(${rgb},${0.16 * k})`; g.beginPath(); g.arc(x, y, 9 * sz * px, 0, Math.PI * 2); g.fill();
+          g.strokeStyle = `rgba(${rgb},${0.5 * (1 - pulse) * k})`; g.lineWidth = 1.5 * mk;
+          g.beginPath(); g.arc(x, y, (5 + 14 * pulse) * sz * mk, 0, Math.PI * 2); g.stroke();
+          g.fillStyle = `rgba(${rgb},${0.16 * k})`; g.beginPath(); g.arc(x, y, 9 * sz * mk, 0, Math.PI * 2); g.fill();
         }
         if (m.status === 'watch') {
           // a dashed ring in the warning colour: the shape says "watch" as well as the colour
           g.save();
-          g.setLineDash([3 * px, 3 * px]); g.lineWidth = 1.5 * px; g.strokeStyle = `rgba(${state.current.warning},${k})`;
-          g.beginPath(); g.arc(x, y, (5.5 * sz + 5 * Math.min(sz, 1.6)) * px, 0, Math.PI * 2); g.stroke();
+          g.setLineDash([3 * mk, 3 * mk]); g.lineWidth = 1.5 * mk; g.strokeStyle = `rgba(${state.current.warning},${k})`;
+          g.beginPath(); g.arc(x, y, (5.5 * sz + 5 * Math.min(sz, 1.6)) * mk, 0, Math.PI * 2); g.stroke();
           g.restore();
         }
         g.globalCompositeOperation = 'destination-out';
-        g.beginPath(); g.arc(x, y, (picked ? 7 : hot ? 6.5 : 5.5) * sz * px, 0, Math.PI * 2); g.fill();
+        g.beginPath(); g.arc(x, y, (picked ? 7 : hot ? 6.5 : 5.5) * sz * mk, 0, Math.PI * 2); g.fill();
         g.globalCompositeOperation = 'source-over';
-        g.fillStyle = `rgba(${rgb},${k})`; g.beginPath(); g.arc(x, y, (picked ? 5 : hot ? 4.5 : 3.5) * sz * px, 0, Math.PI * 2); g.fill();
+        g.fillStyle = `rgba(${rgb},${k})`; g.beginPath(); g.arc(x, y, (picked ? 5 : hot ? 4.5 : 3.5) * sz * mk, 0, Math.PI * 2); g.fill();
         if (m.rank != null) {
-          // the rank chip, up and to the right of the dot (Figma Rank=Number: 18px, the text colour with the surface colour inside)
-          const o = (5.5 * sz * 0.7 + 7) * px, cxr = x + o, cyr = y - o;
-          g.fillStyle = `rgba(${rgb},${k})`; g.beginPath(); g.arc(cxr, cyr, 9 * px, 0, Math.PI * 2); g.fill();
-          g.font = `500 ${11 * px}px ${state.current.font}`; g.textAlign = 'center'; g.textBaseline = 'middle';
-          g.fillStyle = `rgba(${state.current.surface},${k})`; g.fillText(String(m.rank), cxr, cyr + px * 0.5);
+          // the rank chip, up and to the right of the dot (Figma Rank=Number: 18px, the text colour with the surface colour inside, 10px type)
+          const o = (5.5 * sz * 0.7 + 7) * mk, cxr = x + o, cyr = y - o;
+          g.fillStyle = `rgba(${rgb},${k})`; g.beginPath(); g.arc(cxr, cyr, 9 * mk, 0, Math.PI * 2); g.fill();
+          g.font = `400 ${10 * mk}px ${state.current.font}`; g.textAlign = 'center'; g.textBaseline = 'middle';
+          g.fillStyle = `rgba(${state.current.surface},${k})`; g.fillText(String(m.rank), cxr, cyr + mk * 0.5);
           g.textAlign = 'start';
         }
       });
@@ -319,10 +334,20 @@ export const MapGlobe: React.FC<MapGlobeProps> = ({
         const hit = cardIdxRef.current == null ? null : hits.find((h) => h.i === cardIdxRef.current);
         if (!hit) card.style.opacity = '0';
         else {
-          const w = card.offsetWidth, h = card.offsetHeight, gap = hit.r + 6;
-          const left = clamp(hit.x, w / 2 + 4, S - w / 2 - 4);
-          const top = hit.y - gap - h < 4 ? hit.y + gap : hit.y - gap - h;
-          card.style.transform = `translate(${(left - w / 2).toFixed(1)}px, ${top.toFixed(1)}px)`;
+          const w = card.offsetWidth, h = card.offsetHeight;
+          let x: number, top: number;
+          if (L.side) {
+            // beside the marker, on the side with room, and a little above its centre
+            const gx = hit.r * 0.5 + 8;
+            x = hit.x + gx + w <= S - 4 ? hit.x + gx : hit.x - gx - w;
+            x = clamp(x, 4, S - w - 4);
+            top = clamp(hit.y - 8, 4, S - h - 4);
+          } else {
+            const gap = hit.r + 6;
+            x = clamp(hit.x, w / 2 + 4, S - w / 2 - 4) - w / 2;
+            top = hit.y - gap - h < 4 ? hit.y + gap : hit.y - gap - h;
+          }
+          card.style.transform = `translate(${x.toFixed(1)}px, ${top.toFixed(1)}px)`;
           card.style.opacity = String(hit.k);
         }
       }

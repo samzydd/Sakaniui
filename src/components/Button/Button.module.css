@@ -281,6 +281,9 @@
   display: inline-flex;
   align-items: center;
   flex-shrink: 0;
+  /* The label's line is 1em (the button's line-height is 1), so a 16px or 18px glyph must not be what sets the button's
+     height: Figma's sm / md / lg are 32 / 36 / 44 with an icon or without one. The glyph overflows its box evenly. */
+  height: 1em;
 }
 
 /** Label span — allows text + icons to space correctly via parent gap. */

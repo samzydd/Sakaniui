@@ -4,8 +4,9 @@
   display: inline-flex;
   align-items: center;
   gap: var(--space-6);
-  height: 28px;
-  padding: var(--space-4) var(--space-10);
+  height: 26px;   /* Figma: 4 + an 18px line + 4, the 1px stroke drawn inside */
+  box-sizing: border-box;
+  padding: calc(var(--space-4) - 1px) calc(var(--space-8) - 1px);
   border-radius: var(--radius-full);
   font-family: var(--font-sans);
   font-size: 13px;
@@ -24,7 +25,7 @@
   border-color: transparent;
   color: var(--color-fg-default);
   font-weight: 500;
-  padding-right: var(--space-8);
+  padding-right: calc(var(--space-8) - 1px);
 }
 .chip__remove {
   transition: background-color var(--transition-base), border-color var(--transition-base), box-shadow var(--transition-base), color var(--transition-base), transform var(--transition-base);

@@ -16,6 +16,23 @@ All additions are optional; a globe that uses none of them draws and behaves as 
 - **`renderMarkerCard(index, marker)`**: your own card, kept on the hovered marker (or the selected one) as the globe turns, above it or below when there is no room, and hidden while the marker is on the far side. It never takes the pointer. Replaces the small text label.
 - **Arrow keys** move between the markers' keyboard buttons.
 - New type export `MapGlobeMarkerSize`.
+- **`cardPlacement`** (`"above"` | `"side"`, default `"above"`): `renderMarkerCard` can sit beside the marker, on the side with room, instead of above it.
+- **`markerScale`**: how big the markers are drawn (dots, rings, halos and rank chips together). It follows the globe's size by default; pass `1` to keep the design size on a small globe, so the rank numbers stay readable on a phone.
+- A marker pinned with `hovered` now shows its `renderMarkerCard` too. Markers stay solid until the very edge of the disc instead of fading a little early, and the rank chip is Geist Regular 10px as in Figma.
+
+### New block: Live Map (`LiveMapBlock`)
+
+A live payments map from the Figma "Live Map" set (Device x State). A dotted globe whose dots are sized by the metric and ranked, a ranked list of cities that turns into a city's detail when you pick one, region filters, a Revenue / Payments / Approval rate switch, a hover card, a legend, zoom buttons, and a playback row (Replay today, Pause, the volume by hour, a UTC clock). Under 720px of its own width it is the phone layout, with the list as a bottom sheet. States: `default`, `loading` (skeletons), `empty` (no payments yet today). It is a composition example: the data is plain props (`cities`, `regions`, `hourly`, `totals`, `insight`) with the Figma block's figures as the default, and it is built from Map Globe, Segmented control, Filter chip, Tabs, Badge, Button, Icon button and Location dot.
+
+```tsx
+import { LiveMapBlock } from '@sakaniui/react/blocks';
+<LiveMapBlock cities={cities} onViewCity={(city) => router.push(`/payments?city=${city.id}`)} />
+```
+
+### Fixed
+
+- **`Button` is the same height with an icon as without one.** A 16px (or 18px) icon was taller than the label's 14px line, so every `sm` button with an icon was 34px tall (Figma: 32) and `md` 38px (Figma: 36). The icon now overflows its box evenly and the button keeps its size.
+- **`FilterChip` is 26px tall**, as in Figma (4px + an 18px line + 4px, with the 1px stroke inside). It was 28px, and 2 to 4px wider.
 
 ## 0.17.3
 

@@ -270,7 +270,11 @@ lists its other names under `aliases` in `manifest.json`, and `search_components
   navigation: `variant` land or ocean, `markers`, `arcs`. It has no background of its own, so place it on the
   colour you want (`theme="dark"` for a dark surface inside a light page); give markers a `label` and
   `onMarkerClick` to make them selectable. Choose Map when people need streets and zoom, MapGlobe when the point
-  is global spread.
+  is global spread. A marker can carry data: `size` ("sm" | "md" | "lg", bigger = more), `rank` (a numbered chip that
+  matches a list beside the globe) and `status="watch"` (a dashed amber ring, so a warning is not only a colour).
+  Change `center` and the globe turns to face the new place; `zoom` scales it; `renderMarkerCard` puts your own card
+  on the hovered or selected marker (`cardPlacement="side"` puts it beside the marker). `markerScale={1}` keeps the
+  markers at design size on a small globe.
 - **CommandMenu / CommandMenuTrigger / CommandMenuAnswer** — the ⌘K search and command palette: search pages, people,
   files and actions in one place. Use it instead of building a modal with an `Input` and a list. Pass `groups` of
   `items` and handle `onSelect`; it opens on ⌘K by itself and filters as you type (`filter={false}` for server
@@ -289,6 +293,10 @@ lists its other names under `aliases` in `manifest.json`, and `search_components
 Blocks (`CRMDashboardBlock`, `DataTableBlock`, `KanbanBoardBlock`, `LoginBlock`, …) are composed
 screens, not primitives. Use one when it matches the screen you are building; otherwise compose primitives.
 Many Figma-frame blocks have a fixed design width — put them in a container at least that wide or scale them.
+`LiveMapBlock` is a live payments map (a dotted globe with ranked, sized dots, a ranked city list that becomes a
+city's detail, region filters, a metric switch and a replay of the day). Use it for "where is the money coming from"
+screens; pass your own `cities`, `hourly` and `totals` (the default is sample data), and `state="loading"` or
+`"empty"` for those states. Below 720px of its own width it becomes the phone layout with the list as a bottom sheet.
 
 ## 6. Moments an AI product needs (compose these today)
 

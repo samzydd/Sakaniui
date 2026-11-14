@@ -64,6 +64,8 @@ export { CRMDashboardBlock } from './CRMDashboardBlock';
 export type { CRMDashboardBlockProps } from './CRMDashboardBlock';
 export { LiquidDashboardBlock } from './LiquidDashboardBlock';
 export type { LiquidDashboardBlockProps } from './LiquidDashboardBlock';
+export { LiveMapBlock } from './LiveMapBlock';
+export type { LiveMapBlockProps, LiveMapCity, LiveMapRegion, LiveMapTotals, LiveMapInsight, LiveMapMetric, LiveMapState } from './LiveMapBlock';
 export { BlogListingBlock } from './BlogListingBlock';
 export type { BlogListingBlockProps, BlogListingFeaturedPost, BlogListingPost } from './BlogListingBlock';
 export { CareersBlock } from './CareersBlock';
