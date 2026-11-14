@@ -23,7 +23,7 @@ export const SidebarSubItem: React.FC<SidebarSubItemProps> = ({ label, active, d
     active ? styles['subItem--active'] : '',
     disabled ? styles['subItem--disabled'] : '',
   ].filter(Boolean).join(' ');
-  const common = { className: cls, 'data-hover-item': '', 'aria-current': active ? ('page' as const) : undefined };
+  const common = { className: cls, 'data-hover-item': active ? 'off' : '', 'aria-current': active ? ('page' as const) : undefined };
   const content = (
     <>
       <span className={styles.subItem__dot} aria-hidden="true" />

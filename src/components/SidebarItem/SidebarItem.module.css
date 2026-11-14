@@ -66,11 +66,11 @@
 /* ─── Active states (re-read 2026-09-28) ───
  * Figma now gives collapsed the same Indicator/Default split as expanded:
  *   "- Indicator" (.item--active): bg/surface card + left accent bar -- the
- *     original Active look, still the default. Shadow is two-tier: shadow/xs
- *     at rest, strengthening to shadow/sm on hover -- in both layouts.
+ *     original Active look, still the default. shadow/xs, in both layouts.
  *   "- Default" (.item--active-flat): flat bg/subtle tint, no bar, no shadow.
- *     Expanded-only, hover lightens the tint toward bg/canvas -- Figma has no
- *     collapsed hover variant for this flavor, so collapsed stays flat. */
+ * The active item has NO hover state in either flavor: it is where you are,
+ * not something to point at, so the pointer changes nothing on it (there are
+ * no "Active Hover" variants in Figma either). */
 .item--active,
 .item--active-flat {
   transition: background-color var(--transition-base), color var(--transition-base), border-color var(--transition-base), box-shadow var(--transition-base), opacity var(--transition-base);
@@ -79,9 +79,6 @@
 /* On glass the active item floats; it casts no shadow of its own (a lens or the
    5% fill is its indicator, and the accent bar still draws). */
 :global([data-surface="liquid"]) .item--active:not(:focus-visible) { box-shadow: none; }
-@media (hover: hover) {
-  :global([data-surface="liquid"]) .item--active:hover:not(:focus-visible) { box-shadow: none; }
-}
 
 .item--active .item__icon,
 .item--active-flat .item__icon { color: var(--color-fg-default); }
@@ -92,26 +89,13 @@
 
 .item--active {
   background: var(--surface-bg);
-  /* shadow/xs at rest -- shadow/sm (the old, stronger, always-on value) now
-     only applies on hover, matching Figma's separate Active/Active Hover
-     Indicator variants. */
+  /* shadow/xs, and it stays shadow/xs under the pointer. */
   box-shadow: 0 1px 1px rgba(16, 15, 12, 0.05);
-}
-@media (hover: hover) {
-  .item--active:hover {
-    box-shadow: 0 1px 1px rgba(16, 15, 12, 0.06), 0 1px 1.5px rgba(16, 15, 12, 0.1);
-  }
 }
 .item--active .item__bar { opacity: 1; }
 
 .item--active-flat {
   background: var(--surface-bg-subtle);
-}
-/* Expanded only -- Figma has no Collapsed=Yes "Active Hover - Default" variant. */
-@media (hover: hover) {
-  .item--active-flat:not(.item--collapsed):hover {
-    background: var(--color-bg-canvas);
-  }
 }
 
 .item--disabled { color: var(--color-fg-subtle); opacity: var(--opacity-60, 0.6); cursor: not-allowed; pointer-events: none; }

@@ -9,8 +9,7 @@ const meta = {
   component: SidebarItem,
   tags: ['autodocs'],
   parameters: { docs: { description: { component: `Primary nav item. Matches Figma "Sidebar Item":
-State (Default|Hover|Active - Indicator|Active - Default|Active Hover - Indicator|
-Active Hover - Default|Focus|Disabled) x Collapsed (No|Yes),
+State (Default|Hover|Active - Indicator|Active - Default|Focus|Disabled) x Collapsed (No|Yes),
 with Badge + Submenu-chevron toggles and a swappable Lucide icon (default: house).
 
 Figma spec (read from the component, expanded AND collapsed):
@@ -18,16 +17,13 @@ Figma spec (read from the component, expanded AND collapsed):
 - LEFT ACCENT BAR: 3x20px brand/default rounded pill — present in BOTH expanded
 and collapsed layouts, shown when active AND indicator-styled
 - Default/Hover: icon+label fg/muted->fg/default, badge bg/muted + fg/muted text
-- Active states (re-read 2026-09-28 — Figma now gives collapsed the same
-Indicator/Default split as expanded, and gives each flavor its own hover look):
+- Active states (collapsed has the same Indicator/Default split as expanded; the
+active item has no hover look, the pointer changes nothing on it):
 "- Indicator": bg/surface card + the left accent bar, opt-in via
 \`activeIndicator\` (default true, so existing \`active\` usages render unchanged).
-Shadow is two-tier: shadow/xs at rest, strengthening to shadow/sm on hover —
-in BOTH collapsed and expanded.
+shadow/xs, in BOTH collapsed and expanded.
 "- Default": flat bg/subtle tint, no bar, no shadow. Used by passing
-\`activeIndicator={false}\` — now available collapsed too, not just expanded.
-Expanded-only, hovering lightens the tint to bg/canvas (no collapsed hover
-variant exists in Figma for this flavor, so collapsed stays flat on hover).
+\`activeIndicator={false}\`, collapsed or expanded.
 Both flavors: icon+label fg/default, badge bg accent/default + fg/on-accent
 text, chevron accent-tinted.
 - Disabled: fg/subtle

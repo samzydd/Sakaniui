@@ -2,6 +2,10 @@
 
 All notable changes to `@sakaniui/react` are documented here.
 
+## Unreleased
+
+- **The active `SidebarItem` has no hover state.** It is where you are, not something to point at, so the pointer no longer changes it. The "Active - Indicator" item keeps shadow/xs under the pointer (it used to strengthen to shadow/sm), the "Active - Default" item keeps its bg/subtle tint (it used to lighten toward bg/canvas, expanded only), and the Sidebar's gliding hover highlight skips the active item (`data-hover-item="off"`, also on the active `SidebarSubItem`). Every other item still reacts as before. The Figma Sidebar Item set no longer has the three "Active Hover" variants either. Nothing to change in your code; blocks that use `SidebarItem` (the CRM dashboard, the chat and AI chat blocks) follow automatically.
+
 ## 0.17.3
 
 - **Marketing and commerce blocks keep their Figma padding at every width above a phone.** In 0.16.0 their side padding followed the *viewport* (`clamp(16px, 4vw, 48px)`), so a block shown at its full Figma width in a window under about 1200px had less padding than the design (40px at 1000px). The padding is now Figma's (48px; 64px above and below the centred hero) at any width, and tightens to 16px only on a phone-sized viewport (640px and under). Applies to `HeroBlock`, `FeatureGridBlock`, `LogoCloudBlock`, `CtaBannerBlock`, `PricingTableBlock`, `TestimonialBlock`, `FaqBlock`, `BlogListingBlock`, `CareersBlock`, `TeamSectionBlock`, `ProductDetailBlock`, `ProductGridBlock`, `CheckoutFlowBlock` and `DataTableBlock`.
