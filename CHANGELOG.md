@@ -2,6 +2,12 @@
 
 All notable changes to `@sakaniui/react` are documented here.
 
+## 0.17.3
+
+- **Marketing and commerce blocks keep their Figma padding at every width above a phone.** In 0.16.0 their side padding followed the *viewport* (`clamp(16px, 4vw, 48px)`), so a block shown at its full Figma width in a window under about 1200px had less padding than the design (40px at 1000px). The padding is now Figma's (48px; 64px above and below the centred hero) at any width, and tightens to 16px only on a phone-sized viewport (640px and under). Applies to `HeroBlock`, `FeatureGridBlock`, `LogoCloudBlock`, `CtaBannerBlock`, `PricingTableBlock`, `TestimonialBlock`, `FaqBlock`, `BlogListingBlock`, `CareersBlock`, `TeamSectionBlock`, `ProductDetailBlock`, `ProductGridBlock`, `CheckoutFlowBlock` and `DataTableBlock`.
+- **`Button` size `sm` is 32px tall**, as in Figma (14px text and a 6px icon gap). It was 27px with 13px text. Every small button grows 5px.
+- **`Button` size `md`'s icon gap is 8px**, as in Figma (it was 6px).
+
 ## 0.17.2
 
 Marketing blocks now match Figma to the pixel. Each of these was measured against its Figma frame (padding, gaps, sizes, type) and corrected:

@@ -230,13 +230,13 @@
 /* ─── Sizes ──────────────────────────────────────────────────────────────────── */
 
 /**
- * sm — 32px target height.
- * Maps to Figma: Size=sm (padding 6px 12px, font 13px)
+ * sm — 32px target height (8 + 14 + 8, plus the 1px border each side).
+ * Maps to Figma: Size=sm (14/20 text, a 6px gap, 6px 12px padding around a 20px line)
  */
 .button--sm {
-  padding: var(--space-6) var(--space-12);
-  font-size: 13px;
-  gap: var(--space-4);
+  padding: var(--space-8) var(--space-12);
+  font-size: 14px;
+  gap: var(--space-6);
 }
 
 /**
@@ -246,7 +246,7 @@
 .button--md {
   padding: var(--space-10) var(--space-16);
   font-size: 14px;
-  gap: var(--space-6);
+  gap: var(--space-8);   /* Figma: an 8px gap between the icon and the label */
 }
 
 /**

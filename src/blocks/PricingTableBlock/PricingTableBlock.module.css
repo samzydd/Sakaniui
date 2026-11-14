@@ -7,7 +7,7 @@
   max-width: 100%;
   container: pricing / inline-size;
   box-sizing: border-box;
-  padding: clamp(var(--space-16), 4vw, var(--space-48));   /* 48px on a desktop, 16px at the sides on a phone */
+  padding: var(--space-48);   /* the Figma padding at every width above a phone (phones: see the end of this file) */
   background: var(--color-bg-canvas);
   font-family: var(--font-sans);
 }
@@ -155,4 +155,10 @@
 @container pricing (max-width: 860px) {
   .plans { flex-direction: column; align-items: center; }
   .plan, .planFixed { flex: none; width: 100%; max-width: 440px; }
+}
+
+/* A phone-sized viewport: tighter side padding. Above it the block keeps its Figma padding whatever width it is shown at
+   (the old clamp() followed the viewport, so a block at its full Figma width in a 1000px window lost some). */
+@media (max-width: 640px) {
+  .block { padding: var(--space-16); }
 }
