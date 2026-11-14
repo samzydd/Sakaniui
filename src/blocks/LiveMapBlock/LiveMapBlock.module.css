@@ -40,7 +40,7 @@
 
 /* ---------------- body ---------------- */
 .body { display: flex; align-items: stretch; }
-.mapArea { display: flex; flex-direction: column; flex: 1 1 0; min-width: 0; gap: 12px; padding: 16px 20px; box-sizing: border-box; }
+.mapArea { display: flex; flex-direction: column; flex: 1 1 0; min-width: 0; gap: 12px; padding: 16px 20px; box-sizing: border-box; background: var(--color-bg-canvas); }   /* the globe sits on the canvas colour; the cards on it are surface */
 .stage { position: relative; flex-shrink: 0; height: 480px; }
 
 .globeBox { position: absolute; top: 10px; left: calc(50% - 97px); width: 460px; transition: opacity var(--transition-slow); }
