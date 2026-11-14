@@ -43,8 +43,8 @@ export const SAMPLE_INSIGHT: LiveMapInsight = {
   short: 'Europe leads · London $334K',
 };
 
-/** Payment volume for each hour of today (UTC), relative. Hours that have not happened yet are not drawn. */
-export const SAMPLE_HOURLY: number[] = [11, 9, 8, 7, 8, 10, 14, 17, 21, 25, 28, 31, 30, 32, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+/** Payment volume for each hour of today (UTC), relative. Hours that have not happened yet are not drawn, so the live demo has a full day of values to reveal. The first 14 are the Figma block's (13:42 UTC). */
+export const SAMPLE_HOURLY: number[] = [11, 9, 8, 7, 8, 10, 14, 17, 21, 25, 28, 31, 30, 32, 29, 26, 24, 22, 20, 17, 14, 12, 10, 9];
 
 /** The moment the Figma block shows: 13:42:03 UTC on 14 November 2026. */
 export const SAMPLE_NOW = new Date(Date.UTC(2026, 10, 14, 13, 42, 3));
