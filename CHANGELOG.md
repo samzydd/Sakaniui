@@ -2,6 +2,21 @@
 
 All notable changes to `@sakaniui/react` are documented here.
 
+## Unreleased
+
+### Map Globe: markers that carry data, a globe that follows
+
+All additions are optional; a globe that uses none of them draws and behaves as before.
+
+- **`MapGlobeMarker.size`** (`"sm"` | `"md"` | `"lg"`, default `"sm"`): the dot, its ring and its halo scale 1x, 1.6x and 2.3x, so a marker can show a value (Figma Map Globe Marker, Size).
+- **`MapGlobeMarker.rank`**: a numbered chip beside the marker that matches the rank in a list next to the globe (Rank=Number).
+- **`MapGlobeMarker.status="watch"`**: a dashed amber ring (`--color-warning-solid`), so a warning is never carried by colour alone (Status=Watch).
+- **`center` is reactive.** When it changes after mount the globe turns to face the new place, the short way round, over about 0.9s, then pauses its spin for a moment; dragging cancels it. Under reduced motion it jumps.
+- **`zoom`** (default `1`, `0.7` to `2.2`): scales the sphere, easing between values.
+- **`renderMarkerCard(index, marker)`**: your own card, kept on the hovered marker (or the selected one) as the globe turns, above it or below when there is no room, and hidden while the marker is on the far side. It never takes the pointer. Replaces the small text label.
+- **Arrow keys** move between the markers' keyboard buttons.
+- New type export `MapGlobeMarkerSize`.
+
 ## 0.17.3
 
 - **Marketing and commerce blocks keep their Figma padding at every width above a phone.** In 0.16.0 their side padding followed the *viewport* (`clamp(16px, 4vw, 48px)`), so a block shown at its full Figma width in a window under about 1200px had less padding than the design (40px at 1000px). The padding is now Figma's (48px; 64px above and below the centred hero) at any width, and tightens to 16px only on a phone-sized viewport (640px and under). Applies to `HeroBlock`, `FeatureGridBlock`, `LogoCloudBlock`, `CtaBannerBlock`, `PricingTableBlock`, `TestimonialBlock`, `FaqBlock`, `BlogListingBlock`, `CareersBlock`, `TeamSectionBlock`, `ProductDetailBlock`, `ProductGridBlock`, `CheckoutFlowBlock` and `DataTableBlock`.

@@ -6,7 +6,7 @@ export type { MapMarkerProps, MapMarkerVariant } from './MapMarker';
 export { MapPopup } from './MapPopup';
 export type { MapPopupProps } from './MapPopup';
 export { MapGlobe } from './MapGlobe';
-export type { MapGlobeProps, MapGlobeMarker, MapGlobeArc } from './MapGlobe';
+export type { MapGlobeProps, MapGlobeMarker, MapGlobeMarkerSize, MapGlobeArc } from './MapGlobe';
 export { MapClusterLayer } from './MapClusterLayer';
 export type { MapClusterLayerProps, MapClusterPoint } from './MapClusterLayer';
 export { MapControlButton, MapControls } from './MapControls';
