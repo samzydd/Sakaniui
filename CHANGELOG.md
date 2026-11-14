@@ -2,7 +2,7 @@
 
 All notable changes to `@sakaniui/react` are documented here.
 
-## Unreleased
+## 0.18.0
 
 ### Map Globe: markers that carry data, a globe that follows
 
