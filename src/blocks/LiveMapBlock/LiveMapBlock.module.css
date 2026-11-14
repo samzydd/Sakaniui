@@ -198,6 +198,7 @@
   .globeBox { top: 28px; left: calc(50% - 150px); width: 300px; }
   .globeSkeleton { top: 40px; left: calc(50% - 130px); width: 260px; height: 260px; }
   .block .pill { display: inline-flex; }
+  .selection { left: 50%; transform: translateX(-50%); }   /* where the insight pill sits */
   .block .caption { display: block; }
   .legend { display: none; bottom: 44px; box-shadow: var(--shadow-md); }
   .legend[data-open] { display: flex; }
