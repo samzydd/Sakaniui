@@ -2,6 +2,12 @@
 
 All notable changes to `@sakaniui/react` are documented here.
 
+## 0.18.1
+
+### Fixed
+
+- **Table: a selected row stays selected when you drag it.** The selection is a list of row positions, and a reorder left it where it was, so the tick stayed on the old slot and the row you moved lost it. A drag now moves the selection with the rows, in both the uncontrolled and the controlled (`selectedRows`) table; `onSelectionChange` fires with the new positions just before `onReorder`. Nothing to change in your code.
+
 ## 0.18.0
 
 ### Map Globe: markers that carry data, a globe that follows

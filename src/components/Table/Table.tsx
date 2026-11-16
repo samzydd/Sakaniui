@@ -93,6 +93,17 @@ const TableCheckbox: React.FC<{
   );
 };
 
+/** Where a selected row's index lands after the row at `from` is dragged to `to` (the same splice the table does to
+ *  its rows): the dragged row keeps its tick, and the rows it passed shift by one. */
+function moveSelection(selected: number[], from: number, to: number): number[] {
+  return selected.map((s) => {
+    if (s === from) return to;
+    if (from < to && s > from && s <= to) return s - 1;
+    if (from > to && s >= to && s < from) return s + 1;
+    return s;
+  });
+}
+
 export function Table<T>({
   columns, rows, selectable, selectedRows, onSelectionChange, rowKey, reorderable, onReorder, bordered = true,
   responsive = 'auto', className,
@@ -120,6 +131,8 @@ export function Table<T>({
     const next = [...rows];
     const [moved] = next.splice(dragIndex, 1);
     next.splice(overIndex, 0, moved);
+    // The selection is a list of row positions, so it has to move with the rows or it would stay on the old slots.
+    if (selected.length > 0) setSelected(moveSelection(selected, dragIndex, overIndex));
     onReorder?.(next);
     setDragIndex(null); setOverIndex(null);
   };

@@ -80,3 +80,16 @@ export const Reorderable: Story = {
     return <ReorderableTable />;
   },
 };
+
+/** A selected row stays selected when it is dragged: the ticks follow the rows, not the positions. Tick a row or two,
+ * then drag one of them (or a row they pass) to a new place. */
+export const ReorderableWithSelection: Story = {
+  render: function Render() {
+    function SelectableReorderable() {
+      const [order, setOrder] = useState(rows);
+      const [sel, setSel] = useState<number[]>([1]);
+      return <Table columns={columns as any} rows={order} rowKey={(r) => r.email} selectable selectedRows={sel} onSelectionChange={setSel} reorderable onReorder={setOrder} />;
+    }
+    return <SelectableReorderable />;
+  },
+};
