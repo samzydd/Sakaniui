@@ -212,6 +212,7 @@ const defined = new Set([...css.matchAll(/(--[a-z0-9-]+)\s*:/gi)].map((m) => m[1
 const listed = new Set(Object.values(manifest.tokens.groups).flatMap((g) => Object.keys(g)));
 for (const t of listed) if (!defined.has(t)) fail(`token ${t} is listed but not defined in tokens.css`);
 for (const t of defined) if (!listed.has(t)) fail(`token ${t} is defined in tokens.css but missing from the manifest`);
+for (const t of Object.keys(manifest.tokens.dark ?? {})) if (!listed.has(t)) fail(`token ${t} has a dark value in the manifest but is not a listed token`);
 
 /* ---- safety: what must never ship to an agent ---- */
 const shipped = { 'dist/manifest.json': read('dist/manifest.json'), 'AGENTS.md': read('AGENTS.md'), 'bin/sakaniui-mcp.mjs': read('bin/sakaniui-mcp.mjs') };

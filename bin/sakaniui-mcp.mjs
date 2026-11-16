@@ -727,7 +727,7 @@ const tools = {
     },
   },
   get_tokens: {
-    description: 'Design tokens (CSS custom properties). Pass a group (color, space, radius, shadow, font, motion, glass, surface, liquid, ...) and/or a substring to filter. Only these tokens exist.',
+    description: 'Design tokens (CSS custom properties). Pass a group (color, space, radius, shadow, font, motion, glass, surface, liquid, ...) and/or a substring to filter. Only these tokens exist. A token that changes in dark mode (the .dark class) lists { light, dark }, each with its resolved value; the others have one value for both themes.',
     inputSchema: { type: 'object', properties: { group: { type: 'string' }, query: { type: 'string' } } },
     run(args) {
       const g = strArg(args, 'group'); const q = strArg(args, 'query');
@@ -735,11 +735,24 @@ const tools = {
       const groups = manifest.tokens.groups;
       if (g.value && !has(groups, g.value)) return fail(`Unknown token group "${g.value}". Groups: ${Object.keys(groups).join(', ')}`);
       const needle = q.value?.toLowerCase();
+      const dark = manifest.tokens.dark ?? {};
+      const light = Object.assign({}, ...Object.values(groups));
+      // follow var() chains to the real value, in the light or the dark theme, so "var(--color-neutral-500)" also shows #78716A
+      const resolve = (name, mode) => {
+        let v = mode === 'dark' && name in dark ? dark[name] : light[name];
+        for (let i = 0; i < 8 && typeof v === 'string'; i++) {
+          const m = v.match(/^var\((--[a-z0-9-]+)\)$/i); if (!m) break;
+          v = mode === 'dark' && m[1] in dark ? dark[m[1]] : light[m[1]];
+        }
+        return v;
+      };
+      const show = (name, raw, mode) => { const r = resolve(name, mode); return r && r !== raw && !String(r).startsWith('var(') ? `${raw} (${r})` : raw; };
       const out = {};
       for (const [name, toks] of Object.entries(groups)) {
         if (g.value && name !== g.value) continue;
-        const sel = Object.entries(toks).filter(([k, v]) => !needle || k.includes(needle) || String(v).toLowerCase().includes(needle));
-        if (sel.length) out[name] = Object.fromEntries(sel);
+        const sel = Object.entries(toks).filter(([k, v]) => !needle || k.includes(needle) || String(v).toLowerCase().includes(needle) || String(dark[k] ?? '').toLowerCase().includes(needle));
+        // a token that is different in dark (its own .dark value, or a var() of one that is) shows both values; the rest stay a plain string
+        if (sel.length) out[name] = Object.fromEntries(sel.map(([k, v]) => [k, k in dark || resolve(k, 'light') !== resolve(k, 'dark') ? { light: show(k, v, 'light'), dark: show(k, dark[k] ?? v, 'dark') } : v]));
       }
       return text(Object.keys(out).length ? out : `No tokens match. Groups: ${Object.keys(groups).join(', ')}`);
     },

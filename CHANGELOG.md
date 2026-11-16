@@ -2,6 +2,12 @@
 
 All notable changes to `@sakaniui/react` are documented here.
 
+## 0.18.3
+
+### Fixed
+
+- **`get_tokens` (MCP) shows the dark value.** The manifest kept only the first (light) definition of each token, so an agent asking for `--color-fg-muted` saw `neutral-500` and had no way to know that dark mode swaps it with `--color-fg-subtle`. The manifest now carries the `.dark` overrides (`tokens.dark`), and `get_tokens` lists `{ light, dark }` for every token that differs in dark, each resolved to its colour (for example `var(--color-neutral-500) (#78716A)`). 56 tokens show both values; the rest are one string as before. The existing `tokens.groups` of the manifest is unchanged, and the build verifies that every dark token is a listed token. AGENTS.md says not to assume a token keeps its light value in dark.
+
 ## 0.18.2
 
 ### Fixed

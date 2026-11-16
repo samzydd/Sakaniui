@@ -102,6 +102,10 @@ colour. Do not guess names (`--fg-muted`, `--bg-canvas`, `--spacing-4` and `--sp
 - **Radius** — `--radius-{none,2xs,xs,sm,md,lg,xl,2xl,3xl,full}` (`md` = 8px is the default control radius).
 - **Shadow** — `--shadow-{xs,sm,md,lg,xl,2xl}`. **Font** — `--font-sans`, `--font-mono`.
   **Motion** — `--transition-{fast,base,hover,slow}`.
+- **Light and dark values:** `get_tokens` lists `{ light, dark }` for every token that is different in dark mode, each with
+  its resolved colour. Do not assume a token keeps its light value in dark: `--color-fg-muted` and `--color-fg-subtle` swap
+  (muted is the lighter grey in dark, so it stays readable), `--color-border-focus` and `--color-brand-fg` lighten, and the
+  chart colours are one set in both. Use the token by name and the theme picks the value.
 - Full, resolved list for light and dark: https://www.sakaniui.com/docs/tokens
 
 ## 3. When nothing fits

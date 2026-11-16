@@ -780,6 +780,20 @@ for (const m of css.matchAll(/(--[a-z0-9-]+)\s*:\s*([^;{}]+);/gi)) {
 }
 const tokenCount = Object.values(tokens).reduce((a, g) => a + Object.keys(g).length, 0);
 
+/* The dark values. `tokens` above is the light default; a token the `.dark` class changes has a second value, and an agent
+ * that only sees the first one writes dark mode wrong (fg-muted and fg-subtle swap, border-focus, the brand tints ...).
+ * Only plain `.dark` rules count: the glass and liquid surfaces are a separate axis and keep their own tokens. A token
+ * whose dark declaration is the same as its light one (the ones re-declared only so var() resolves in place) is left out. */
+const lightOf = Object.assign({}, ...Object.values(tokens));
+const darkTokens = {};
+for (const b of css.matchAll(/([^{}]+)\{([^{}]*)\}/g)) {
+  if (!b[1].split(',').map((x) => x.trim()).includes('.dark')) continue;
+  for (const m of b[2].matchAll(/(--[a-z0-9-]+)\s*:\s*([^;{}]+);/gi)) {
+    const v = clean(m[2]);
+    if (m[1] in lightOf && v !== lightOf[m[1]]) darkTokens[m[1]] = v; else delete darkTokens[m[1]];
+  }
+}
+
 /* ---- icons: every exported icon name, with Tabler's category and search tags ---- */
 const count = (d) => fs.readdirSync(path.join(root, 'src/icons', d)).filter((f) => f.endsWith('.ts')).length;
 function iconExports(dir) {
@@ -856,7 +870,7 @@ const manifest = {
     version: `This manifest describes ${pkg.name}@${pkg.version}. Each component has \`since\`, the first release that contained it; a prop added later has its own \`since\`, and a value added later is listed in the prop's \`valuesSince\`. If the project has an older version installed, anything newer than that does not exist there.`,
     acceptsNativeProps: 'Components forward native HTML attributes (className, style, aria-*, event handlers) to their root element unless a prop says otherwise; only the props that are specific to SakaniUI are listed here.',
     accessibleName: 'When `contract.requiresAccessibleName` is true, a required prop (aria-label, aria-labelledby or an alt text) is the only thing that names the control or image. Do not omit it.',
-    tokens: 'Use only the token names listed under `tokens`. Colour tokens follow the theme (the `.dark` class flips them); do not hard-code colours.',
+    tokens: 'Use only the token names listed under `tokens`. Colour tokens follow the theme (the `.dark` class flips them; get_tokens lists the light and the dark value of each token that changes); do not hard-code colours.',
     icons: 'Icon props take the component itself (IconSettings), not an element (<IconSettings />). Only names in icon-index.json exist; search them (MCP: search_icons) instead of guessing. Emoji are separate (`@sakaniui/react/emoji`, emoji-index.json, MCP: search_emoji) and are rendered as elements, not passed to icon props.',
     examples: 'Each component has `example`: its imports and the element with every required prop filled in, type-checked against this build. Start from it.',
     shapes: 'A prop with a `shape` takes an object (collection "object") or an array of objects (collection "array") with exactly those fields; `required` fields must be present. In a generic shape (`typeParameters: ["T"]`) T is the type of your own data: `key: keyof T & string` means the key must be a field of your row type. `recipes` hold patterns the types alone do not teach.',
@@ -864,7 +878,7 @@ const manifest = {
   },
   // what a component's root element accepts besides its own props (plus aria-*, data-* and on* handlers)
   nativeAttributes: htmlAttributes(root),
-  tokens: { count: tokenCount, groups: tokens },
+  tokens: { count: tokenCount, groups: tokens, dark: darkTokens },
   counts: { components: components.filter((c) => c.kind === 'component').length, blocks: components.filter((c) => c.kind === 'block').length, utilities: utilities.length },
   components,
   utilities,
