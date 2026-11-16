@@ -125,6 +125,21 @@ export const ThemeDark: Story = {
   decorators: [(S) => <div style={{ width: 520, padding: 24 }}><S /></div>],
 };
 
+/** The theme class does not have to sit on <html>: a wrapper that flips `dark` (a docs preview, a themed card) re-colours the globe in place. Press the button: the dots, the arcs and the atmosphere follow at once. */
+export const ThemeFollowsWrapper: Story = {
+  render: function Render() {
+    const [dark, setDark] = React.useState(false);
+    return (
+      <div className={dark ? 'dark' : ''} style={{ background: 'var(--color-bg-canvas)', borderRadius: 16, padding: 24, color: 'var(--color-fg-default)' }}>
+        <button type="button" onClick={() => setDark((v) => !v)} style={{ marginBottom: 12, font: 'inherit', color: 'inherit', background: 'transparent', border: '1px solid var(--color-border-subtle)', borderRadius: 8, padding: '4px 10px', cursor: 'pointer' }}>
+          {dark ? 'Switch to light' : 'Switch to dark'}
+        </button>
+        <Interactive />
+      </div>
+    );
+  },
+};
+
 /* ---- Block markers: size, rank, status (Figma Map Globe Marker) ---- */
 
 const SIZED: { position: LatLng; label: string; size?: 'sm' | 'md' | 'lg'; rank?: number; status?: 'healthy' | 'watch'; selected?: boolean }[] = [

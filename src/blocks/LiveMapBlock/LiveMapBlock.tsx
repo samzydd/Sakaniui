@@ -478,7 +478,8 @@ export const LiveMapBlock: React.FC<LiveMapBlockProps> = ({
                 </>
               )}
             </div>
-            <span className={cx(styles.clock, styles.onlyDesktop)}>{replayHour !== null ? `${pad2(shownHour)}:00:00 UTC` : utcClock(now)}</span>
+            {/* the server renders its own second, so the text is allowed to differ on hydration */}
+            <span className={cx(styles.clock, styles.onlyDesktop)} suppressHydrationWarning>{replayHour !== null ? `${pad2(shownHour)}:00:00 UTC` : utcClock(now)}</span>
             <LocationDot className={styles.live} location={paused ? 'Paused' : 'Live'} status={paused ? 'remote' : 'active'} />
           </div>
         </section>

@@ -2,6 +2,13 @@
 
 All notable changes to `@sakaniui/react` are documented here.
 
+## Unreleased
+
+### Fixed
+
+- **Map Globe follows a theme class on any ancestor.** The globe read its colours again only when the class on `<html>` changed, so inside a wrapper that flips `dark` (a docs preview, a themed card, a `<div className="dark">`) it kept its light-mode colours: near-black dots on a dark surface, which read as an empty map. It now watches every ancestor's class too. `useThemeTick` takes an optional ref for the same reason (the charts still watch `<html>` only).
+- **Live Map: no hydration warning on the clock.** The clock's seconds differ between the server's render and the browser's first render, which React reported as a hydration error and answered by rebuilding the block. The clock text is now allowed to differ.
+
 ## 0.18.1
 
 ### Fixed

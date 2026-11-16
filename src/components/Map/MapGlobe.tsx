@@ -142,7 +142,7 @@ export const MapGlobe: React.FC<MapGlobeProps> = ({
 }) => {
   const wrap = React.useRef<HTMLDivElement>(null);
   const canvas = React.useRef<HTMLCanvasElement>(null);
-  const themeTick = useThemeTick();
+  const themeTick = useThemeTick(wrap);   // also watches the ancestors, so a `.dark` on a wrapper re-reads the colours
   const dots = React.useMemo<GlobeDot[]>(() => globeDots(dotSpacing), [dotSpacing]);
   const arcPts = React.useMemo(() => arcs.map((a) => arcPath(a.from, a.to)), [arcs]);
   const view = React.useRef({
