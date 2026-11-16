@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import type React from 'react';
 
 /**
  * Chart components read color tokens once per render via getComputedStyle
@@ -8,8 +9,13 @@ import { useEffect, useState } from 'react';
  * happens to re-render for an unrelated reason. This watches <html>'s class
  * attribute and bumps a counter on change, so a chart calling this hook
  * re-renders — and re-reads its colors — right when the theme flips.
+ *
+ * The theme class does not always sit on <html>: a preview pane, a themed card or a
+ * `<div className="dark">` scopes it to a subtree. Pass the element the colors are read from and
+ * every ancestor between it and <html> is watched too (one observer per ancestor, class
+ * attribute only, so it stays cheap), or the colors would stay on the old theme for that subtree.
  */
-export function useThemeTick(): number {
+export function useThemeTick(from?: React.RefObject<Element | null>): number {
   const [tick, setTick] = useState(0);
 
   useEffect(() => {
@@ -28,7 +34,11 @@ export function useThemeTick(): number {
 
     const observer = new MutationObserver(() => setTick((t) => t + 1));
     observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+    for (let el = from?.current?.parentElement; el && el !== document.documentElement; el = el.parentElement) {
+      observer.observe(el, { attributes: true, attributeFilter: ['class'] });
+    }
     return () => observer.disconnect();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return tick;
