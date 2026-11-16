@@ -35,7 +35,7 @@ Any MCP client (Cursor, Windsurf, Claude Desktop, ...), or a `.mcp.json` in your
 and in Claude Code: `claude mcp add sakaniui -- cmd /c npx -y @sakaniui/mcp`.
 
 Needs Node.js 18 or later. Check it is connected in your editor's MCP list (in Claude Code: `/mcp`): `sakaniui` should
-show 10 tools.
+show 11 tools.
 
 ## Tools
 
@@ -71,7 +71,7 @@ npx -y @sakaniui/mcp --doctor
 | Times out on the first start | The first run downloads about 200 kB. Run `npx -y @sakaniui/mcp --version` once in a terminal to warm the cache, then restart the editor. |
 | Behind a company proxy or private npm registry | The machine must reach `registry.npmjs.org` (check `npm config get registry`) and `@sakaniui/*` packages must be allowed. |
 | Odd `npx` errors, or an old version keeps running | Delete the `_npx` folder inside your npm cache (find it with `npm config get cache`), then restart the editor. |
-| Added it but no tools appear | Restart the editor. In Claude Code run `/mcp` and look for `sakaniui` with 10 tools. |
+| Added it but no tools appear | Restart the editor. In Claude Code run `/mcp` and look for `sakaniui` with 11 tools. |
 | `Failed to connect` after typing the command by hand | Check the package name for a full-width `＠` or stray characters; copy the command from here instead. |
 
 ## Matches your version
