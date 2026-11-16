@@ -2,7 +2,7 @@
 
 All notable changes to `@sakaniui/react` are documented here.
 
-## Unreleased
+## 0.18.2
 
 ### Fixed
 
