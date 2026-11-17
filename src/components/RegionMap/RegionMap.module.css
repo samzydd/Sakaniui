@@ -1,0 +1,53 @@
+.map { position: relative; width: 100%; line-height: 0; }
+.svg { display: block; width: 100%; height: auto; overflow: hidden; }
+
+.region {
+  fill: var(--color-bg-subtle);
+  stroke: var(--color-bg-surface);
+  stroke-width: 0.75px;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+  cursor: pointer;
+  outline: none;
+  transition: opacity 160ms ease;
+}
+/* while one region is selected the others step back a little, so the zoomed one reads first */
+.map[data-selected] .region:not([data-selected]) { opacity: 0.85; }
+
+.outline {
+  fill: none;
+  stroke: var(--color-fg-default);
+  stroke-width: 1.5px;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+
+.loading .region { fill: var(--color-bg-subtle) !important; animation: rmPulse 1.6s ease-in-out infinite; cursor: default; pointer-events: none; }
+@keyframes rmPulse { 0%, 100% { opacity: 0.55; } 50% { opacity: 1; } }
+
+/* the hover card */
+.card {
+  position: absolute;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  box-sizing: border-box;
+  width: max-content;
+  max-width: 240px;
+  padding: 8px 12px;
+  line-height: 1.3;
+  white-space: nowrap;
+  color: var(--color-fg-on-inverse);
+  background: var(--color-bg-inverse);
+  border-radius: 8px;
+  box-shadow: var(--shadow-md);
+  pointer-events: none;
+}
+.cardName { font-size: 13px; line-height: 18px; font-weight: 600; }
+.cardValue { font-size: 12px; line-height: 16px; font-weight: 400; opacity: 0.8; }
+
+@media (prefers-reduced-motion: reduce) {
+  .region { transition: none; }
+  .loading .region { animation: none; }
+}

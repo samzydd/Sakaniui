@@ -2,6 +2,12 @@
 
 All notable changes to `@sakaniui/react` are documented here.
 
+## Unreleased
+
+### Added
+
+- **`RegionMap`, `RegionMapLegend` and `RegionMapBlock`.** A choropleth for "how does this vary by place": regions shaded by a value, a hover card with the rank, and click-to-zoom into one region (the view eases to it; Escape or a second click goes back out; reduced motion jumps). Plain SVG, no map library, no new dependency. The shapes are data (`regions` + `viewBox`), so it is not tied to one country: `US_STATES` (the 50 states and DC, 43 KB, from US Census boundaries) ships with it, and any SVG paths work. `scale` takes `breaks` (4 breaks make 5 bins) and `diverging` for growth-style data (orange below zero, blue above). Keyboard: one tab stop, arrows move between regions, Enter or Space selects. `RegionMapBlock` is the full "Revenue by state" card (Blocks / Application / Region Map): a metric switch, an area select, the headline figure, the map and legend, and a ranked list that becomes the zoomed region's figures. Nothing existing changes.
+
 ## 0.18.3
 
 ### Fixed

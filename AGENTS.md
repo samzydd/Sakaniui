@@ -279,6 +279,14 @@ lists its other names under `aliases` in `manifest.json`, and `search_components
   Change `center` and the globe turns to face the new place; `zoom` scales it; `renderMarkerCard` puts your own card
   on the hovered or selected marker (`cardPlacement="side"` puts it beside the marker). `markerScale={1}` keeps the
   markers at design size on a small globe.
+  **RegionMap** — a choropleth: regions (states, countries, territories) shaded by a number, for "how does this vary by
+  place". `regions` + `viewBox` are the shapes (`US_STATES` and `US_STATES_VIEWBOX` ship with the library; any SVG paths
+  work), `values` is `{ [regionId]: number }` and `scale` is `{ breaks, diverging? }` (4 breaks = 5 bins; `diverging` paints
+  bins below zero orange, for growth or change). Hover shows a card (`renderTooltip`); click, Enter or Space selects a region
+  and the view eases to it (`selected` / `defaultSelected` / `onSelectedChange`; Escape or a second click goes back out).
+  Put `RegionMapLegend` (same `scale`, optional `caption`) under it. It has no tiles, streets or search: for places by
+  coordinates use Map or MapGlobe. `RegionMapBlock` is the full "Revenue by state" card (metric tabs, area select, ranked
+  list that becomes a region's detail); copy it and swap `sample.ts`.
   **Flag** — a country flag (`country="JP"`, an ISO alpha-2 code; 16px beside text, 32px beside a heading). Not an emoji:
   it is the Figma flag artwork, so use it instead of a flag emoji. Only the flags the library uses are imported; any other
   code draws a neutral placeholder. Put the country's name in text beside it.
