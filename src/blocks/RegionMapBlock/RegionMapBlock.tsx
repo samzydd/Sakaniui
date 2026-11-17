@@ -6,7 +6,7 @@
  *
  *   header      title + description
  *   controls    SegmentedControl (the metric: Revenue, Growth, Penetration) and a Combobox to find a region by name
- *   headline    the region name, its figure (counts up when it appears), and "All states" once a region is zoomed
+ *   headline    the region name, its figure (counts up when it appears), and a ghost zoom-out icon button once a region is zoomed
  *   map         RegionMap shaded by the metric; hover gives a card with the rank, click zooms in
  *   legend      RegionMapLegend; hover a band to see which regions are in it, click to hold it
  *   panel       nothing selected: the highest or lowest regions as soft bars behind their names (each bar grows and its
@@ -21,8 +21,10 @@
  */
 
 import React from 'react';
-import { IconArrowLeft } from '../../icons/outline/arrow-left';
+import { IconZoomOut } from '../../icons/outline/zoom-out';
 import { Button } from '../../components/Button';
+import { IconButton } from '../../components/IconButton';
+import { Tooltip } from '../../components/Tooltip';
 import { Combobox } from '../../components/Combobox';
 import { SegmentedControl } from '../../components/SegmentedControl';
 import { RegionMap, RegionMapLegend, US_STATES, US_STATES_VIEWBOX, binIndex, type RegionShape } from '../../components/RegionMap';
@@ -305,9 +307,9 @@ export const RegionMapBlock: React.FC<RegionMapBlockProps> = ({
           </span>
         </div>
         {selectedRow && (
-          <Button variant="outline" size="sm" leftIcon={<IconArrowLeft size={16} />} onClick={back}>
-            All {plural}
-          </Button>
+          <Tooltip title={`Back to all ${plural}`} pointer="bottom-right">
+            <IconButton variant="ghost" size="sm" icon={IconZoomOut} aria-label={`Back to all ${plural}`} onClick={back} />
+          </Tooltip>
         )}
       </div>
 
