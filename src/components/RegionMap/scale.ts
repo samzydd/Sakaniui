@@ -28,21 +28,28 @@ export function binIndex(value: number, breaks: number[]): number {
  */
 export function binColor(i: number, scale: RegionScale): string {
   const n = scale.breaks.length + 1;
-  const mix = (token: string, t: number) =>
-    `color-mix(in srgb, var(${token}) ${Math.round(t * 1000) / 10}%, var(--color-bg-muted))`;
+  // The common steps are tokens (--color-map-bin-0..4, --color-map-neg-0..1), so a theme can retune them and Figma has
+  // the same variables. Any other step is mixed the same way on the spot.
+  const BIN = [0.25, 0.4375, 0.625, 0.8125, 1];
+  const NEG = [0.85, 0.4];
+  const at = (arr: number[], prefix: string, t: number) => {
+    const k = arr.findIndex((x) => Math.abs(x - t) < 0.001);
+    if (k >= 0) return `var(--color-map-${prefix}-${k})`;
+    return `color-mix(in srgb, var(${prefix === 'neg' ? '--color-chart-1' : '--color-chart-2'}) ${Math.round(t * 1000) / 10}%, var(--color-bg-muted))`;
+  };
   if (scale.diverging) {
     // bin k spans [breaks[k-1], breaks[k]); it is "below zero" when its upper edge is <= 0
     const below = scale.breaks.filter((b) => b <= 0).length; // bins 0 .. below-1
     if (i < below) {
       // deepest orange for the most negative bin, easing off toward zero
-      return mix('--color-chart-1', below === 1 ? 0.85 : 0.85 - (i / (below - 1)) * 0.45);
+      return at(NEG, 'neg', below === 1 ? 0.85 : 0.85 - (i / (below - 1)) * 0.45);
     }
     // the blue bins use the top of the same ramp as a plain scale: the last bin is always the full chart blue
     const above = n - below;
     const step = above > 1 ? Math.min(RAMP_STEP, 0.75 / (above - 1)) : 0;
-    return mix('--color-chart-2', 1 - (above - 1 - (i - below)) * step);
+    return at(BIN, 'bin', 1 - (above - 1 - (i - below)) * step);
   }
-  return mix('--color-chart-2', n === 1 ? 1 : RAMP_MIN + (i / (n - 1)) * (1 - RAMP_MIN));
+  return at(BIN, 'bin', n === 1 ? 1 : RAMP_MIN + (i / (n - 1)) * (1 - RAMP_MIN));
 }
 
 /** Even-ish breaks for a set of values (quantiles), rounded to 2 significant figures. Used when `scale` is left out. */

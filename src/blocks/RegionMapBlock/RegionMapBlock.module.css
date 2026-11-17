@@ -21,13 +21,13 @@
 /* the hover card, in the library's tooltip colours */
 .tipHead { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; }
 .tipName { font-size: 13px; line-height: 18px; font-weight: 600; }
-.tipRank { font-size: 11px; line-height: 16px; opacity: 0.6; }
+.tipRank { font-size: 12px; line-height: 16px; opacity: 0.6; }
 .tipRows { display: flex; flex-direction: column; gap: 1px; margin-top: 4px; }
-.tipRow { display: flex; align-items: baseline; justify-content: space-between; gap: 24px; font-size: 11px; line-height: 16px; font-variant-numeric: tabular-nums; }
+.tipRow { display: flex; align-items: baseline; justify-content: space-between; gap: 24px; font-size: 12px; line-height: 16px; font-variant-numeric: tabular-nums; }
 .tipRow span:first-child { opacity: 0.6; }
 .tipRowOn span:first-child { opacity: 1; }
 .tipRowOn span:last-child { font-weight: 600; }
-.tipHint { margin-top: 6px; font-size: 11px; line-height: 16px; opacity: 0.6; }
+.tipHint { margin-top: 6px; font-size: 12px; line-height: 16px; opacity: 0.6; }
 
 .divider { height: 1px; margin: 0; border: 0; background: var(--color-border-subtle); }
 

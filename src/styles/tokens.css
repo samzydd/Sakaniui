@@ -122,6 +122,15 @@
   --color-chart-4: var(--color-chart-purple);
   --color-chart-5: var(--color-chart-gold);
   --color-chart-6: var(--color-chart-green);
+  /* map ramp (Region Map): the chart blue (bin) and orange (neg) mixed over bg/muted. Declared where bg/muted is, so a
+     .dark wrapper recomputes them. Figma: Semantic map/bin-0..4 and map/neg-0..1. */
+  --color-map-bin-0: color-mix(in srgb, var(--color-chart-2) 25%, var(--color-bg-muted));
+  --color-map-bin-1: color-mix(in srgb, var(--color-chart-2) 43.75%, var(--color-bg-muted));
+  --color-map-bin-2: color-mix(in srgb, var(--color-chart-2) 62.5%, var(--color-bg-muted));
+  --color-map-bin-3: color-mix(in srgb, var(--color-chart-2) 81.25%, var(--color-bg-muted));
+  --color-map-bin-4: var(--color-chart-2);
+  --color-map-neg-0: color-mix(in srgb, var(--color-chart-1) 85%, var(--color-bg-muted));
+  --color-map-neg-1: color-mix(in srgb, var(--color-chart-1) 40%, var(--color-bg-muted));
   --color-accent-default: var(--color-neutral-900);
   --color-accent-hover: var(--color-neutral-800);
   --color-accent-active: var(--color-neutral-700);
@@ -295,6 +304,15 @@ html, body {
   --color-info-bg: var(--color-info-950);
   --color-info-border: var(--color-info-800);
   --color-info-solid: var(--color-info-500);
+  /* map ramp (Region Map): the chart blue (bin) and orange (neg) mixed over bg/muted. Declared where bg/muted is, so a
+     .dark wrapper recomputes them. Figma: Semantic map/bin-0..4 and map/neg-0..1. */
+  --color-map-bin-0: color-mix(in srgb, var(--color-chart-2) 25%, var(--color-bg-muted));
+  --color-map-bin-1: color-mix(in srgb, var(--color-chart-2) 43.75%, var(--color-bg-muted));
+  --color-map-bin-2: color-mix(in srgb, var(--color-chart-2) 62.5%, var(--color-bg-muted));
+  --color-map-bin-3: color-mix(in srgb, var(--color-chart-2) 81.25%, var(--color-bg-muted));
+  --color-map-bin-4: var(--color-chart-2);
+  --color-map-neg-0: color-mix(in srgb, var(--color-chart-1) 85%, var(--color-bg-muted));
+  --color-map-neg-1: color-mix(in srgb, var(--color-chart-1) 40%, var(--color-bg-muted));
 }
 
 /* ── Global accessibility baseline ─────────────────────────────────────────── */
