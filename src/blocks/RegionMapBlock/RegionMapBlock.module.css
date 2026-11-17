@@ -59,13 +59,15 @@
 .rowValue { flex-shrink: 0; min-width: 56px; font-size: 14px; line-height: 20px; font-weight: 500; font-variant-numeric: tabular-nums; text-align: right; }
 
 /* three cards: what it is and where it ranks, the figure, then one quiet line on how it compares */
-.figures { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin: 0; }
-.figure { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: baseline; gap: 10px 8px; padding: 16px; border: 1px solid var(--color-border-subtle); border-radius: 12px; }
+.figures { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin: 0; }
+.help { margin: 0; font-size: 12px; line-height: 18px; color: var(--color-fg-muted); }
+.help strong { font-weight: 500; color: var(--color-fg-default); }
+.figure { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: baseline; gap: 6px 8px; padding: 12px 14px; border: 1px solid var(--color-border-subtle); border-radius: 12px; }
 .figure[data-on] { border-color: var(--color-border-strong); }
 .figure dt, .figure dd { margin: 0; }
 .figure dt { font-size: 12px; line-height: 16px; font-weight: 500; color: var(--color-fg-muted); }
 .figureRank { font-size: 12px; line-height: 16px; color: var(--color-fg-subtle); white-space: nowrap; text-align: right; }
-.figureValue { grid-column: 1 / -1; font-size: 24px; line-height: 30px; font-weight: 500; letter-spacing: -0.01em; font-variant-numeric: tabular-nums; color: var(--color-fg-default); }
+.figureValue { grid-column: 1 / -1; font-size: 20px; line-height: 26px; font-weight: 500; letter-spacing: -0.01em; font-variant-numeric: tabular-nums; color: var(--color-fg-default); }
 .delta { grid-column: 1 / -1; justify-self: start; display: inline-flex; align-items: center; gap: 4px; max-width: 100%; padding: 2px 8px 2px 6px; border-radius: 999px; font-size: 12px; line-height: 16px; font-weight: 500; white-space: nowrap; color: var(--color-fg-muted); background: var(--color-bg-subtle); }
 .delta[data-dir="up"] { color: var(--color-success-fg); background: var(--color-success-bg); }
 .delta[data-dir="down"] { color: var(--color-danger-fg); background: var(--color-danger-bg); }
@@ -77,5 +79,4 @@
 
 @media (max-width: 480px) {
   .block { padding: 16px; }
-  .figures { grid-template-columns: 1fr; }
 }

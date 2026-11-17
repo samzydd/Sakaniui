@@ -75,15 +75,19 @@ const ordinal = (n: number) => {
 };
 
 /** How a figure compares with the average region: a short phrase ("+16.6 pts", "39% above") and which way it points. */
-function compareParts(metric: RegionMapMetric, value: number, average: number): { text: string; dir: 'up' | 'down' | 'flat' } {
+function compareParts(metric: RegionMapMetric, value: number, average: number): { text: string; long: string; dir: 'up' | 'down' | 'flat' } {
   const diff = value - average;
   const mean = metric.aggregate === 'mean';
   const flat = mean ? Math.abs(diff) < 0.5 : Math.abs(diff) <= Math.abs(average) * 0.02;
   const dir = flat ? 'flat' : diff > 0 ? 'up' : 'down';
-  if (metric.compare) return { text: metric.compare(value, average), dir };
-  if (flat) return { text: 'On average', dir };
-  if (mean) return { text: `${diff < 0 ? '\u2212' : '+'}${Math.abs(diff).toFixed(1)} pts`, dir };
-  return { text: `${Math.round((Math.abs(diff) / Math.abs(average)) * 100)}% ${diff > 0 ? 'above' : 'below'}`, dir };
+  if (metric.compare) return { text: metric.compare(value, average), long: metric.compare(value, average), dir };
+  if (flat) return { text: 'On average', long: 'in line with the average', dir };
+  if (mean) {
+    const t = `${diff < 0 ? '\u2212' : '+'}${Math.abs(diff).toFixed(1)} pts`;
+    return { text: t, long: `${t} vs average`, dir };
+  }
+  const t = `${Math.round((Math.abs(diff) / Math.abs(average)) * 100)}% ${diff > 0 ? 'above' : 'below'}`;
+  return { text: t, long: `${t} average`, dir };
 }
 
 /** A figure that counts up from zero when it appears. */
@@ -366,7 +370,7 @@ export const RegionMapBlock: React.FC<RegionMapBlockProps> = ({
               <span className={styles.panelHint}>Compared with the average {regionNoun}</span>
             </div>
             <dl className={styles.figures}>
-              {metrics.map((m, i) => {
+              {metrics.slice(0, 2).map((m, i) => {
                 const v = selectedRow.values[m.id];
                 const cmp = compareParts(m, v, average(m.id));
                 const CmpIcon = cmp.dir === 'up' ? IconArrowUpRight : cmp.dir === 'down' ? IconArrowDownRight : IconMinus;
@@ -385,6 +389,19 @@ export const RegionMapBlock: React.FC<RegionMapBlockProps> = ({
                 );
               })}
             </dl>
+            {metrics.length > 2 && (
+              <p className={styles.help}>
+                {metrics.slice(2).map((m, i) => {
+                  const v = selectedRow.values[m.id];
+                  return (
+                    <React.Fragment key={m.id}>
+                      {i > 0 && ' \u00b7 '}
+                      {m.label} <strong>{m.format(v)}</strong>, {ordinal(rankIn(selectedRow.id, m.id))} of {rows.length}, {compareParts(m, v, average(m.id)).long}
+                    </React.Fragment>
+                  );
+                })}
+              </p>
+            )}
             <h5 className={styles.subhead}>Nearby in the ranking</h5>
             <ul className={styles.list}>{nearby.map((r, i) => listRow(r, i, { current: r.id === selectedRow.id, max: nearMax }))}</ul>
           </div>
