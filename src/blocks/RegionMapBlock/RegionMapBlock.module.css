@@ -44,18 +44,15 @@
 .listScroll { max-height: 340px; overflow-y: auto; margin: 0 -6px; padding: 0 6px; }
 
 .list { display: flex; flex-direction: column; gap: 4px; margin: 0; padding: 0; list-style: none; }
-.row { display: flex; align-items: center; gap: 12px; width: 100%; box-sizing: border-box; padding: 0; border: 0; background: transparent; font: inherit; color: inherit; text-align: left; cursor: pointer; border-radius: 8px; }
-.row[data-dim] { opacity: 0.35; }
-.row[data-active] .bar, .row[data-current] .bar { background: var(--color-bg-muted); }
-.row[data-current] .rowName, .row[data-current] .rowValue { font-weight: 600; }
-.row { transition: opacity 160ms ease; }
+.row { display: flex; align-items: center; gap: 12px; width: 100%; box-sizing: border-box; padding: 0; border: 0; background: transparent; font: inherit; color: inherit; text-align: left; cursor: pointer; border-radius: 8px; transition: opacity 160ms ease; }
 .row:focus-visible { outline: 2px solid var(--color-border-focus); outline-offset: 2px; }
 .row:disabled { cursor: default; }
-/* the bar behind the name is as long as the value, so the list reads as a chart */
-.pillWrap { position: relative; display: flex; align-items: center; flex: 1 1 0; min-width: 0; height: 36px; }
-.bar { position: absolute; top: 0; bottom: 0; left: 0; border-radius: 8px; background: var(--color-bg-subtle); transition: background-color 160ms ease; }
-.row:hover .bar { background: var(--color-bg-muted); }
-.rowName { position: relative; padding: 0 12px; font-size: 14px; line-height: 20px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.row[data-dim] { opacity: 0.35; }
+/* the bar is the pill the name sits in: as long as the value, but never shorter than its own name */
+.pillWrap { display: flex; align-items: center; flex: 1 1 0; min-width: 0; height: 36px; }
+.pill { display: flex; align-items: center; box-sizing: border-box; height: 100%; min-width: max-content; max-width: 100%; padding: 0 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; border-radius: 8px; background: var(--color-bg-subtle); font-size: 14px; line-height: 20px; font-weight: 500; transition: background-color 160ms ease; }
+.row:hover .pill, .row[data-active] .pill, .row[data-current] .pill { background: var(--color-bg-muted); }
+.row[data-current] .pill, .row[data-current] .rowValue { font-weight: 600; }
 .rowValue { flex-shrink: 0; min-width: 56px; font-size: 14px; line-height: 20px; font-weight: 500; font-variant-numeric: tabular-nums; text-align: right; }
 
 /* three cards: what it is and where it ranks, the figure, then one quiet line on how it compares */

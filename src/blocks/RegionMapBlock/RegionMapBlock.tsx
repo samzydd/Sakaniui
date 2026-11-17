@@ -128,8 +128,7 @@ const RankRow: React.FC<{
       onBlur={() => onHover(false)}
     >
       <span className={styles.pillWrap}>
-        <span className={styles.bar} style={{ width: `${Math.max(22, pct * 100) * p}%` }} aria-hidden />
-        <span className={styles.rowName}>{name}</span>
+        <span className={styles.pill} style={{ width: `${Math.max(22, pct * 100) * p}%` }}>{name}</span>
       </span>
       <span className={styles.rowValue} aria-label={format(value)}>{format(value * p)}</span>
     </button>
