@@ -37,15 +37,16 @@
 .panelTitle { margin: 0; font-size: 14px; line-height: 20px; font-weight: 500; }
 .panelHint { font-size: 12px; line-height: 16px; color: var(--color-fg-muted); }
 
-.list { display: flex; flex-direction: column; margin: 0; padding: 0; list-style: none; }
-.row { display: grid; grid-template-columns: 20px minmax(0, 1fr) minmax(0, 1.4fr) auto; align-items: center; gap: 12px; width: 100%; box-sizing: border-box; padding: 8px; border: 0; border-radius: 8px; background: transparent; font: inherit; color: inherit; text-align: left; cursor: pointer; }
-.row:hover { background: var(--color-bg-subtle); }
-.row:focus-visible { outline: 2px solid var(--color-border-focus); outline-offset: -2px; }
-.rank { font-size: 12px; line-height: 16px; color: var(--color-fg-subtle); font-variant-numeric: tabular-nums; }
-.rowName { font-size: 13px; line-height: 18px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.track { height: 6px; border-radius: 3px; background: var(--color-bg-subtle); overflow: hidden; }
-.fill { display: block; height: 100%; border-radius: 3px; }
-.rowValue { font-size: 13px; line-height: 18px; font-weight: 500; font-variant-numeric: tabular-nums; text-align: right; min-width: 56px; }
+.list { display: flex; flex-direction: column; gap: 4px; margin: 0; padding: 0; list-style: none; }
+.row { display: flex; align-items: center; gap: 12px; width: 100%; box-sizing: border-box; padding: 0; border: 0; background: transparent; font: inherit; color: inherit; text-align: left; cursor: pointer; border-radius: 8px; }
+.row:focus-visible { outline: 2px solid var(--color-border-focus); outline-offset: 2px; }
+.row:disabled { cursor: default; }
+/* the bar behind the name is as long as the value, so the list reads as a chart */
+.pillWrap { position: relative; display: flex; align-items: center; flex: 1 1 0; min-width: 0; height: 36px; }
+.bar { position: absolute; top: 0; bottom: 0; left: 0; border-radius: 8px; background: var(--color-bg-subtle); transition: width 320ms cubic-bezier(0.4, 0, 0.2, 1), background-color 160ms ease; }
+.row:hover .bar { background: var(--color-bg-muted); }
+.rowName { position: relative; padding: 0 12px; font-size: 14px; line-height: 20px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rowValue { flex-shrink: 0; min-width: 56px; font-size: 14px; line-height: 20px; font-weight: 500; font-variant-numeric: tabular-nums; text-align: right; }
 
 .figures { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin: 0; }
 .figure { display: flex; flex-direction: column; gap: 2px; padding: 10px 12px; border: 1px solid var(--color-border-subtle); border-radius: 10px; }
@@ -59,11 +60,9 @@
 .skeleton { display: flex; flex-direction: column; gap: 8px; }
 .skeleton i { display: block; height: 14px; border-radius: 4px; background: var(--color-bg-subtle); animation: rmbPulse 1.6s ease-in-out infinite; }
 @keyframes rmbPulse { 0%, 100% { opacity: 0.55; } 50% { opacity: 1; } }
-@media (prefers-reduced-motion: reduce) { .skeleton i { animation: none; } }
+@media (prefers-reduced-motion: reduce) { .skeleton i { animation: none; } .bar { transition: none; } }
 
 @media (max-width: 480px) {
   .block { padding: 16px; }
   .figures { grid-template-columns: 1fr; }
-  .row { grid-template-columns: 20px minmax(0, 1fr) auto; }
-  .track { display: none; }
 }

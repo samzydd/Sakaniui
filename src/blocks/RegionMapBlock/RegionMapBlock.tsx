@@ -9,7 +9,7 @@
  *   headline    the area or region name, its figure, and "All states" (a Button) once a region is zoomed
  *   map         RegionMap shaded by the metric; hover gives a card with the rank, click zooms in
  *   legend      RegionMapLegend + "Shaded by ..."
- *   panel       nothing selected: the ranked list (a bar and a figure per region, click to zoom);
+ *   panel       nothing selected: the ranked list (a soft bar behind each name, as long as its value, and the figure at the right; click to zoom);
  *               a region selected: its figures, its rank and a note (`renderDetail` replaces it)
  *
  * States (the `state` prop): "default", "loading" (skeletons), "empty" (no figures yet). Dark mode is the `dark` class
@@ -21,7 +21,7 @@ import { IconArrowLeft } from '../../icons/outline/arrow-left';
 import { Button } from '../../components/Button';
 import { SegmentedControl } from '../../components/SegmentedControl';
 import { Select } from '../../components/Select';
-import { RegionMap, RegionMapLegend, US_STATES, US_STATES_VIEWBOX, binColor, binIndex, type RegionShape } from '../../components/RegionMap';
+import { RegionMap, RegionMapLegend, US_STATES, US_STATES_VIEWBOX, type RegionShape } from '../../components/RegionMap';
 import { SAMPLE_METRICS, SAMPLE_ROWS } from './sample';
 import type { RegionMapMetric, RegionMapRow, RegionMapState } from './types';
 import styles from './RegionMapBlock.module.css';
@@ -267,15 +267,14 @@ export const RegionMapBlock: React.FC<RegionMapBlockProps> = ({
             <span className={styles.panelHint}>{metric.rankedBy}</span>
           </div>
           <ul className={styles.list}>
-            {ranked.slice(0, 6).map((r, i) => {
+            {ranked.slice(0, 6).map((r) => {
               const v = r.values[metric.id];
               return (
                 <li key={r.id}>
                   <button type="button" className={styles.row} onClick={() => setSelected(r.id)} disabled={empty}>
-                    <span className={styles.rank}>{i + 1}</span>
-                    <span className={styles.rowName}>{r.name}</span>
-                    <span className={styles.track} aria-hidden>
-                      <span className={styles.fill} style={{ width: `${Math.max(4, (Math.abs(v) / max) * 100)}%`, background: binColor(binIndex(v, metric.scale.breaks), metric.scale) }} />
+                    <span className={styles.pillWrap}>
+                      <span className={styles.bar} style={{ width: `${Math.max(22, (Math.abs(v) / max) * 100)}%` }} aria-hidden />
+                      <span className={styles.rowName}>{r.name}</span>
                     </span>
                     <span className={styles.rowValue}>{metric.format(v)}</span>
                   </button>
