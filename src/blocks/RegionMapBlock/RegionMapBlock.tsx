@@ -22,6 +22,9 @@
 
 import React from 'react';
 import { IconZoomOut } from '../../icons/outline/zoom-out';
+import { IconArrowUpRight } from '../../icons/outline/arrow-up-right';
+import { IconArrowDownRight } from '../../icons/outline/arrow-down-right';
+import { IconMinus } from '../../icons/outline/minus';
 import { Button } from '../../components/Button';
 import { IconButton } from '../../components/IconButton';
 import { Tooltip } from '../../components/Tooltip';
@@ -71,14 +74,16 @@ const ordinal = (n: number) => {
   return `${n}${s[(v - 20) % 10] || s[v] || s[0]}`;
 };
 
-/** How a figure compares with the average region, in the metric's own terms. */
-function compareText(metric: RegionMapMetric, value: number, average: number): string {
-  if (metric.compare) return metric.compare(value, average);
-  if (metric.aggregate === 'mean') {
-    const d = value - average;
-    return `${d < 0 ? '−' : '+'}${Math.abs(d).toFixed(1)} pts vs average`;
-  }
-  return average > 0 ? `${(value / average).toFixed(1)}× the average` : '';
+/** How a figure compares with the average region: a short phrase ("+16.6 pts", "39% above") and which way it points. */
+function compareParts(metric: RegionMapMetric, value: number, average: number): { text: string; dir: 'up' | 'down' | 'flat' } {
+  const diff = value - average;
+  const mean = metric.aggregate === 'mean';
+  const flat = mean ? Math.abs(diff) < 0.5 : Math.abs(diff) <= Math.abs(average) * 0.02;
+  const dir = flat ? 'flat' : diff > 0 ? 'up' : 'down';
+  if (metric.compare) return { text: metric.compare(value, average), dir };
+  if (flat) return { text: 'On average', dir };
+  if (mean) return { text: `${diff < 0 ? '\u2212' : '+'}${Math.abs(diff).toFixed(1)} pts`, dir };
+  return { text: `${Math.round((Math.abs(diff) / Math.abs(average)) * 100)}% ${diff > 0 ? 'above' : 'below'}`, dir };
 }
 
 /** A figure that counts up from zero when it appears. */
@@ -358,19 +363,24 @@ export const RegionMapBlock: React.FC<RegionMapBlockProps> = ({
           <div className={styles.panel}>
             <div className={styles.panelHead}>
               <h4 className={styles.panelTitle}>{selectedRow.name}</h4>
-              <span className={styles.panelHint}>{ordinal(selRank)} of {ranked.length} by {metric.label.toLowerCase()}</span>
+              <span className={styles.panelHint}>Compared with the average {regionNoun}</span>
             </div>
             <dl className={styles.figures}>
               {metrics.map((m, i) => {
                 const v = selectedRow.values[m.id];
+                const cmp = compareParts(m, v, average(m.id));
+                const CmpIcon = cmp.dir === 'up' ? IconArrowUpRight : cmp.dir === 'down' ? IconArrowDownRight : IconMinus;
                 return (
                   <div key={`${m.id}-${selectedRow.id}`} className={styles.figure} data-on={m.id === metric.id ? '' : undefined}>
                     <dt>{m.label}</dt>
-                    <dd>
+                    <dd className={styles.figureRank}>{ordinal(rankIn(selectedRow.id, m.id))} of {rows.length}</dd>
+                    <dd className={styles.figureValue}>
                       <Count value={v} format={m.format} animate={animate} delay={i * 70} />
                     </dd>
-                    <small>{ordinal(rankIn(selectedRow.id, m.id))} of {rows.length}</small>
-                    <small className={styles.compare}>{compareText(m, v, average(m.id))}</small>
+                    <dd className={styles.delta} data-dir={cmp.dir}>
+                      <CmpIcon size={14} aria-hidden />
+                      {cmp.text}
+                    </dd>
                   </div>
                 );
               })}

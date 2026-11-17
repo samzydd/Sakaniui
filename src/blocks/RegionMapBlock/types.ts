@@ -11,7 +11,7 @@ export interface RegionMapMetric {
   format: (value: number) => string;
   /** The legend breaks. */
   scale: RegionScale;
-  /** Words for how a figure compares with the average region ("+16.6 pts vs average"). Default: points for a mean metric, a multiple for a sum. */
+  /** Words for how a figure compares with the average region ("+16.6 pts"). Default: points for a mean metric, a multiple for a sum. */
   compare?: (value: number, average: number) => string;
   /** How the headline combines every region when none is selected. Default "sum". */
   aggregate?: 'sum' | 'mean';

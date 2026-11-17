@@ -42,7 +42,6 @@
 .toggle button[aria-pressed="true"] { background: var(--color-bg-surface); color: var(--color-fg-default); box-shadow: 0 1px 2px rgba(16, 15, 12, 0.08); }
 .toggle button:focus-visible { outline: 2px solid var(--color-border-focus); outline-offset: 1px; }
 .listScroll { max-height: 340px; overflow-y: auto; margin: 0 -6px; padding: 0 6px; }
-.compare { color: var(--color-fg-muted); }
 
 .list { display: flex; flex-direction: column; gap: 4px; margin: 0; padding: 0; list-style: none; }
 .row { display: flex; align-items: center; gap: 12px; width: 100%; box-sizing: border-box; padding: 0; border: 0; background: transparent; font: inherit; color: inherit; text-align: left; cursor: pointer; border-radius: 8px; }
@@ -59,11 +58,17 @@
 .rowName { position: relative; padding: 0 12px; font-size: 14px; line-height: 20px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .rowValue { flex-shrink: 0; min-width: 56px; font-size: 14px; line-height: 20px; font-weight: 500; font-variant-numeric: tabular-nums; text-align: right; }
 
+/* three cards: what it is and where it ranks, the figure, then one quiet line on how it compares */
 .figures { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin: 0; }
-.figure { display: flex; flex-direction: column; gap: 2px; padding: 10px 12px; border: 1px solid var(--color-border-subtle); border-radius: 10px; }
-.figure dt { font-size: 11px; line-height: 14px; color: var(--color-fg-muted); }
-.figure dd { margin: 0; font-size: 16px; line-height: 22px; font-weight: 500; font-variant-numeric: tabular-nums; }
-.figure small { font-size: 12px; line-height: 16px; color: var(--color-fg-subtle); }
+.figure { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: baseline; gap: 10px 8px; padding: 16px; border: 1px solid var(--color-border-subtle); border-radius: 12px; }
+.figure[data-on] { border-color: var(--color-border-strong); }
+.figure dt, .figure dd { margin: 0; }
+.figure dt { font-size: 12px; line-height: 16px; font-weight: 500; color: var(--color-fg-muted); }
+.figureRank { font-size: 12px; line-height: 16px; color: var(--color-fg-subtle); white-space: nowrap; text-align: right; }
+.figureValue { grid-column: 1 / -1; font-size: 24px; line-height: 30px; font-weight: 500; letter-spacing: -0.01em; font-variant-numeric: tabular-nums; color: var(--color-fg-default); }
+.delta { grid-column: 1 / -1; justify-self: start; display: inline-flex; align-items: center; gap: 4px; max-width: 100%; padding: 2px 8px 2px 6px; border-radius: 999px; font-size: 12px; line-height: 16px; font-weight: 500; white-space: nowrap; color: var(--color-fg-muted); background: var(--color-bg-subtle); }
+.delta[data-dir="up"] { color: var(--color-success-fg); background: var(--color-success-bg); }
+.delta[data-dir="down"] { color: var(--color-danger-fg); background: var(--color-danger-bg); }
 
 .skeleton { display: flex; flex-direction: column; gap: 8px; }
 .skeleton i { display: block; height: 14px; border-radius: 4px; background: var(--color-bg-subtle); animation: rmbPulse 1.6s ease-in-out infinite; }

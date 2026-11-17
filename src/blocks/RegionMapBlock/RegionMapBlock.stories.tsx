@@ -34,5 +34,7 @@ export const Dark: Story = { decorators: [dark] };
 export const DarkZoomedIn: Story = { args: { defaultMetric: 'growth', defaultSelectedId: 'OR' }, decorators: [dark] };
 export const Growth: Story = { args: { defaultMetric: 'growth' } };
 export const ZoomedIn: Story = { args: { defaultSelectedId: 'OR' } };
+/** A state below the average on every figure: the comparison pills turn red. */
+export const ZoomedBelowAverage: Story = { args: { defaultSelectedId: 'WV' } };
 export const Loading: Story = { args: { state: 'loading' } };
 export const Empty: Story = { args: { state: 'empty' } };
