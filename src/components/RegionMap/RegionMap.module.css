@@ -9,10 +9,12 @@
   vector-effect: non-scaling-stroke;
   cursor: pointer;
   outline: none;
-  transition: opacity 160ms ease;
+  transition: opacity 160ms ease, fill 320ms ease;
 }
 /* while one region is selected the others step back a little, so the zoomed one reads first */
 .map[data-selected] .region:not([data-selected]) { opacity: 0.85; }
+/* a legend band or a list row is being pointed at: everything outside it steps back */
+.region[data-dim] { opacity: 0.22 !important; }
 
 .outline {
   fill: none;

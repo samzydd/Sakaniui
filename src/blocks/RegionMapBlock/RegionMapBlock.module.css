@@ -6,7 +6,7 @@
 
 .controls { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
 .metrics { flex: 1 1 280px; max-width: 340px; min-width: 0; }
-.area { flex: 0 0 auto; min-width: 150px; }
+.find { flex: 0 0 auto; width: 176px; }
 
 .headline { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; min-height: 52px; }
 .headlineText { display: flex; flex-direction: column; min-width: 0; }
@@ -36,9 +36,20 @@
 .panelHead { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
 .panelTitle { margin: 0; font-size: 14px; line-height: 20px; font-weight: 500; }
 .panelHint { font-size: 12px; line-height: 16px; color: var(--color-fg-muted); }
+.subhead { margin: 4px 0 -4px; font-size: 12px; line-height: 16px; font-weight: 500; color: var(--color-fg-muted); }
+.toggle { display: inline-flex; gap: 2px; padding: 2px; border-radius: 8px; background: var(--color-bg-subtle); }
+.toggle button { padding: 2px 10px; border: 0; border-radius: 6px; background: transparent; font: inherit; font-size: 12px; line-height: 20px; font-weight: 500; color: var(--color-fg-muted); cursor: pointer; }
+.toggle button[aria-pressed="true"] { background: var(--color-bg-surface); color: var(--color-fg-default); box-shadow: 0 1px 2px rgba(16, 15, 12, 0.08); }
+.toggle button:focus-visible { outline: 2px solid var(--color-border-focus); outline-offset: 1px; }
+.listScroll { max-height: 340px; overflow-y: auto; margin: 0 -6px; padding: 0 6px; }
+.compare { color: var(--color-fg-muted); }
 
 .list { display: flex; flex-direction: column; gap: 4px; margin: 0; padding: 0; list-style: none; }
 .row { display: flex; align-items: center; gap: 12px; width: 100%; box-sizing: border-box; padding: 0; border: 0; background: transparent; font: inherit; color: inherit; text-align: left; cursor: pointer; border-radius: 8px; }
+.row[data-dim] { opacity: 0.35; }
+.row[data-active] .bar, .row[data-current] .bar { background: var(--color-bg-muted); }
+.row[data-current] .rowName, .row[data-current] .rowValue { font-weight: 600; }
+.row { transition: opacity 160ms ease; }
 .row:focus-visible { outline: 2px solid var(--color-border-focus); outline-offset: 2px; }
 .row:disabled { cursor: default; }
 /* the bar behind the name is as long as the value, so the list reads as a chart */
@@ -52,10 +63,7 @@
 .figure { display: flex; flex-direction: column; gap: 2px; padding: 10px 12px; border: 1px solid var(--color-border-subtle); border-radius: 10px; }
 .figure dt { font-size: 11px; line-height: 14px; color: var(--color-fg-muted); }
 .figure dd { margin: 0; font-size: 16px; line-height: 22px; font-weight: 500; font-variant-numeric: tabular-nums; }
-.figure small { font-size: 11px; line-height: 14px; color: var(--color-fg-subtle); }
-.note { display: flex; flex-direction: column; gap: 4px; align-items: flex-start; }
-.noteTitle { margin: 0; font-size: 13px; line-height: 18px; font-weight: 500; }
-.noteBody { margin: 0; font-size: 12px; line-height: 18px; color: var(--color-fg-muted); }
+.figure small { font-size: 12px; line-height: 16px; color: var(--color-fg-subtle); }
 
 .skeleton { display: flex; flex-direction: column; gap: 8px; }
 .skeleton i { display: block; height: 14px; border-radius: 4px; background: var(--color-bg-subtle); animation: rmbPulse 1.6s ease-in-out infinite; }

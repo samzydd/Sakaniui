@@ -45,6 +45,12 @@ export interface RegionMapProps {
   renderTooltip?: (region: RegionShape, value: number | null) => React.ReactNode;
   /** Formats a value for the default card and the screen-reader label. Default: `String(value)`. */
   formatValue?: (value: number) => string;
+  /** Called with the id of the region under the pointer or keyboard focus, and null when it leaves. */
+  onHoverChange?: (id: string | null) => void;
+  /** Outline a region from outside (a list row, a legend), without a card. */
+  hovered?: string | null;
+  /** Fade every region whose id is not in this list (the band a legend segment names). Null: none faded. */
+  dimExcept?: string[] | null;
   /** Shimmer the map while data loads. */
   loading?: boolean;
   /** Accessible name for the map. */
@@ -76,6 +82,9 @@ export const RegionMap: React.FC<RegionMapProps> = ({
   onSelectedChange,
   renderTooltip,
   formatValue = String,
+  onHoverChange,
+  hovered,
+  dimExcept,
   loading,
   'aria-label': ariaLabel = 'Map',
   className,
@@ -131,6 +140,17 @@ export const RegionMap: React.FC<RegionMapProps> = ({
     if (r) setHover({ id, x: e.clientX - r.left, y: e.clientY - r.top });
   };
   const cardId = hover?.id ?? focusId;
+  const lastHover = React.useRef<string | null>(null);
+  React.useEffect(() => {
+    const id = cardId ?? null;
+    if (lastHover.current !== id) {
+      lastHover.current = id;
+      onHoverChange?.(id);
+    }
+  }, [cardId, onHoverChange]);
+  const dimSet = React.useMemo(() => (dimExcept ? new Set(dimExcept) : null), [dimExcept]);
+  const outlineId = cardId ?? hovered ?? null;
+  const outlineRegion = outlineId ? byId.get(outlineId) : undefined;
   const cardRegion = cardId ? byId.get(cardId) : undefined;
   const wrapBox = wrap.current?.getBoundingClientRect();
 
@@ -198,6 +218,7 @@ export const RegionMap: React.FC<RegionMapProps> = ({
               d={r.d}
               data-region={r.id}
               data-selected={selected === r.id ? '' : undefined}
+              data-dim={dimSet && !dimSet.has(r.id) ? '' : undefined}
               className={styles.region}
               style={fill ? { fill } : undefined}
               role="button"
@@ -213,7 +234,7 @@ export const RegionMap: React.FC<RegionMapProps> = ({
             />
           );
         })}
-        {cardRegion && <path d={cardRegion.d} className={styles.outline} pointerEvents="none" />}
+        {outlineRegion && <path d={outlineRegion.d} className={styles.outline} pointerEvents="none" />}
       </svg>
 
       {cardRegion && !loading && (
