@@ -11,6 +11,7 @@ import path from 'node:path';
 //   .        -> src/index.ts   (stable, fully-configurable components)
 //   ./icons       -> src/icons/index.ts (the icon set: Tabler Icons, outline + filled)
 //   ./emoji       -> src/emoji/index.ts (the emoji set: Fluent Emoji Flat, full colour)
+//   ./regions, ./regions/uk ... -> src/regions (RegionMap outlines: US, UK, Spain, Germany, Canada, Australia)
 //   ./blocks -> src/blocks/index.ts (copy-paste composition examples --
 //     kept out of the main entry so importing them is an explicit,
 //     separate choice, matching how they're already split out in Storybook)
@@ -25,6 +26,7 @@ export default defineConfig({
         'src/blocks/**/*.ts', 'src/blocks/**/*.tsx',
         'src/icons/**/*.ts', 'src/icons/**/*.tsx',
         'src/emoji/**/*.ts', 'src/emoji/**/*.tsx',
+        'src/regions/**/*.ts',
         // index.ts re-exports from ./lib (LiquidGlass, HoverGroup, helpers): without these their types are `any`
         'src/lib/**/*.ts', 'src/lib/**/*.tsx',
       ],
@@ -54,6 +56,14 @@ export default defineConfig({
         icons: path.resolve(__dirname, 'src/icons/index.ts'),
         // 1,594 generated emoji modules, same idea: their own entry, pure exports.
         emoji: path.resolve(__dirname, 'src/emoji/index.ts'),
+        // Region outlines for RegionMap, one entry per country so an app ships only the ones it imports.
+        regions: path.resolve(__dirname, 'src/regions/index.ts'),
+        'regions/us': path.resolve(__dirname, 'src/regions/us.ts'),
+        'regions/uk': path.resolve(__dirname, 'src/regions/uk.ts'),
+        'regions/es': path.resolve(__dirname, 'src/regions/es.ts'),
+        'regions/de': path.resolve(__dirname, 'src/regions/de.ts'),
+        'regions/ca': path.resolve(__dirname, 'src/regions/ca.ts'),
+        'regions/au': path.resolve(__dirname, 'src/regions/au.ts'),
       },
       name: 'SakaniDesignSystem',
       formats: ['es', 'cjs'],

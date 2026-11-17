@@ -280,8 +280,10 @@ lists its other names under `aliases` in `manifest.json`, and `search_components
   on the hovered or selected marker (`cardPlacement="side"` puts it beside the marker). `markerScale={1}` keeps the
   markers at design size on a small globe.
   **RegionMap** — a choropleth: regions (states, countries, territories) shaded by a number, for "how does this vary by
-  place". `regions` + `viewBox` are the shapes (`US_STATES` and `US_STATES_VIEWBOX` ship with the library; any SVG paths
-  work), `values` is `{ [regionId]: number }` and `scale` is `{ breaks, diverging? }` (4 breaks = 5 bins; `diverging` paints
+  place". `regions` + `viewBox` are the shapes (outlines ship per country and are imported on their own so an app only carries
+  the ones it uses: `import { UK_REGIONS, UK_REGIONS_VIEWBOX } from '@sakaniui/react/regions/uk'`, likewise `/us` US_STATES,
+  `/es` ES_REGIONS (autonomous communities), `/de` DE_REGIONS (Länder), `/ca` CA_REGIONS (provinces), `/au` AU_REGIONS (states and
+  territories); any SVG paths work), `values` is `{ [regionId]: number }` and `scale` is `{ breaks, diverging? }` (4 breaks = 5 bins; `diverging` paints
   bins below zero orange, for growth or change). Hover shows a card (`renderTooltip`); click, Enter or Space selects a region
   and the view eases to it (`selected` / `defaultSelected` / `onSelectedChange`; Escape or a second click goes back out).
   Put `RegionMapLegend` (same `scale`, optional `caption`) under it. It has no tiles, streets or search: for places by

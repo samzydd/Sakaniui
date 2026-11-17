@@ -68,6 +68,41 @@
       "import": "./dist/emoji.mjs",
       "require": "./dist/emoji.cjs"
     },
+    "./regions": {
+      "types": "./dist/regions.d.ts",
+      "import": "./dist/regions.mjs",
+      "require": "./dist/regions.cjs"
+    },
+    "./regions/us": {
+      "types": "./dist/regions/us.d.ts",
+      "import": "./dist/regions/us.mjs",
+      "require": "./dist/regions/us.cjs"
+    },
+    "./regions/uk": {
+      "types": "./dist/regions/uk.d.ts",
+      "import": "./dist/regions/uk.mjs",
+      "require": "./dist/regions/uk.cjs"
+    },
+    "./regions/es": {
+      "types": "./dist/regions/es.d.ts",
+      "import": "./dist/regions/es.mjs",
+      "require": "./dist/regions/es.cjs"
+    },
+    "./regions/de": {
+      "types": "./dist/regions/de.d.ts",
+      "import": "./dist/regions/de.mjs",
+      "require": "./dist/regions/de.cjs"
+    },
+    "./regions/ca": {
+      "types": "./dist/regions/ca.d.ts",
+      "import": "./dist/regions/ca.mjs",
+      "require": "./dist/regions/ca.cjs"
+    },
+    "./regions/au": {
+      "types": "./dist/regions/au.d.ts",
+      "import": "./dist/regions/au.mjs",
+      "require": "./dist/regions/au.cjs"
+    },
     "./style.css": "./dist/style.css",
     "./tokens.css": "./dist/tokens.css",
     "./manifest.json": "./dist/manifest.json",

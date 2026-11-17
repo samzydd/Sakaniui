@@ -1,4 +1,6 @@
-import { US_STATES } from '../../components/RegionMap';
+import { US_STATES } from '../../regions/us';
+import { autoBreaks } from '../../components/RegionMap';
+import type { RegionShape } from '../../components/RegionMap';
 import type { RegionMapMetric, RegionMapRow } from './types';
 
 const money = (n: number) => {
@@ -64,3 +66,40 @@ export const SAMPLE_ROWS: RegionMapRow[] = US_STATES.map((s, i) => {
     },
   };
 });
+
+/**
+ * Figures for any set of regions (the UK, Germany, ...): a believable spread of revenue, growth and penetration, fixed
+ * so every render and screenshot reads the same. Swap for your own query.
+ */
+export function makeSampleRows(regions: RegionShape[], seed = 7): RegionMapRow[] {
+  return regions.map((s, i) => {
+    const r = rng(i * 104729 + seed * 31);
+    const area = Math.sqrt(s.box[2] * s.box[3]);
+    const weight = 0.4 + (area / 40) * (0.6 + r() * 0.9);
+    return {
+      id: s.id,
+      name: s.name,
+      values: {
+        revenue: Math.round((weight * 450_000 * (0.7 + r() * 0.6)) / 1000) * 1000,
+        growth: Math.round((-7 + r() * 34) * 10) / 10,
+        penetration: Math.round((3 + r() * 16) * 10) / 10,
+      },
+    };
+  });
+}
+
+/** The same three metrics with a currency symbol, and legend breaks taken from the rows. */
+export function makeSampleMetrics(symbol: string, rows: RegionMapRow[]): RegionMapMetric[] {
+  const money = (n: number) => {
+    const a = Math.abs(n);
+    if (a >= 1e6) return `${symbol}${(n / 1e6).toFixed(1)}M`;
+    if (a >= 1e3) return `${symbol}${Math.round(n / 1e3)}K`;
+    return `${symbol}${Math.round(n)}`;
+  };
+  return SAMPLE_METRICS.map((m) => {
+    const vals = rows.map((r) => r.values[m.id]);
+    if (m.id === 'revenue') return { ...m, format: money, scale: { breaks: autoBreaks(vals, 5) } };
+    if (m.id === 'penetration') return { ...m, scale: { breaks: autoBreaks(vals, 5) } };
+    return m;
+  });
+}

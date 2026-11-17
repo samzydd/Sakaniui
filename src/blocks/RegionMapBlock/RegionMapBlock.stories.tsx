@@ -1,6 +1,13 @@
 import React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { RegionMapBlock } from './RegionMapBlock';
+import { makeSampleMetrics, makeSampleRows } from './sample';
+import { UK_REGIONS, UK_REGIONS_VIEWBOX } from '../../regions/uk';
+import { ES_REGIONS, ES_REGIONS_VIEWBOX } from '../../regions/es';
+import { DE_REGIONS, DE_REGIONS_VIEWBOX } from '../../regions/de';
+import { CA_REGIONS, CA_REGIONS_VIEWBOX } from '../../regions/ca';
+import { AU_REGIONS, AU_REGIONS_VIEWBOX } from '../../regions/au';
+import type { RegionShape } from '../../components/RegionMap';
 
 /**
  * A "Revenue by state" card: a choropleth of the United States shaded by a metric you switch between, a hover card with
@@ -38,3 +45,17 @@ export const ZoomedIn: Story = { args: { defaultSelectedId: 'OR' } };
 export const ZoomedBelowAverage: Story = { args: { defaultSelectedId: 'WV' } };
 export const Loading: Story = { args: { state: 'loading' } };
 export const Empty: Story = { args: { state: 'empty' } };
+
+/* ---- other countries: the same block with another country's outlines. Import only the one you use, e.g.
+   `import { UK_REGIONS, UK_REGIONS_VIEWBOX } from '@sakaniui/react/regions/uk'`. ---- */
+const country = (regions: RegionShape[], viewBox: [number, number, number, number], symbol: string, noun: string, all: string, title: string, plural?: string): Story => {
+  const rows = makeSampleRows(regions);
+  return { args: { regions, viewBox, rows, metrics: makeSampleMetrics(symbol, rows), regionNoun: noun, regionNounPlural: plural, allLabel: all, title } };
+};
+export const UnitedKingdom: Story = country(UK_REGIONS, UK_REGIONS_VIEWBOX, '\u00a3', 'region', 'United Kingdom', 'Revenue by region');
+export const Germany: Story = country(DE_REGIONS, DE_REGIONS_VIEWBOX, '\u20ac', 'state', 'Germany', 'Revenue by state');
+export const Spain: Story = country(ES_REGIONS, ES_REGIONS_VIEWBOX, '\u20ac', 'community', 'Spain', 'Revenue by community', 'communities');
+export const Canada: Story = country(CA_REGIONS, CA_REGIONS_VIEWBOX, 'C$', 'province', 'Canada', 'Revenue by province');
+export const Australia: Story = country(AU_REGIONS, AU_REGIONS_VIEWBOX, 'A$', 'state', 'Australia', 'Revenue by state');
+export const UnitedKingdomZoomed: Story = { ...country(UK_REGIONS, UK_REGIONS_VIEWBOX, '\u00a3', 'region', 'United Kingdom', 'Revenue by region'), };
+UnitedKingdomZoomed.args = { ...UnitedKingdomZoomed.args, defaultSelectedId: 'SC' };

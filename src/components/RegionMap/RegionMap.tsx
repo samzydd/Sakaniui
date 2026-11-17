@@ -3,7 +3,7 @@
  *
  * A choropleth: regions (states, countries, any shapes you pass) shaded by a value, with a hover card and a click to
  * zoom into one region. Plain SVG, no map library and no tiles; the shapes are data (`regions`), so it is not tied to
- * the United States. `shapes/usStates` ships the 50 states and DC.
+ * the United States. `@sakaniui/react/regions/us` (and /uk, /es, /de, /ca, /au) ship the outlines.
  *
  *   shading     `values` by region id, binned by `scale.breaks` into the chart blue (or blue + orange when
  *               `scale.diverging`). A region without a value is drawn in a neutral tone.

@@ -2,7 +2,7 @@ import React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { RegionMap } from './RegionMap';
 import { RegionMapLegend } from './RegionMapLegend';
-import { US_STATES, US_STATES_VIEWBOX } from './shapes/usStates';
+import { US_STATES, US_STATES_VIEWBOX } from '../../regions/us';
 
 /* A fixed stream so the story reads the same every time. */
 const values: Record<string, number> = {};
