@@ -68,7 +68,6 @@ export { LiveMapBlock } from './LiveMapBlock';
 export type { LiveMapBlockProps, LiveMapCity, LiveMapRegion, LiveMapTotals, LiveMapInsight, LiveMapMetric, LiveMapState } from './LiveMapBlock';
 export { RegionMapBlock } from './RegionMapBlock';
 export type { RegionMapBlockProps, RegionMapMetric, RegionMapRow, RegionMapState } from './RegionMapBlock';
-export { makeSampleMetrics as makeRegionMapSampleMetrics, makeSampleRows as makeRegionMapSampleRows } from './RegionMapBlock';
 export { BlogListingBlock } from './BlogListingBlock';
 export type { BlogListingBlockProps, BlogListingFeaturedPost, BlogListingPost } from './BlogListingBlock';
 export { CareersBlock } from './CareersBlock';
