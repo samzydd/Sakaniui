@@ -11,6 +11,10 @@ export interface RegionScale {
   diverging?: boolean;
 }
 
+/** The lightest blue is 25% chart blue over the muted background; five bins step by 18.75%. */
+const RAMP_MIN = 0.25;
+const RAMP_STEP = 0.1875;
+
 /** Which bin a value falls in, 0 .. breaks.length. */
 export function binIndex(value: number, breaks: number[]): number {
   let i = 0;
@@ -25,20 +29,20 @@ export function binIndex(value: number, breaks: number[]): number {
 export function binColor(i: number, scale: RegionScale): string {
   const n = scale.breaks.length + 1;
   const mix = (token: string, t: number) =>
-    `color-mix(in srgb, var(${token}) ${Math.round(t * 100)}%, var(--color-bg-muted))`;
+    `color-mix(in srgb, var(${token}) ${Math.round(t * 1000) / 10}%, var(--color-bg-muted))`;
   if (scale.diverging) {
     // bin k spans [breaks[k-1], breaks[k]); it is "below zero" when its upper edge is <= 0
-    const negative = scale.breaks.map((b) => b <= 0);
-    const below = negative.filter(Boolean).length; // bins 0 .. below-1
+    const below = scale.breaks.filter((b) => b <= 0).length; // bins 0 .. below-1
     if (i < below) {
       // deepest orange for the most negative bin, easing off toward zero
-      return mix('--color-chart-1', below === 1 ? 0.8 : 0.85 - (i / (below - 1)) * 0.45);
+      return mix('--color-chart-1', below === 1 ? 0.85 : 0.85 - (i / (below - 1)) * 0.45);
     }
+    // the blue bins use the top of the same ramp as a plain scale: the last bin is always the full chart blue
     const above = n - below;
-    const k = i - below;
-    return mix('--color-chart-2', above === 1 ? 0.9 : 0.3 + (k / (above - 1)) * 0.7);
+    const step = above > 1 ? Math.min(RAMP_STEP, 0.75 / (above - 1)) : 0;
+    return mix('--color-chart-2', 1 - (above - 1 - (i - below)) * step);
   }
-  return mix('--color-chart-2', n === 1 ? 0.9 : 0.25 + (i / (n - 1)) * 0.75);
+  return mix('--color-chart-2', n === 1 ? 1 : RAMP_MIN + (i / (n - 1)) * (1 - RAMP_MIN));
 }
 
 /** Even-ish breaks for a set of values (quantiles), rounded to 2 significant figures. Used when `scale` is left out. */
