@@ -43,7 +43,7 @@
 .row:disabled { cursor: default; }
 /* the bar behind the name is as long as the value, so the list reads as a chart */
 .pillWrap { position: relative; display: flex; align-items: center; flex: 1 1 0; min-width: 0; height: 36px; }
-.bar { position: absolute; top: 0; bottom: 0; left: 0; border-radius: 8px; background: var(--color-bg-subtle); transition: width 320ms cubic-bezier(0.4, 0, 0.2, 1), background-color 160ms ease; }
+.bar { position: absolute; top: 0; bottom: 0; left: 0; border-radius: 8px; background: var(--color-bg-subtle); transition: background-color 160ms ease; }
 .row:hover .bar { background: var(--color-bg-muted); }
 .rowName { position: relative; padding: 0 12px; font-size: 14px; line-height: 20px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .rowValue { flex-shrink: 0; min-width: 56px; font-size: 14px; line-height: 20px; font-weight: 500; font-variant-numeric: tabular-nums; text-align: right; }
@@ -60,7 +60,7 @@
 .skeleton { display: flex; flex-direction: column; gap: 8px; }
 .skeleton i { display: block; height: 14px; border-radius: 4px; background: var(--color-bg-subtle); animation: rmbPulse 1.6s ease-in-out infinite; }
 @keyframes rmbPulse { 0%, 100% { opacity: 0.55; } 50% { opacity: 1; } }
-@media (prefers-reduced-motion: reduce) { .skeleton i { animation: none; } .bar { transition: none; } }
+@media (prefers-reduced-motion: reduce) { .skeleton i { animation: none; } }
 
 @media (max-width: 480px) {
   .block { padding: 16px; }

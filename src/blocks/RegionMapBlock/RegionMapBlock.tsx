@@ -23,6 +23,7 @@ import { SegmentedControl } from '../../components/SegmentedControl';
 import { Select } from '../../components/Select';
 import { RegionMap, RegionMapLegend, US_STATES, US_STATES_VIEWBOX, type RegionShape } from '../../components/RegionMap';
 import { SAMPLE_METRICS, SAMPLE_ROWS } from './sample';
+import { useReveal } from './useReveal';
 import type { RegionMapMetric, RegionMapRow, RegionMapState } from './types';
 import styles from './RegionMapBlock.module.css';
 
@@ -58,6 +59,8 @@ export interface RegionMapBlockProps {
   /** The region zoomed first (uncontrolled). */
   defaultSelectedId?: string | null;
   onSelectedChange?: (id: string | null) => void;
+  /** Play the load animation: each bar grows from the left while its figure counts up from zero. Default true. */
+  animate?: boolean;
   /** Replaces the selected region's panel. */
   renderDetail?: (row: RegionMapRow, ctx: { metric: RegionMapMetric; rank: number; total: number; back: () => void }) => React.ReactNode;
   /** Pins the hover card on one region without a pointer: documentation and visual tests. */
@@ -70,6 +73,29 @@ const ordinal = (n: number) => {
   const s = ['th', 'st', 'nd', 'rd'];
   const v = n % 100;
   return `${n}${s[(v - 20) % 10] || s[v] || s[0]}`;
+};
+
+/** One ranked row. It plays its own reveal when it mounts (first load, a new metric, coming back from a zoom). */
+const RankRow: React.FC<{
+  name: string;
+  value: number;
+  pct: number;
+  index: number;
+  format: (n: number) => string;
+  animate: boolean;
+  disabled?: boolean;
+  onClick: () => void;
+}> = ({ name, value, pct, index, format, animate, disabled, onClick }) => {
+  const p = useReveal(index * 70, 900, animate);
+  return (
+    <button type="button" className={styles.row} onClick={onClick} disabled={disabled}>
+      <span className={styles.pillWrap}>
+        <span className={styles.bar} style={{ width: `${Math.max(22, pct * 100) * p}%` }} aria-hidden />
+        <span className={styles.rowName}>{name}</span>
+      </span>
+      <span className={styles.rowValue} aria-label={format(value)}>{format(value * p)}</span>
+    </button>
+  );
 };
 
 export const RegionMapBlock: React.FC<RegionMapBlockProps> = ({
@@ -87,6 +113,7 @@ export const RegionMapBlock: React.FC<RegionMapBlockProps> = ({
   selectedId,
   defaultSelectedId = null,
   onSelectedChange,
+  animate = true,
   renderDetail,
   className,
 }) => {
@@ -267,17 +294,20 @@ export const RegionMapBlock: React.FC<RegionMapBlockProps> = ({
             <span className={styles.panelHint}>{metric.rankedBy}</span>
           </div>
           <ul className={styles.list}>
-            {ranked.slice(0, 6).map((r) => {
+            {ranked.slice(0, 6).map((r, i) => {
               const v = r.values[metric.id];
               return (
-                <li key={r.id}>
-                  <button type="button" className={styles.row} onClick={() => setSelected(r.id)} disabled={empty}>
-                    <span className={styles.pillWrap}>
-                      <span className={styles.bar} style={{ width: `${Math.max(22, (Math.abs(v) / max) * 100)}%` }} aria-hidden />
-                      <span className={styles.rowName}>{r.name}</span>
-                    </span>
-                    <span className={styles.rowValue}>{metric.format(v)}</span>
-                  </button>
+                <li key={`${metric.id}-${r.id}`}>
+                  <RankRow
+                    name={r.name}
+                    value={v}
+                    pct={Math.abs(v) / max}
+                    index={i}
+                    format={metric.format}
+                    animate={animate}
+                    disabled={empty}
+                    onClick={() => setSelected(r.id)}
+                  />
                 </li>
               );
             })}
