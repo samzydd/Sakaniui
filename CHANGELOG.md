@@ -2,6 +2,12 @@
 
 All notable changes to `@sakaniui/react` are documented here.
 
+## 0.19.1
+
+### Fixed
+
+- **`RegionMap`'s hover card stays under the pointer inside a scaled container.** The card was placed from the pointer's screen position, so in a preview shrunk with `transform: scale()` (an expanded docs preview, a scale-to-fit frame) it landed off by the scale factor. It now divides by the scale. Nothing changes when the map is not scaled.
+
 ## 0.19.0
 
 ### Added

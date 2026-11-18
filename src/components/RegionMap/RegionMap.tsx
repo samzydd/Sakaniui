@@ -136,8 +136,13 @@ export const RegionMap: React.FC<RegionMapProps> = ({
   const [hover, setHover] = React.useState<{ id: string; x: number; y: number } | null>(null);
   const [focusId, setFocusId] = React.useState<string | null>(null);
   const move = (id: string, e: React.PointerEvent) => {
-    const r = wrap.current?.getBoundingClientRect();
-    if (r) setHover({ id, x: e.clientX - r.left, y: e.clientY - r.top });
+    const el = wrap.current;
+    if (!el) return;
+    const r = el.getBoundingClientRect();
+    // Inside a scaled ancestor (a transform: scale() preview) the pointer is in screen pixels but the card is placed in
+    // the map's own pixels: divide by the scale so the card stays under the pointer.
+    const k = el.offsetWidth ? r.width / el.offsetWidth : 1;
+    setHover({ id, x: (e.clientX - r.left) / k, y: (e.clientY - r.top) / k });
   };
   const cardId = hover?.id ?? focusId;
   const lastHover = React.useRef<string | null>(null);
@@ -152,7 +157,8 @@ export const RegionMap: React.FC<RegionMapProps> = ({
   const outlineId = cardId ?? hovered ?? null;
   const outlineRegion = outlineId ? byId.get(outlineId) : undefined;
   const cardRegion = cardId ? byId.get(cardId) : undefined;
-  const wrapBox = wrap.current?.getBoundingClientRect();
+  const wrapW = wrap.current?.offsetWidth ?? 0;
+  const wrapH = wrap.current?.offsetHeight ?? 0;
 
   const valueOf = (id: string): number | null => {
     const v = values?.[id];
@@ -192,8 +198,8 @@ export const RegionMap: React.FC<RegionMapProps> = ({
     return v === null ? r.name : `${r.name}, ${formatValue(v)}`;
   };
 
-  const flipX = hover && wrapBox ? hover.x > wrapBox.width * 0.55 : false;
-  const flipY = hover && wrapBox ? hover.y > wrapBox.height * 0.6 : false;
+  const flipX = hover && wrapW ? hover.x > wrapW * 0.55 : false;
+  const flipY = hover && wrapH ? hover.y > wrapH * 0.6 : false;
 
   return (
     <div
