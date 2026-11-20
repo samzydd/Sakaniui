@@ -286,7 +286,7 @@ export const WeekCalendar: React.FC<WeekCalendarProps> = ({
                         event={e}
                         shape="block"
                         timeLabel={label}
-                        detail={h < 34 ? 'title' : h < 62 ? 'time' : 'full'}
+                        detail={h < 40 ? 'title' : h < 66 ? 'time' : 'full'}
                         selected={activeEventId === e.id}
                         dragging={dragging}
                         onClick={click(e)}

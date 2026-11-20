@@ -66,6 +66,8 @@ export { LiquidDashboardBlock } from './LiquidDashboardBlock';
 export type { LiquidDashboardBlockProps } from './LiquidDashboardBlock';
 export { LiveMapBlock } from './LiveMapBlock';
 export type { LiveMapBlockProps, LiveMapCity, LiveMapRegion, LiveMapTotals, LiveMapInsight, LiveMapMetric, LiveMapState } from './LiveMapBlock';
+export { WeekCalendarBlock, MonthCalendarBlock } from './CalendarBlocks';
+export type { WeekCalendarBlockProps, MonthCalendarBlockProps, CalendarSource } from './CalendarBlocks';
 export { RegionMapBlock } from './RegionMapBlock';
 export type { RegionMapBlockProps, RegionMapMetric, RegionMapRow, RegionMapState } from './RegionMapBlock';
 export { BlogListingBlock } from './BlogListingBlock';

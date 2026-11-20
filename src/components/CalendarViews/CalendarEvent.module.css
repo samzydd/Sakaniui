@@ -25,6 +25,9 @@
 .time { flex: 0 0 auto; color: var(--color-fg-muted); font-variant-numeric: tabular-nums; }
 .title { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 500; }
 
+/* a narrow month grid (a docked panel beside it): the title gets the room, the time goes */
+@container (max-width: 940px) { .chip .time { display: none; } }
+
 /* bar: all-day and multi-day */
 .bar { align-items: center; height: 22px; padding: 0 8px; border-radius: 6px; font-size: 12px; line-height: 16px; background: var(--tint); box-shadow: inset 3px 0 0 var(--cv); }
 .bar:hover, .bar[data-selected] { background: var(--tint-hover); }

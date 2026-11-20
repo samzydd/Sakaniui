@@ -2,6 +2,12 @@
 
 All notable changes to `@sakaniui/react` are documented here.
 
+## Unreleased
+
+### Added
+
+- **Calendar views: `MonthCalendar`, `WeekCalendar`, `DayPanel` and `CalendarEvent`.** `Calendar` is a date picker; these show events. `MonthCalendar` is a month grid with chips, bars that run across days (all-day and multi-day events), "N more" and a lit day. `WeekCalendar` is a time grid (7 days or a 5-day work week): events as tall as they are long, overlapping ones side by side, an all-day lane, and a line for now. Both take plain `events` (`{ id, title, start, end, allDay?, color?, location?, meta? }`), report changes through callbacks (`onEventClick`, `onEventMove`, `onSlotClick`, `onMoreClick`) and own no data. Drag an event to another day (month) or day and time (week, snapping to `snapMinutes`, default 15); Alt + arrows moves a focused event, so it works without a mouse. `DayPanel` is one day beside either view: how many events, hours booked and free, a strip of the working day, all-day events, the schedule in order, and each free gap of 30 minutes or more as a "Block focus time" button. Event colours come from the chart tokens. Two blocks compose them into full screens, **Week Calendar** and **Month Calendar** (Blocks / Application / Calendar): a sidebar with a mini month and your calendars (untick one and its events leave the grid), and a card that opens on an event with when, where, which calendar, Delete and Done. Nothing existing changes.
+
 ## 0.19.1
 
 ### Fixed

@@ -70,6 +70,7 @@ export * from './components/BoardColumn';
 export * from './components/Breadcrumb';
 export * from './components/Button';
 export * from './components/Calendar';
+export * from './components/CalendarViews';
 export * from './components/Card';
 export * from './components/CardMetaItem';
 export * from './components/ChainOfThought';

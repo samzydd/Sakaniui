@@ -279,6 +279,14 @@ lists its other names under `aliases` in `manifest.json`, and `search_components
   Change `center` and the globe turns to face the new place; `zoom` scales it; `renderMarkerCard` puts your own card
   on the hovered or selected marker (`cardPlacement="side"` puts it beside the marker). `markerScale={1}` keeps the
   markers at design size on a small globe.
+  **MonthCalendar / WeekCalendar / DayPanel** — calendars that show EVENTS (a schedule, bookings, a team's week), not a date
+  picker: for choosing a date use `Calendar`. `events` is `{ id, title, start, end, allDay?, color?, location?, meta? }[]`
+  (color is blue, green, orange, purple, teal, gold, red or neutral); you own the data and the view reports changes:
+  `onEventClick(event, el)` (open your own card), `onEventMove(event, { start, end })` (a drag or Alt + arrows: store it and
+  pass the new events back), `onSlotClick(start)` (week) and `onMoreClick(date)` (month). Month: `date`/`onDateChange`,
+  `selectedDate`/`onSelectedDateChange`, `weekStartsOn` (default 1). Week: `days` 5 or 7, `hourHeight`, `snapMinutes`, `now`.
+  `DayPanel` (`date`, `events`, `workHours`, `onBlockFocus`, `onCreate`) sits beside either view. `WeekCalendarBlock` and
+  `MonthCalendarBlock` (from `/blocks`) are the full screens with a sidebar and an event card: copy and edit them.
   **RegionMap** — a choropleth: regions (states, countries, territories) shaded by a number, for "how does this vary by
   place". `regions` + `viewBox` are the shapes (outlines ship per country and are imported on their own so an app only carries
   the ones it uses: `import { UK_REGIONS, UK_REGIONS_VIEWBOX } from '@sakaniui/react/regions/uk'`, likewise `/us` US_STATES,
