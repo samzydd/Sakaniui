@@ -1,0 +1,38 @@
+.month { display: flex; flex-direction: column; box-sizing: border-box; width: 100%; min-height: 0; color: var(--color-fg-default); font-family: var(--font-sans); }
+
+.header { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 0 0 12px; }
+.title { margin: 0; font-size: 18px; line-height: 24px; font-weight: 600; letter-spacing: -0.01em; }
+.title span { font-weight: 400; color: var(--color-fg-muted); }
+.nav { display: flex; align-items: center; gap: 4px; }
+.navBtn { display: inline-flex; align-items: center; justify-content: center; height: 32px; min-width: 32px; padding: 0; border: 1px solid var(--color-border-default); border-radius: 8px; background: var(--color-bg-surface); color: var(--color-fg-default); font: inherit; font-size: 13px; font-weight: 500; cursor: pointer; transition: background-color 120ms ease; }
+.navBtn[data-text] { padding: 0 12px; }
+.navBtn:hover { background: var(--color-bg-subtle); }
+.navBtn:focus-visible { outline: 2px solid var(--color-border-focus); outline-offset: 1px; }
+
+.weekdays { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); padding: 0 0 6px; font-size: 12px; line-height: 16px; font-weight: 500; color: var(--color-fg-muted); }
+.weekdays span { padding: 0 8px; }
+
+.grid { display: grid; grid-auto-rows: minmax(104px, 1fr); flex: 1 1 auto; border-top: 1px solid var(--color-border-subtle); border-left: 1px solid var(--color-border-subtle); border-radius: 8px 0 0 0; }
+.week { position: relative; display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); min-height: 0; }
+
+.cell { display: flex; flex-direction: column; min-width: 0; min-height: 0; padding: 4px 4px 4px; border-right: 1px solid var(--color-border-subtle); border-bottom: 1px solid var(--color-border-subtle); cursor: default; transition: background-color 120ms ease; }
+.cell[data-outside] { background: color-mix(in srgb, var(--color-bg-subtle) 55%, transparent); }
+.cell[data-outside] .num { color: var(--color-fg-subtle); }
+.cell[data-selected] { background: color-mix(in srgb, var(--color-chart-2) 8%, var(--color-bg-surface)); }
+.cell[data-over] { background: color-mix(in srgb, var(--color-chart-2) 16%, var(--color-bg-surface)); box-shadow: inset 0 0 0 1.5px var(--color-chart-2); }
+
+.num { align-self: flex-start; display: inline-flex; align-items: center; justify-content: center; min-width: 24px; height: 24px; margin: 0 0 4px 2px; padding: 0 6px; border: 0; border-radius: 12px; background: transparent; color: var(--color-fg-default); font: inherit; font-size: 12px; line-height: 16px; font-weight: 500; font-variant-numeric: tabular-nums; cursor: pointer; }
+.num:hover { background: var(--color-bg-subtle); }
+.num:focus-visible { outline: 2px solid var(--color-border-focus); outline-offset: 1px; }
+.num[data-today] { background: var(--color-fg-default); color: var(--color-bg-surface); }
+
+/* the bars sit in lanes right under the date numbers; the chips start below them */
+.bars { position: absolute; top: 32px; left: 0; right: 0; display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); grid-auto-rows: 22px; row-gap: 2px; padding: 0 3px; pointer-events: none; }
+.bars > * { pointer-events: auto; }
+.chips { display: flex; flex-direction: column; gap: 2px; min-height: 0; margin-top: calc(var(--lanes, 0) * 24px); }
+
+.more { align-self: flex-start; height: 20px; padding: 0 6px; border: 0; border-radius: 6px; background: transparent; color: var(--color-fg-muted); font: inherit; font-size: 12px; line-height: 16px; font-weight: 500; cursor: pointer; }
+.more:hover { background: var(--color-bg-subtle); color: var(--color-fg-default); }
+.more:focus-visible { outline: 2px solid var(--color-border-focus); outline-offset: 1px; }
+
+@media (prefers-reduced-motion: reduce) { .cell, .navBtn { transition: none; } }
