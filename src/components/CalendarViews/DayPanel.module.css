@@ -1,0 +1,45 @@
+.panel { display: flex; flex-direction: column; gap: 16px; box-sizing: border-box; min-width: 0; color: var(--color-fg-default); font-family: var(--font-sans); }
+
+.head { display: flex; flex-direction: column; gap: 4px; }
+.title { display: flex; align-items: center; gap: 8px; margin: 0; font-size: 16px; line-height: 22px; font-weight: 600; letter-spacing: -0.01em; }
+.badge { padding: 1px 8px; border-radius: 999px; background: var(--color-bg-subtle); color: var(--color-fg-muted); font-size: 11px; line-height: 16px; font-weight: 500; letter-spacing: 0; }
+.sub { margin: 0; font-size: 13px; line-height: 18px; color: var(--color-fg-muted); }
+
+.strip { margin-top: 8px; }
+.track { position: relative; height: 8px; border-radius: 4px; background: var(--color-bg-subtle); overflow: hidden; }
+.track i { position: absolute; top: 0; bottom: 0; min-width: 2px; opacity: 0.85; }
+.ticks { display: flex; justify-content: space-between; margin-top: 4px; font-size: 11px; line-height: 14px; color: var(--color-fg-subtle); font-variant-numeric: tabular-nums; }
+
+.group { display: flex; flex-direction: column; gap: 8px; }
+.groupTitle { margin: 0; font-size: 12px; line-height: 16px; font-weight: 500; color: var(--color-fg-muted); }
+.list { display: flex; flex-direction: column; gap: 4px; margin: 0; padding: 0; list-style: none; }
+.empty { margin: 0; font-size: 13px; color: var(--color-fg-muted); }
+
+.allDay { display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%; box-sizing: border-box; padding: 6px 10px; border: 0; border-radius: 8px; background: color-mix(in srgb, var(--cv) 16%, var(--color-bg-surface)); box-shadow: inset 3px 0 0 var(--cv); font: inherit; font-size: 13px; line-height: 18px; color: inherit; text-align: left; cursor: pointer; }
+.allDay:hover, .allDay[data-active] { background: color-mix(in srgb, var(--cv) 26%, var(--color-bg-surface)); }
+.allDayTitle { font-weight: 500; }
+.allDayRange { color: var(--color-fg-muted); font-size: 12px; white-space: nowrap; }
+
+.row { display: grid; grid-template-columns: 72px 3px minmax(0, 1fr); align-items: stretch; gap: 10px; width: 100%; box-sizing: border-box; padding: 6px 8px; border: 0; border-radius: 8px; background: transparent; font: inherit; color: inherit; text-align: left; cursor: pointer; transition: background-color 120ms ease; }
+.row:hover, .row[data-active] { background: var(--color-bg-subtle); }
+.when { display: flex; flex-direction: column; font-variant-numeric: tabular-nums; }
+.when b { font-size: 12px; line-height: 16px; font-weight: 500; }
+.when small { font-size: 11px; line-height: 14px; color: var(--color-fg-subtle); }
+.bar { align-self: stretch; width: 3px; border-radius: 2px; background: var(--cv); }
+.what { display: flex; flex-direction: column; min-width: 0; }
+.name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 13px; line-height: 18px; font-weight: 500; }
+.place { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; line-height: 16px; color: var(--color-fg-muted); }
+.row:focus-visible, .allDay:focus-visible { outline: 2px solid var(--color-border-focus); outline-offset: 1px; }
+
+.gap { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 4px 8px; border: 1px dashed var(--color-border-default); border-radius: 8px; font-size: 12px; line-height: 16px; color: var(--color-fg-muted); }
+.gap em { font-style: normal; color: var(--color-fg-subtle); }
+.block { padding: 2px 8px; border: 0; border-radius: 6px; background: transparent; color: var(--color-fg-default); font: inherit; font-size: 12px; line-height: 16px; font-weight: 500; text-decoration: underline; text-underline-offset: 2px; cursor: pointer; white-space: nowrap; }
+.block:hover { background: var(--color-bg-subtle); }
+.block:focus-visible { outline: 2px solid var(--color-border-focus); outline-offset: 1px; }
+
+.foot { padding-top: 4px; border-top: 1px solid var(--color-border-subtle); }
+.create { display: inline-flex; align-items: center; gap: 6px; margin-top: 8px; padding: 6px 10px; border: 0; border-radius: 8px; background: transparent; color: var(--color-fg-muted); font: inherit; font-size: 13px; line-height: 18px; font-weight: 500; cursor: pointer; }
+.create:hover { background: var(--color-bg-subtle); color: var(--color-fg-default); }
+.create:focus-visible { outline: 2px solid var(--color-border-focus); outline-offset: 1px; }
+
+@media (prefers-reduced-motion: reduce) { .row { transition: none; } }
