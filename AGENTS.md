@@ -286,7 +286,7 @@ lists its other names under `aliases` in `manifest.json`, and `search_components
   pass the new events back), `onSlotClick(start)` (week) and `onMoreClick(date)` (month). Month: `date`/`onDateChange`,
   `selectedDate`/`onSelectedDateChange`, `weekStartsOn` (default 1). Week: `days` 5 or 7, `hourHeight`, `snapMinutes`, `now`.
   `DayPanel` (`date`, `events`, `workHours`, `onBlockFocus`, `onCreate`) sits beside either view. `WeekCalendarBlock` and
-  `MonthCalendarBlock` (from `/blocks`) are the full screens with a sidebar and an event card: copy and edit them.
+  `MonthCalendarBlock` (from `/blocks`) are the finished cards with a header and an event card: copy and edit them.
   **RegionMap** — a choropleth: regions (states, countries, territories) shaded by a number, for "how does this vary by
   place". `regions` + `viewBox` are the shapes (outlines ship per country and are imported on their own so an app only carries
   the ones it uses: `import { UK_REGIONS, UK_REGIONS_VIEWBOX } from '@sakaniui/react/regions/uk'`, likewise `/us` US_STATES,

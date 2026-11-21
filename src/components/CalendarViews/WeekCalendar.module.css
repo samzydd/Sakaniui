@@ -8,7 +8,8 @@
 .navBtn:hover { background: var(--color-bg-subtle); }
 .navBtn:focus-visible { outline: 2px solid var(--color-border-focus); outline-offset: 1px; }
 
-.head { display: grid; grid-template-columns: var(--gutter) repeat(var(--cols), minmax(0, 1fr)); padding: 0 0 6px; }
+.frame { display: flex; flex-direction: column; flex: 1 1 auto; min-height: 0; overflow: hidden; border: 1px solid var(--color-border-subtle); border-radius: 14px; background: var(--color-bg-surface); }
+.head { display: grid; grid-template-columns: var(--gutter) repeat(var(--cols), minmax(0, 1fr)); padding: 10px 0 6px; }
 .dayHead { display: flex; flex-direction: column; align-items: center; gap: 2px; }
 .dow { font-size: 12px; line-height: 16px; font-weight: 500; color: var(--color-fg-muted); }
 .dom { display: inline-flex; align-items: center; justify-content: center; min-width: 28px; height: 28px; padding: 0 6px; border-radius: 14px; font-size: 16px; line-height: 20px; font-weight: 500; font-variant-numeric: tabular-nums; }
@@ -19,13 +20,14 @@
 .allDayLabel { align-self: start; padding: 4px 8px 0 0; font-size: 11px; line-height: 14px; text-align: right; color: var(--color-fg-subtle); }
 .allDayGrid { display: grid; grid-template-columns: repeat(var(--cols), minmax(0, 1fr)); row-gap: 2px; padding: 0 3px; }
 
-.scroller { position: relative; overflow-y: auto; overscroll-behavior: contain; border-top: 1px solid var(--color-border-subtle); }
+.scroller { position: relative; overflow-y: auto; overscroll-behavior: contain; border-top: 1px solid var(--color-border-subtle); border-radius: 0 0 14px 14px; }
 .body { position: relative; display: grid; grid-template-columns: var(--gutter) repeat(var(--cols), minmax(0, 1fr)); }
 .hours { position: relative; }
 .hours span { position: absolute; right: 8px; transform: translateY(-50%); font-size: 11px; line-height: 14px; color: var(--color-fg-subtle); white-space: nowrap; font-variant-numeric: tabular-nums; }
 
 .col { position: relative; border-left: 1px solid var(--color-border-subtle); background-image: linear-gradient(to bottom, var(--color-border-subtle) 1px, transparent 1px); background-repeat: repeat-y; }
-.col[data-today] { background-color: color-mix(in srgb, var(--color-chart-2) 5%, transparent); }
+.col[data-today] { background-color: color-mix(in srgb, var(--color-chart-2) 6%, transparent); }
+.col:nth-child(2) { border-left: 0; }
 .slot { position: absolute; box-sizing: border-box; transition: transform 0ms; }
 .slot[data-dragging] { transition: none; filter: drop-shadow(0 4px 10px rgba(16, 15, 12, 0.18)); }
 

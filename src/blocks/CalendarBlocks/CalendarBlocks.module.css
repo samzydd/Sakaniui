@@ -1,29 +1,20 @@
 .block { position: relative; display: flex; box-sizing: border-box; width: 100%; min-height: 0; overflow: hidden; background: var(--color-bg-surface); border: 1px solid var(--color-border-subtle); border-radius: var(--radius-xl); color: var(--color-fg-default); font-family: var(--font-sans); }
 
-/* ---- sidebar ---- */
-.sidebar { display: flex; flex: 0 0 312px; flex-direction: column; gap: 12px; box-sizing: border-box; width: 312px; min-height: 0; padding: 16px 12px 12px; border-right: 1px solid var(--color-border-subtle); background: var(--color-bg-surface); }
-.workspace { padding: 0 6px; font-size: 14px; line-height: 20px; font-weight: 600; }
-.mini { display: flex; justify-content: center; }
-.mini > * { box-shadow: none; }
-.calendars { flex: 1 1 0; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; padding: 0 6px; }
-.group h4 { margin: 0 0 4px; font-size: 12px; line-height: 16px; font-weight: 500; color: var(--color-fg-muted); }
-.calRow { display: flex; align-items: center; gap: 8px; width: 100%; padding: 4px 0; border: 0; background: transparent; color: var(--color-fg-default); font: inherit; font-size: 13px; line-height: 18px; text-align: left; cursor: pointer; }
-.calRow i { display: inline-flex; align-items: center; justify-content: center; flex: 0 0 auto; width: 16px; height: 16px; box-sizing: border-box; border: 1.5px solid var(--cv); border-radius: 4px; color: var(--color-bg-surface); transition: background-color 120ms ease; }
-.calRow i[data-on] { background: var(--cv); }
-.calRow:focus-visible { outline: 2px solid var(--color-border-focus); outline-offset: 2px; border-radius: 4px; }
-.user { display: flex; align-items: center; gap: 8px; padding: 10px 6px 0; border-top: 1px solid var(--color-border-subtle); }
-.user span { display: flex; flex-direction: column; min-width: 0; }
-.user b { font-size: 13px; line-height: 18px; font-weight: 500; }
-.user small { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; line-height: 16px; color: var(--color-fg-muted); }
+.block { position: relative; display: flex; flex-direction: column; gap: 20px; box-sizing: border-box; width: 100%; min-height: 0; padding: 24px 28px 28px; overflow: hidden; background: var(--color-bg-surface); border: 1px solid var(--color-border-subtle); border-radius: 20px; color: var(--color-fg-default); font-family: var(--font-sans); }
+.view { flex: 1 1 auto; min-height: 0; }
 
-/* ---- main ---- */
-.main { display: flex; flex: 1 1 0; flex-direction: column; min-width: 0; min-height: 0; padding: 16px 20px 16px; }
-.bar { display: flex; justify-content: flex-end; padding: 0 0 12px; }
-.barRight { display: flex; align-items: center; gap: 8px; }
-.view { flex: 1 1 0; min-height: 0; }
-.monthWrap { display: flex; flex: 1 1 0; gap: 20px; min-height: 0; }
-.monthWrap > .view { min-width: 0; }
-.dock { flex: 0 0 300px; width: 300px; min-height: 0; overflow-y: auto; padding-left: 20px; border-left: 1px solid var(--color-border-subtle); }
+/* ---- header ---- */
+.header { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+.headTitle h3 { margin: 0; font-size: 28px; line-height: 34px; font-weight: 600; letter-spacing: -0.02em; }
+.headTitle h3 span { font-weight: 400; color: var(--color-fg-muted); }
+.headTitle p { margin: 2px 0 0; font-size: 14px; line-height: 20px; color: var(--color-fg-muted); }
+.headTools { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.viewSwitch { width: 220px; }
+.navGroup { display: inline-flex; align-items: stretch; height: 40px; overflow: hidden; border: 1px solid var(--color-border-default); border-radius: 10px; background: var(--color-bg-surface); }
+.navGroup button { display: inline-flex; align-items: center; justify-content: center; min-width: 40px; padding: 0 12px; border: 0; background: transparent; color: var(--color-fg-default); font: inherit; font-size: 14px; font-weight: 500; cursor: pointer; transition: background-color 120ms ease; }
+.navGroup button + button { border-left: 1px solid var(--color-border-default); }
+.navGroup button:hover { background: var(--color-bg-subtle); }
+.navGroup button:focus-visible { outline: 2px solid var(--color-border-focus); outline-offset: -2px; }
 
 /* ---- event card ---- */
 .card { position: absolute; z-index: 30; display: flex; flex-direction: column; gap: 10px; box-sizing: border-box; width: 300px; padding: 14px; background: var(--color-bg-surface); border: 1px solid var(--color-border-default); border-radius: 12px; box-shadow: var(--shadow-lg, 0 12px 32px -8px rgba(16, 15, 12, 0.25)); }
@@ -43,5 +34,14 @@
 .cardCals button:focus-visible { outline: 2px solid var(--color-border-focus); outline-offset: 1px; }
 .card footer { display: flex; align-items: center; justify-content: space-between; padding-top: 4px; }
 
-@media (max-width: 900px) { .sidebar { display: none; } .dock { display: none; } }
-@media (prefers-reduced-motion: reduce) { .calRow i { transition: none; } }
+@media (max-width: 720px) { .block { padding: 16px; } .headTitle h3 { font-size: 22px; line-height: 28px; } }
+@media (prefers-reduced-motion: reduce) { .navGroup button { transition: none; } }
+
+/* ---- the "N more" list ---- */
+.dayList { display: flex; flex-direction: column; gap: 2px; margin: 0; padding: 0; list-style: none; }
+.dayList button { display: grid; grid-template-columns: 8px 68px minmax(0, 1fr); align-items: center; gap: 8px; width: 100%; padding: 6px 8px; border: 0; border-radius: 8px; background: transparent; color: var(--color-fg-default); font: inherit; font-size: 13px; line-height: 18px; text-align: left; cursor: pointer; }
+.dayList button:hover { background: var(--color-bg-subtle); }
+.dayList button:focus-visible { outline: 2px solid var(--color-border-focus); outline-offset: 1px; }
+.dayList i { width: 8px; height: 8px; border-radius: 50%; background: var(--cv); }
+.dayTime { color: var(--color-fg-muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.dayTitle { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 500; }

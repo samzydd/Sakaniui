@@ -42,8 +42,8 @@ export interface MonthCalendarProps {
   onEventClick?: (event: CalendarEventData, el: HTMLElement) => void;
   /** An event was dragged to another day, or moved with Alt + arrows. */
   onEventMove?: CalendarEventMove;
-  /** "N more" was pressed for a day. */
-  onMoreClick?: (date: Date) => void;
+  /** "N more" was pressed for a day (and its button, to place a card beside). */
+  onMoreClick?: (date: Date, el: HTMLElement) => void;
   /** The id of the event whose card is open: it stays lit. */
   activeEventId?: string | null;
   /** Today, for the highlight. Default: now. */
@@ -142,6 +142,7 @@ export const MonthCalendar: React.FC<MonthCalendarProps> = ({
         </div>
       )}
 
+      <div className={styles.frame}>
       <div className={styles.weekdays} aria-hidden>
         {Array.from({ length: 7 }, (_, i) => (
           <span key={i}>{WEEKDAYS[(weekStartsOn + i) % 7]}</span>
@@ -207,7 +208,7 @@ export const MonthCalendar: React.FC<MonthCalendarProps> = ({
                         <button
                           type="button"
                           className={styles.more}
-                          onClick={(ev) => { ev.stopPropagation(); onSelectedDateChange?.(startOfDay(day)); onMoreClick?.(startOfDay(day)); }}
+                          onClick={(ev) => { ev.stopPropagation(); onSelectedDateChange?.(startOfDay(day)); onMoreClick?.(startOfDay(day), ev.currentTarget); }}
                         >
                           {more} more
                         </button>
@@ -236,6 +237,7 @@ export const MonthCalendar: React.FC<MonthCalendarProps> = ({
             </div>
           );
         })}
+      </div>
       </div>
     </div>
   );

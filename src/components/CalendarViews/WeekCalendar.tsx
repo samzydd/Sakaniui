@@ -202,6 +202,7 @@ export const WeekCalendar: React.FC<WeekCalendarProps> = ({
         </div>
       )}
 
+      <div className={styles.frame}>
       <div className={styles.head}>
         <span />
         {columns.map((d) => {
@@ -236,7 +237,7 @@ export const WeekCalendar: React.FC<WeekCalendarProps> = ({
         </div>
       )}
 
-      <div ref={scroller} className={styles.scroller} style={{ height }} data-lenis-prevent>
+      <div ref={scroller} className={styles.scroller} style={{ height: height === '100%' ? undefined : height, flex: height === '100%' ? '1 1 0' : undefined }} data-lenis-prevent>
         <div ref={body} className={styles.body} style={{ height: 24 * hourHeight }}>
           <div className={styles.hours} aria-hidden>
             {Array.from({ length: 23 }, (_, h) => (
@@ -309,6 +310,7 @@ export const WeekCalendar: React.FC<WeekCalendarProps> = ({
             );
           })}
         </div>
+      </div>
       </div>
     </div>
   );

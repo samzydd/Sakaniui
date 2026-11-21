@@ -1,16 +1,16 @@
 /**
- * The pieces the two calendar blocks share: the sidebar (a mini month, the calendars with their on/off boxes, the
- * person) and the event card that opens next to an event. Not exported on their own: copy them with the block.
+ * The pieces the two calendar blocks share: the header, the card that opens next to an event, and the short list that
+ * "N more" opens. Not exported on their own: copy them with the block.
  */
 
 import React from 'react';
 import { IconX } from '../../icons/outline/x';
+import { IconChevronLeft } from '../../icons/outline/chevron-left';
+import { IconChevronRight } from '../../icons/outline/chevron-right';
 import { IconTrash } from '../../icons/outline/trash';
 import { IconMapPin } from '../../icons/outline/map-pin';
 import { IconClock } from '../../icons/outline/clock';
-import { Avatar } from '../../components/Avatar';
 import { Button } from '../../components/Button';
-import { Calendar } from '../../components/Calendar';
 import { EVENT_COLOR } from '../../components/CalendarViews';
 import type { CalendarEventData } from '../../components/CalendarViews';
 import type { CalendarSource } from './sample';
@@ -20,52 +20,67 @@ const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', '
 const DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 const t = (d: Date) => `${d.getHours() % 12 || 12}:${String(d.getMinutes()).padStart(2, '0')} ${d.getHours() < 12 ? 'AM' : 'PM'}`;
 
-export const CalendarSidebar: React.FC<{
-  workspace: string;
-  user: { name: string; email: string };
+/** The block's header: the month and year, a line about what is in view, then the controls (children) on the right. */
+export const CalendarHeader: React.FC<{
+  month: string;
+  year: string | number;
+  subtitle: string;
+  onPrev: () => void;
+  onNext: () => void;
+  onToday: () => void;
+  prevLabel: string;
+  nextLabel: string;
+  children?: React.ReactNode;
+}> = ({ month, year, subtitle, onPrev, onNext, onToday, prevLabel, nextLabel, children }) => (
+  <header className={styles.header}>
+    <div className={styles.headTitle}>
+      <h3 aria-live="polite">
+        {month} <span>{year}</span>
+      </h3>
+      <p>{subtitle}</p>
+    </div>
+    <div className={styles.headTools}>
+      <div className={styles.navGroup} role="group" aria-label="Navigate">
+        <button type="button" onClick={onPrev} aria-label={prevLabel}><IconChevronLeft size={16} /></button>
+        <button type="button" onClick={onToday}>Today</button>
+        <button type="button" onClick={onNext} aria-label={nextLabel}><IconChevronRight size={16} /></button>
+      </div>
+      {children}
+    </div>
+  </header>
+);
+
+/** What "N more" opens: the day's events as a short list. Pick one to open its card. */
+export const DayPopover: React.FC<{
   date: Date;
-  onDateChange: (d: Date) => void;
-  calendars: CalendarSource[];
-  hidden: Set<string>;
-  onToggle: (id: string) => void;
-}> = ({ workspace, user, date, onDateChange, calendars, hidden, onToggle }) => {
-  const groups = Array.from(new Set(calendars.map((c) => c.group ?? 'Calendars')));
+  events: CalendarEventData[];
+  anchor: { left: number; top: number };
+  onClose: () => void;
+  onPick: (event: CalendarEventData, el: HTMLElement) => void;
+}> = ({ date, events, anchor, onClose, onPick }) => {
+  React.useEffect(() => {
+    const key = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+    window.addEventListener('keydown', key);
+    return () => window.removeEventListener('keydown', key);
+  }, [onClose]);
   return (
-    <aside className={styles.sidebar} aria-label="Calendars">
-      <div className={styles.workspace}>{workspace}</div>
-      <div className={styles.mini}>
-        <Calendar value={date} onChange={onDateChange} defaultMonth={date} />
-      </div>
-      <div className={styles.calendars} data-lenis-prevent>
-        {groups.map((g) => (
-          <div key={g} className={styles.group}>
-            <h4>{g}</h4>
-            {calendars
-              .filter((c) => (c.group ?? 'Calendars') === g)
-              .map((c) => {
-                const on = !hidden.has(c.id);
-                return (
-                  <button key={c.id} type="button" role="checkbox" aria-checked={on} className={styles.calRow} style={{ ['--cv' as string]: EVENT_COLOR[c.color] }} onClick={() => onToggle(c.id)}>
-                    <i data-on={on ? '' : undefined} aria-hidden>
-                      {on && (
-                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round"><path d="m5 12 5 5 9-10" /></svg>
-                      )}
-                    </i>
-                    {c.name}
-                  </button>
-                );
-              })}
-          </div>
+    <div className={styles.card} role="dialog" aria-label={`${DAYS[date.getDay()]}, ${MONTHS[date.getMonth()]} ${date.getDate()}`} style={{ left: anchor.left, top: anchor.top, width: 280 }}>
+      <header>
+        <h4>{DAYS[date.getDay()]}, {MONTHS[date.getMonth()]} {date.getDate()}</h4>
+        <button type="button" className={styles.close} aria-label="Close" onClick={onClose}><IconX size={14} /></button>
+      </header>
+      <ul className={styles.dayList}>
+        {events.map((e) => (
+          <li key={e.id}>
+            <button type="button" style={{ ['--cv' as string]: EVENT_COLOR[e.color ?? 'blue'] }} onClick={(ev) => onPick(e, ev.currentTarget)}>
+              <i aria-hidden />
+              <span className={styles.dayTime}>{e.allDay ? 'All day' : t(e.start)}</span>
+              <span className={styles.dayTitle}>{e.title}</span>
+            </button>
+          </li>
         ))}
-      </div>
-      <div className={styles.user}>
-        <Avatar initials={user.name.split(" ").map((w) => w[0]).join("").slice(0, 2)} size="sm" />
-        <span>
-          <b>{user.name}</b>
-          <small>{user.email}</small>
-        </span>
-      </div>
-    </aside>
+      </ul>
+    </div>
   );
 };
 
