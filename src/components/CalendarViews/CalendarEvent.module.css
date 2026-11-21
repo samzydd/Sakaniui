@@ -28,16 +28,17 @@
 /* a narrow month grid (a docked panel beside it): the title gets the room, the time goes */
 @container (max-width: 940px) { .chip .time { display: none; } }
 
-/* bar: all-day and multi-day */
-.bar { align-items: center; height: 22px; padding: 0 8px; border-radius: 6px; font-size: 12px; line-height: 16px; background: var(--tint); box-shadow: inset 3px 0 0 var(--cv); }
-.bar:hover, .bar[data-selected] { background: var(--tint-hover); }
-.bar[data-before] { border-top-left-radius: 0; border-bottom-left-radius: 0; box-shadow: none; padding-left: 10px; }
+/* bar: all-day and multi-day: a flat tint, nothing else */
+.bar { align-items: center; height: 22px; padding: 0 10px; border-radius: 6px; font-size: 12px; line-height: 16px; background: var(--tint); }
+.bar:hover { background: var(--tint-hover); }
+.bar[data-selected] { background: var(--tint-hover); box-shadow: 0 0 0 1.5px var(--cv); }
+.bar[data-before] { border-top-left-radius: 0; border-bottom-left-radius: 0; }
 .bar[data-after] { border-top-right-radius: 0; border-bottom-right-radius: 0; }
 
 /* block: a timed event in the week grid */
-.block { flex-direction: column; justify-content: flex-start; gap: 1px; width: 100%; height: 100%; padding: 4px 8px; overflow: hidden; border-radius: 6px; font-size: 12px; line-height: 16px; background: var(--tint); box-shadow: inset 3px 0 0 var(--cv); }
-.block:hover, .block[data-selected] { background: var(--tint-hover); }
-.block[data-selected] { box-shadow: inset 3px 0 0 var(--cv), 0 0 0 1.5px var(--cv); }
+.block { flex-direction: column; justify-content: flex-start; gap: 1px; width: 100%; height: 100%; padding: 5px 10px; overflow: hidden; border-radius: 6px; font-size: 12px; line-height: 16px; background: var(--tint); }
+.block:hover { background: var(--tint-hover); }
+.block[data-selected] { background: var(--tint-hover); box-shadow: 0 0 0 1.5px var(--cv); }
 .block .range, .block .place { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--color-fg-muted); font-size: 11px; line-height: 14px; }
 .block .title { flex: 0 0 auto; }
 

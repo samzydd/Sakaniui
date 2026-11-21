@@ -15,7 +15,7 @@
 .list { display: flex; flex-direction: column; gap: 4px; margin: 0; padding: 0; list-style: none; }
 .empty { margin: 0; font-size: 13px; color: var(--color-fg-muted); }
 
-.allDay { display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%; box-sizing: border-box; padding: 6px 10px; border: 0; border-radius: 8px; background: color-mix(in srgb, var(--cv) 16%, var(--color-bg-surface)); box-shadow: inset 3px 0 0 var(--cv); font: inherit; font-size: 13px; line-height: 18px; color: inherit; text-align: left; cursor: pointer; }
+.allDay { display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%; box-sizing: border-box; padding: 6px 10px; border: 0; border-radius: 8px; background: color-mix(in srgb, var(--cv) 16%, var(--color-bg-surface)); font: inherit; font-size: 13px; line-height: 18px; color: inherit; text-align: left; cursor: pointer; }
 .allDay:hover, .allDay[data-active] { background: color-mix(in srgb, var(--cv) 26%, var(--color-bg-surface)); }
 .allDayTitle { font-weight: 500; }
 .allDayRange { color: var(--color-fg-muted); font-size: 12px; white-space: nowrap; }
