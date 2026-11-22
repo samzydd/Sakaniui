@@ -18,7 +18,7 @@
 .cell { overflow: hidden; display: flex; flex-direction: column; gap: 4px; min-width: 0; min-height: 0; padding: 6px; border-right: 1px solid var(--color-border-subtle); border-bottom: 1px solid var(--color-border-subtle); cursor: default; transition: background-color 120ms ease; }
 .cell[data-outside] { background: var(--color-bg-canvas); }
 .cell[data-outside] .num { color: var(--color-fg-subtle); }
-.cell[data-today] { background: var(--color-brand-subtle); }
+.cell[data-today] { background: color-mix(in srgb, var(--color-brand-default) 8%, var(--color-bg-surface)); }
 .cell[data-selected] { box-shadow: inset 0 0 0 1px var(--color-border-strong); }
 .cell[data-over] { background: color-mix(in srgb, var(--color-chart-2) 14%, var(--color-bg-surface)); box-shadow: inset 0 0 0 1.5px var(--color-chart-2); }
 
