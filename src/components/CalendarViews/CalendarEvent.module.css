@@ -19,27 +19,28 @@
 .event[data-dragging] { opacity: 0.6; cursor: grabbing; }
 
 /* chip: a single-day timed event in a month cell */
-.chip { align-items: center; gap: 6px; height: 22px; padding: 0 6px; border-radius: 6px; font-size: 12px; line-height: 16px; background: transparent; }
+.chip { align-items: center; gap: 6px; height: 20px; padding: 0 6px; border-radius: var(--radius-sm); font-size: 12px; line-height: 16px; background: transparent; }
 .chip:hover, .chip[data-selected] { background: var(--tint); }
 .dot { flex: 0 0 auto; width: 6px; height: 6px; border-radius: 50%; background: var(--cv); }
-.time { flex: 0 0 auto; color: var(--color-fg-muted); font-variant-numeric: tabular-nums; }
+.time { flex: 0 0 auto; color: var(--color-fg-muted); font-size: 11px; font-variant-numeric: tabular-nums; }
 .title { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 500; }
 
 /* a narrow month grid (a docked panel beside it): the title gets the room, the time goes */
 @container (max-width: 940px) { .chip .time { display: none; } }
 
 /* bar: all-day and multi-day: a flat tint, nothing else */
-.bar { align-items: center; height: 22px; padding: 0 10px; border-radius: 6px; font-size: 12px; line-height: 16px; background: var(--tint); }
+.bar { align-items: center; height: 20px; padding: 0 8px; border-radius: var(--radius-sm); font-size: 12px; line-height: 16px; background: var(--tint); }
 .bar:hover { background: var(--tint-hover); }
 .bar[data-selected] { background: var(--tint-hover); box-shadow: 0 0 0 1.5px var(--cv); }
 .bar[data-before] { border-top-left-radius: 0; border-bottom-left-radius: 0; }
 .bar[data-after] { border-top-right-radius: 0; border-bottom-right-radius: 0; }
 
-/* block: a timed event in the week grid */
-.block { flex-direction: column; justify-content: flex-start; gap: 1px; width: 100%; height: 100%; padding: 5px 10px; overflow: hidden; border-radius: 6px; font-size: 12px; line-height: 16px; background: var(--tint); }
+/* block: a timed event in the week grid: a tint with a coloured edge, the title, the time range and a place */
+.block { flex-direction: column; justify-content: flex-start; gap: 2px; width: 100%; height: 100%; padding: 6px 8px 6px 7px; overflow: hidden; border-left: 3px solid var(--cv); border-radius: var(--radius-sm); font-size: 12px; line-height: 16px; background: var(--tint); }
 .block:hover { background: var(--tint-hover); }
 .block[data-selected] { background: var(--tint-hover); box-shadow: 0 0 0 1.5px var(--cv); }
-.block .range, .block .place { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--color-fg-muted); font-size: 11px; line-height: 14px; }
-.block .title { flex: 0 0 auto; }
+.block[data-detail='title'] { justify-content: center; padding-top: 2px; padding-bottom: 2px; }
+.block .title { flex: 0 0 auto; max-width: 100%; font-weight: 600; }
+.block .range, .block .place { max-width: 100%; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--color-fg-muted); font-size: 11px; line-height: 16px; }
 
 @media (prefers-reduced-motion: reduce) { .event { transition: none; } }

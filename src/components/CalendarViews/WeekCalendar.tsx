@@ -16,9 +16,11 @@
 import React from 'react';
 import { IconChevronLeft } from '../../icons/outline/chevron-left';
 import { IconChevronRight } from '../../icons/outline/chevron-right';
+import { Button } from '../Button';
+import { IconButton } from '../IconButton';
 import { CalendarEvent } from './CalendarEvent';
 import type { CalendarEventData, CalendarEventMove, WeekStartsOn } from './types';
-import { addDays, byStart, fmtTime, isBanner, layoutDay, minutesOfDay, packBanners, sameDay, shiftEvent, startOfDay, startOfWeek, touchesDay } from './dates';
+import { addDays, byStart, fmtRange, isBanner, layoutDay, minutesOfDay, packBanners, sameDay, shiftEvent, startOfDay, startOfWeek, touchesDay } from './dates';
 import styles from './WeekCalendar.module.css';
 
 const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
@@ -33,7 +35,7 @@ export interface WeekCalendarProps {
   weekStartsOn?: WeekStartsOn;
   /** 7 (default) or 5 for a work week (the first five days of the week). */
   days?: 5 | 7;
-  /** Pixels per hour. Default 48. */
+  /** Pixels per hour. Default 52. */
   hourHeight?: number;
   /** The hour scrolled to at the start. Default 8. */
   scrollToHour?: number;
@@ -70,7 +72,7 @@ export const WeekCalendar: React.FC<WeekCalendarProps> = ({
   events,
   weekStartsOn = 1,
   days = 7,
-  hourHeight = 48,
+  hourHeight = 52,
   scrollToHour = 8,
   snapMinutes = 15,
   height = 640,
@@ -195,9 +197,9 @@ export const WeekCalendar: React.FC<WeekCalendarProps> = ({
             {rangeLabel}
           </h3>
           <div className={styles.nav}>
-            <button type="button" className={styles.navBtn} data-text onClick={() => setDate(new Date())}>Today</button>
-            <button type="button" className={styles.navBtn} onClick={() => setDate(addDays(date, -7))} aria-label="Previous week"><IconChevronLeft size={16} /></button>
-            <button type="button" className={styles.navBtn} onClick={() => setDate(addDays(date, 7))} aria-label="Next week"><IconChevronRight size={16} /></button>
+            <Button variant="outline" size="sm" onClick={() => setDate(new Date())}>Today</Button>
+            <IconButton variant="ghost" size="sm" icon={IconChevronLeft} aria-label="Previous week" onClick={() => setDate(addDays(date, -7))} />
+            <IconButton variant="ghost" size="sm" icon={IconChevronRight} aria-label="Next week" onClick={() => setDate(addDays(date, 7))} />
           </div>
         </div>
       )}
@@ -218,8 +220,8 @@ export const WeekCalendar: React.FC<WeekCalendarProps> = ({
 
       {lanes > 0 && (
         <div className={styles.allDay}>
-          <span className={styles.allDayLabel}>all-day</span>
-          <div className={styles.allDayGrid} style={{ gridTemplateRows: `repeat(${lanes}, 22px)` }}>
+          <span className={styles.allDayLabel}>All day</span>
+          <div className={styles.allDayGrid} style={{ gridTemplateRows: `repeat(${lanes}, 20px)` }}>
             {segs.map((s) => (
               <CalendarEvent
                 key={`${s.event.id}-${s.c0}`}
@@ -265,10 +267,10 @@ export const WeekCalendar: React.FC<WeekCalendarProps> = ({
                   const dx = dragging ? drag.days * colWidth() : 0;
                   const dy = dragging ? drag.mins * pxPerMin : 0;
                   const label = dragging
-                    ? `${fmtTime(shiftEvent(e, 0, drag.mins).start)} – ${fmtTime(shiftEvent(e, 0, drag.mins).end)}`
+                    ? fmtRange(shiftEvent(e, 0, drag.mins).start, shiftEvent(e, 0, drag.mins).end)
                     : undefined;
                   const top = startMin * pxPerMin;
-                  const h = Math.max(22, lenMin * pxPerMin - 2);
+                  const h = Math.max(20, lenMin * pxPerMin - 2);
                   return (
                     <div
                       key={e.id}
@@ -277,8 +279,8 @@ export const WeekCalendar: React.FC<WeekCalendarProps> = ({
                       style={{
                         top,
                         height: h,
-                        left: `calc(${(col / cols) * 100}% + 2px)`,
-                        width: `calc(${100 / cols}% - ${cols > 1 ? 4 : 6}px)`,
+                        left: `calc(${(col / cols) * 100}% + 3px)`,
+                        width: `calc(${100 / cols}% - ${cols > 1 ? 5 : 6}px)`,
                         transform: dragging ? `translate(${dx}px, ${dy}px)` : undefined,
                         zIndex: dragging ? 5 : col + 1,
                       }}
@@ -287,7 +289,7 @@ export const WeekCalendar: React.FC<WeekCalendarProps> = ({
                         event={e}
                         shape="block"
                         timeLabel={label}
-                        detail={h < 40 ? 'title' : h < 66 ? 'time' : 'full'}
+                        detail={h < 46 ? 'title' : h < 70 ? 'time' : 'full'}
                         selected={activeEventId === e.id}
                         dragging={dragging}
                         onClick={click(e)}

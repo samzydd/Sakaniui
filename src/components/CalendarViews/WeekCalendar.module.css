@@ -1,37 +1,32 @@
-.week { display: flex; flex-direction: column; box-sizing: border-box; width: 100%; min-height: 0; color: var(--color-fg-default); font-family: var(--font-sans); }
+/* the week is a card, like the month: the header, the day heads, the all-day strip and the time grid share one border */
+.week { display: flex; flex-direction: column; box-sizing: border-box; width: 100%; min-height: 0; overflow: hidden; border: 1px solid var(--color-border-default); border-radius: var(--radius-xl); background: var(--color-bg-surface); color: var(--color-fg-default); font-family: var(--font-sans); }
 
-.header { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 0 0 12px; }
-.title { margin: 0; font-size: 18px; line-height: 24px; font-weight: 600; letter-spacing: -0.01em; }
+.header { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 16px 14px 20px; border-bottom: 1px solid var(--color-border-subtle); }
+.title { margin: 0; font-size: 18px; line-height: 26px; font-weight: 500; letter-spacing: -0.01em; }
 .nav { display: flex; align-items: center; gap: 4px; }
-.navBtn { display: inline-flex; align-items: center; justify-content: center; height: 32px; min-width: 32px; padding: 0; border: 1px solid var(--color-border-default); border-radius: 8px; background: var(--color-bg-surface); color: var(--color-fg-default); font: inherit; font-size: 13px; font-weight: 500; cursor: pointer; transition: background-color 120ms ease; }
-.navBtn[data-text] { padding: 0 12px; }
-.navBtn:hover { background: var(--color-bg-subtle); }
-.navBtn:focus-visible { outline: 2px solid var(--color-border-focus); outline-offset: 1px; }
 
-.frame { display: flex; flex-direction: column; flex: 1 1 auto; min-height: 0; overflow: hidden; border: 1px solid var(--color-border-subtle); border-radius: 14px; background: var(--color-bg-surface); }
-.head { display: grid; grid-template-columns: var(--gutter) repeat(var(--cols), minmax(0, 1fr)); padding: 10px 0 6px; }
-.dayHead { display: flex; flex-direction: column; align-items: center; gap: 2px; }
-.dow { font-size: 12px; line-height: 16px; font-weight: 500; color: var(--color-fg-muted); }
-.dom { display: inline-flex; align-items: center; justify-content: center; min-width: 28px; height: 28px; padding: 0 6px; border-radius: 14px; font-size: 16px; line-height: 20px; font-weight: 500; font-variant-numeric: tabular-nums; }
+.frame { display: flex; flex-direction: column; flex: 1 1 auto; min-height: 0; }
+.head { display: grid; grid-template-columns: var(--gutter) repeat(var(--cols), minmax(0, 1fr)); padding: 10px 0; border-bottom: 1px solid var(--color-border-subtle); }
+.dayHead { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.dow { font-size: 11px; line-height: 16px; font-weight: 500; color: var(--color-fg-muted); }
+.dom { display: inline-flex; align-items: center; justify-content: center; min-width: 28px; height: 28px; padding: 0 6px; border-radius: var(--radius-full, 9999px); font-size: 16px; line-height: 22px; font-weight: 500; font-variant-numeric: tabular-nums; }
 .dayHead[data-today] .dow { color: var(--color-fg-default); }
-.dayHead[data-today] .dom { background: var(--color-fg-default); color: var(--color-bg-surface); }
+.dayHead[data-today] .dom { background: var(--color-accent-default, var(--color-fg-default)); color: var(--color-fg-on-accent, var(--color-bg-surface)); }
 
-.allDay { display: grid; grid-template-columns: var(--gutter) minmax(0, 1fr); padding: 0 0 6px; }
-.allDayLabel { align-self: start; padding: 4px 8px 0 0; font-size: 11px; line-height: 14px; text-align: right; color: var(--color-fg-subtle); }
-.allDayGrid { display: grid; grid-template-columns: repeat(var(--cols), minmax(0, 1fr)); row-gap: 2px; padding: 0 3px; }
+.allDay { display: grid; grid-template-columns: var(--gutter) minmax(0, 1fr); padding: 6px 0; border-bottom: 1px solid var(--color-border-subtle); background: var(--color-bg-canvas); }
+.allDayLabel { align-self: center; padding-right: 8px; font-size: 11px; line-height: 16px; font-weight: 500; text-align: right; color: var(--color-fg-subtle); }
+.allDayGrid { display: grid; grid-template-columns: repeat(var(--cols), minmax(0, 1fr)); row-gap: 4px; padding: 0 2px; }
 
-.scroller { position: relative; overflow-y: auto; overscroll-behavior: contain; border-top: 1px solid var(--color-border-subtle); border-radius: 0 0 14px 14px; }
+.scroller { position: relative; overflow-y: auto; overscroll-behavior: contain; }
 .body { position: relative; display: grid; grid-template-columns: var(--gutter) repeat(var(--cols), minmax(0, 1fr)); }
 .hours { position: relative; }
-.hours span { position: absolute; right: 8px; transform: translateY(-50%); font-size: 11px; line-height: 14px; color: var(--color-fg-subtle); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.hours span { position: absolute; right: 8px; transform: translateY(-50%); font-size: 11px; line-height: 16px; font-weight: 500; color: var(--color-fg-subtle); white-space: nowrap; font-variant-numeric: tabular-nums; }
 
 .col { position: relative; border-left: 1px solid var(--color-border-subtle); background-image: linear-gradient(to bottom, var(--color-border-subtle) 1px, transparent 1px); background-repeat: repeat-y; }
-.col[data-today] { background-color: color-mix(in srgb, var(--color-chart-2) 6%, transparent); }
+.col[data-today] { background-color: var(--color-bg-canvas); }
 .col:nth-child(2) { border-left: 0; }
 .slot { position: absolute; box-sizing: border-box; transition: transform 0ms; }
 .slot[data-dragging] { transition: none; filter: drop-shadow(0 4px 10px rgba(16, 15, 12, 0.18)); }
 
-.now { position: absolute; left: 0; right: 0; height: 0; border-top: 2px solid var(--color-danger-solid); z-index: 4; pointer-events: none; }
-.now i { position: absolute; left: -5px; top: -6px; width: 10px; height: 10px; border-radius: 50%; background: var(--color-danger-solid); }
-
-@media (prefers-reduced-motion: reduce) { .navBtn { transition: none; } }
+.now { position: absolute; left: 0; right: 0; height: 0; border-top: 2px solid var(--color-brand-default); z-index: 4; pointer-events: none; }
+.now i { position: absolute; left: -4px; top: -5px; width: 8px; height: 8px; border-radius: 50%; background: var(--color-brand-default); }

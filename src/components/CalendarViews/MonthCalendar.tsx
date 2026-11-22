@@ -18,6 +18,8 @@
 import React from 'react';
 import { IconChevronLeft } from '../../icons/outline/chevron-left';
 import { IconChevronRight } from '../../icons/outline/chevron-right';
+import { Button } from '../Button';
+import { IconButton } from '../IconButton';
 import { CalendarEvent } from './CalendarEvent';
 import type { CalendarEventData, CalendarEventMove, WeekStartsOn } from './types';
 import { addDays, byStart, dayDiff, isBanner, packBanners, sameDay, shiftEvent, startOfDay, startOfMonth, startOfWeek, touchesDay } from './dates';
@@ -135,9 +137,9 @@ export const MonthCalendar: React.FC<MonthCalendarProps> = ({
             {MONTHS[monthStart.getMonth()]} <span>{monthStart.getFullYear()}</span>
           </h3>
           <div className={styles.nav}>
-            <button type="button" className={styles.navBtn} onClick={() => setDate(new Date())} data-text>Today</button>
-            <button type="button" className={styles.navBtn} onClick={() => go(-1)} aria-label="Previous month"><IconChevronLeft size={16} /></button>
-            <button type="button" className={styles.navBtn} onClick={() => go(1)} aria-label="Next month"><IconChevronRight size={16} /></button>
+            <Button variant="outline" size="sm" onClick={() => setDate(new Date())}>Today</Button>
+            <IconButton variant="ghost" size="sm" icon={IconChevronLeft} aria-label="Previous month" onClick={() => go(-1)} />
+            <IconButton variant="ghost" size="sm" icon={IconChevronRight} aria-label="Next month" onClick={() => go(1)} />
           </div>
         </div>
       )}
@@ -156,7 +158,7 @@ export const MonthCalendar: React.FC<MonthCalendarProps> = ({
           const shownSegs = segs.filter((s) => s.lane < laneCount);
           const hiddenSegs = segs.filter((s) => s.lane >= laneCount);
           return (
-            <div key={rowStart.toISOString()} className={styles.week} role="row" style={{ ['--lanes' as string]: laneCount }}>
+            <div key={rowStart.toISOString()} className={styles.week} role="row">
               {Array.from({ length: 7 }, (_, c) => {
                 const day = addDays(rowStart, c);
                 const outside = day.getMonth() !== monthStart.getMonth();
@@ -164,7 +166,9 @@ export const MonthCalendar: React.FC<MonthCalendarProps> = ({
                 const isSelected = !!selectedDate && sameDay(day, selectedDate);
                 const timed = sorted.filter((e) => !isBanner(e) && touchesDay(e, day));
                 const hiddenBanners = hiddenSegs.filter((s) => c >= s.c0 && c <= s.c1).length;
-                const slots = Math.max(1, maxRows - laneCount);
+                // this day's chips start under the bars that cover it, not under the row's deepest lane
+                const cellLanes = shownSegs.reduce((m, s) => (c >= s.c0 && c <= s.c1 ? Math.max(m, s.lane + 1) : m), 0);
+                const slots = Math.max(1, maxRows - cellLanes);
                 const overflow = timed.length + hiddenBanners > slots;
                 const visible = overflow ? timed.slice(0, Math.max(0, slots - 1)) : timed;
                 const more = timed.length - visible.length + hiddenBanners;
@@ -175,6 +179,7 @@ export const MonthCalendar: React.FC<MonthCalendarProps> = ({
                     role="gridcell"
                     className={styles.cell}
                     data-outside={outside ? '' : undefined}
+                    data-today={isToday ? '' : undefined}
                     data-selected={isSelected ? '' : undefined}
                     data-over={over === key ? '' : undefined}
                     onClick={() => onSelectedDateChange?.(startOfDay(day))}
@@ -192,7 +197,7 @@ export const MonthCalendar: React.FC<MonthCalendarProps> = ({
                     >
                       {day.getDate() === 1 ? `${MONTHS[day.getMonth()].slice(0, 3)} 1` : day.getDate()}
                     </button>
-                    <div className={styles.chips}>
+                    <div className={styles.chips} style={{ ['--lanes' as string]: cellLanes }}>
                       {visible.map((e) => (
                         <CalendarEvent
                           key={e.id}

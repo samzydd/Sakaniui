@@ -2,6 +2,18 @@
 
 All notable changes to `@sakaniui/react` are documented here.
 
+## Unreleased
+
+### Changed
+
+- **The calendar views are redrawn: calmer, tighter, one card each.** `MonthCalendar`, `WeekCalendar` and `DayPanel` are now a real card (surface, a 1px `border-default` edge, `radius-xl`) with their header inside it, padded, instead of a header floating above a bordered frame. Nothing to change in your code: the props are the same. What you will see:
+  - **Month:** quieter grid lines, days outside the month on the canvas colour instead of a grey fill, today as a warm tint with a dark date pill, and a selected day shown by a thin ring instead of a blue wash. Chips and bars are 20px; a day's chips drop below an all-day bar only on the days that bar covers (they used to drop for the whole week).
+  - **Week:** 52px hours (was 48), a lighter all-day strip, the today column on the canvas colour, timed events as a tint with a 3px edge in their colour, compact times ("10 to 11:30 AM"), and the current-time line in the brand colour.
+  - **Day panel:** free time is a quiet dashed line with its length ("30m free") instead of a dashed box per gap; with `onBlockFocus` the line offers "Block focus time" when you hover or focus it. The "New event" button is a ghost `Button`.
+  - **Header buttons** are the library's own `Button` (outline) and `IconButton` (ghost), so they follow your button theming.
+  - **Blocks:** `WeekCalendarBlock` and `MonthCalendarBlock` use a 24px padding, a `border-default` edge and a tighter inner card; the event card and the "N more" list use the same spacing and radii.
+- `CalendarEvent` blocks show the time as a range with the period said once ("2 to 3 PM"). The `WeekCalendar` `hourHeight` default is 52.
+
 ## 0.20.0
 
 ### Added

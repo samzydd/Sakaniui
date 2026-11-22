@@ -4,11 +4,12 @@
  * One day, beside a month or week view: how busy it is, what is on it, and where the free time is. It says how many
  * events there are and how much of the working day is booked and free, draws the day as a strip (busy stretches in
  * their event colours), lists all-day events and then the schedule in order, and offers each free gap of 30 minutes or
- * more as a button (`onBlockFocus`) so someone can claim it as focus time.
+ * more as a quiet line (`onBlockFocus`): hover it and it offers "Block focus time".
  */
 
 import React from 'react';
 import { IconPlus } from '../../icons/outline/plus';
+import { Button } from '../Button';
 import { EVENT_COLOR } from './CalendarEvent';
 import type { CalendarEventData } from './types';
 import { byStart, fmtDuration, fmtTime, fmtTimeShort, isBanner, mergeBusy, minutesOfDay, sameDay, touchesDay } from './dates';
@@ -152,14 +153,20 @@ export const DayPanel: React.FC<DayPanelProps> = ({
                   </button>
                 </li>
               ) : (
-                <li key={`gap-${r.a}`} className={styles.gap}>
-                  <span>
-                    Free {fmtTime(at(date, r.a))} to {fmtTime(at(date, r.b))} <em>{fmtDuration(r.b - r.a)}</em>
-                  </span>
-                  {onBlockFocus && (
-                    <button type="button" className={styles.block} onClick={() => onBlockFocus(at(date, r.a), at(date, r.b))}>
-                      Block focus time
+                <li key={`gap-${r.a}`}>
+                  {onBlockFocus ? (
+                    <button type="button" className={styles.gap} data-action="" aria-label={`Block focus time, ${fmtTime(at(date, r.a))} to ${fmtTime(at(date, r.b))}`} onClick={() => onBlockFocus(at(date, r.a), at(date, r.b))}>
+                      <span className={styles.gapAt}>{fmtTime(at(date, r.a))}</span>
+                      <i className={styles.gapLine} aria-hidden />
+                      <span className={styles.gapLen}>{fmtDuration(r.b - r.a)} free</span>
+                      <span className={styles.gapDo}>Block focus time</span>
                     </button>
+                  ) : (
+                    <div className={styles.gap}>
+                      <span className={styles.gapAt}>{fmtTime(at(date, r.a))}</span>
+                      <i className={styles.gapLine} aria-hidden />
+                      <span className={styles.gapLen}>{fmtDuration(r.b - r.a)} free</span>
+                    </div>
                   )}
                 </li>
               ),
@@ -170,9 +177,9 @@ export const DayPanel: React.FC<DayPanelProps> = ({
 
       {onCreate && (
         <footer className={styles.foot}>
-          <button type="button" className={styles.create} onClick={() => onCreate(date)}>
-            <IconPlus size={14} /> New event on {MONTHS[date.getMonth()].slice(0, 3)} {date.getDate()}
-          </button>
+          <Button variant="ghost" size="sm" leftIcon={<IconPlus size={16} />} onClick={() => onCreate(date)}>
+            New event on {MONTHS[date.getMonth()].slice(0, 3)} {date.getDate()}
+          </Button>
         </footer>
       )}
     </section>
