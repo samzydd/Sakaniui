@@ -64,7 +64,7 @@ export const DayPopover: React.FC<{
     return () => window.removeEventListener('keydown', key);
   }, [onClose]);
   return (
-    <div className={styles.card} role="dialog" aria-label={`${DAYS[date.getDay()]}, ${MONTHS[date.getMonth()]} ${date.getDate()}`} style={{ left: anchor.left, top: anchor.top, width: 280 }}>
+    <div className={`${styles.card} ${styles.popover}`} role="dialog" aria-label={`${DAYS[date.getDay()]}, ${MONTHS[date.getMonth()]} ${date.getDate()}`} style={{ left: anchor.left, top: anchor.top, width: 280 }}>
       <header>
         <h4>{DAYS[date.getDay()]}, {MONTHS[date.getMonth()]} {date.getDate()}</h4>
         <button type="button" className={styles.close} aria-label="Close" onClick={onClose}><IconX size={14} /></button>

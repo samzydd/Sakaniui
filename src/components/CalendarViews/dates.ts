@@ -31,6 +31,16 @@ export const fmtTime = (d: Date) => {
   const h = d.getHours() % 12 || 12;
   return `${h}:${pad(d.getMinutes())} ${d.getHours() < 12 ? 'AM' : 'PM'}`;
 };
+/** "10 to 11 AM", "9:30 to 10:30 AM", "11 AM to 12 PM": a time range with the period said once when it is shared. */
+export const fmtRange = (a: Date, b: Date) => {
+  const part = (d: Date, period: boolean) => {
+    const h = d.getHours() % 12 || 12;
+    const m = d.getMinutes();
+    return `${h}${m ? `:${pad(m)}` : ''}${period ? ` ${d.getHours() < 12 ? 'AM' : 'PM'}` : ''}`;
+  };
+  const samePeriod = (a.getHours() < 12) === (b.getHours() < 12 && !(b.getHours() === 0 && b.getMinutes() === 0));
+  return samePeriod ? `${part(a, false)} to ${part(b, true)}` : `${part(a, true)} to ${part(b, true)}`;
+};
 export const fmtDuration = (mins: number) => {
   const h = Math.floor(mins / 60);
   const m = Math.round(mins % 60);

@@ -12,7 +12,7 @@
 
 import React from 'react';
 import type { CalendarEventColor, CalendarEventData } from './types';
-import { fmtTime, fmtTimeShort } from './dates';
+import { fmtRange, fmtTimeShort } from './dates';
 import styles from './CalendarEvent.module.css';
 
 export const EVENT_COLOR: Record<CalendarEventColor, string> = {
@@ -47,7 +47,7 @@ export interface CalendarEventProps extends Omit<React.ButtonHTMLAttributes<HTML
 export const CalendarEvent = React.forwardRef<HTMLButtonElement, CalendarEventProps>(
   ({ event, shape = 'chip', continuesBefore, continuesAfter, selected, dragging, timeLabel, detail = 'full', className, style, ...rest }, ref) => {
     const color = EVENT_COLOR[event.color ?? 'blue'];
-    const range = timeLabel ?? `${fmtTime(event.start)} – ${fmtTime(event.end)}`;
+    const range = timeLabel ?? fmtRange(event.start, event.end);
     return (
       <button
         ref={ref}
@@ -56,6 +56,7 @@ export const CalendarEvent = React.forwardRef<HTMLButtonElement, CalendarEventPr
         style={{ ...style, ['--cv' as string]: color }}
         data-selected={selected ? '' : undefined}
         data-dragging={dragging ? '' : undefined}
+        data-detail={shape === 'block' ? detail : undefined}
         data-before={continuesBefore ? '' : undefined}
         data-after={continuesAfter ? '' : undefined}
         aria-label={`${event.title}, ${event.allDay ? 'all day' : range}${event.location ? `, ${event.location}` : ''}`}
