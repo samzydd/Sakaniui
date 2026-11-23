@@ -47,8 +47,6 @@
 .card__footer { display: flex; align-items: center; justify-content: space-between; }
 .card__meta { display: flex; align-items: center; gap: var(--space-10); }
 .card__assignees { display: inline-flex; }
-/* assignees and the stage mover, together at the footer's end */
-.card__end { display: inline-flex; align-items: center; gap: var(--space-8); margin-left: auto; }
 
 /* ---- Real pointer interaction ----
  * `state="hover"` above is the static variant for design demos; these give

@@ -66,7 +66,7 @@ export const Bug: Story = {
     assignees: <AvatarGroup size="sm" max={2} avatars={[{ initials: 'AB' }, { initials: 'MR' }]} />,
   },
 };
-/** With `stages`, `stage` and `onMoveTo` the card's footer gets a "Move to" button (⇄), shown on hover or focus. It opens a
+/** With `stages`, `stage` and `onMoveTo` the card's header gets a quiet "Move to" button (⇄) at the top right. It opens a
  * short list of the stages, each with its colour; the card's own has a check and the next one is highlighted to start with.
  * Alt + → / Alt + ← move the focused card one stage. (Figma: Board Card State=Move, with the Stage Menu.) */
 export const MoveToStage: Story = {

@@ -11,12 +11,12 @@
  *   empty-column · a column with no cards shows a dashed drop zone
  *   dragging     · a card lifts and tilts while a card-shaped slot marks where it lands
  *
- * Move to another stage (default state): hover or focus a card and a small "Move to" button (⇄) shows in its footer.
+ * Move to another stage (default state): each card has a small, quiet "Move to" button (⇄) at its top right, beside the flag.
  * It opens a short list of the stages, each with its colour; the card's own stage has a check and the next stage is
  * highlighted to start with. Pick one and the card slides across into that column at its own height, settles, then glides up to the
  * top while the cards around it make room: done as layout animation on its own soft path, so nothing jumps. The new
  * column's colour rings the card as it lands and both counts tick; moves are announced to screen readers. Alt + → /
- * Alt + ← on a focused card move it one stage without the menu. On touch the button stays on every card. Nothing
+ * Alt + ← on a focused card move it one stage without the menu. Nothing
  * animates under prefers-reduced-motion.
  *
  * Drag and drop (default state) is pointer-based, see useKanbanDrag.ts: the

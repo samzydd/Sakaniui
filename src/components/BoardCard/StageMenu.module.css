@@ -1,42 +1,39 @@
 /* StageMenu: the footer button (⇄) and the short "Move to" list it opens. */
 
-/* ---- the button ---- */
+/* ---- the button: a quiet icon at the card's top right, always there ---- */
 .trigger {
   position: relative;
   flex: none;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 28px;
-  height: 28px;
+  width: 24px;
+  height: 24px;
+  margin: -2px 0; /* centred on the title's 20px line without making the header taller */
   padding: 0;
-  box-sizing: border-box;
-  border: var(--border-width-100, 1px) solid var(--color-border-default);
+  border: 0;
   border-radius: var(--radius-full, 9999px);
-  background: var(--color-bg-surface);
-  color: var(--color-fg-muted);
-  box-shadow: var(--shadow-xs);
+  background: transparent;
+  color: var(--color-fg-subtle);
   cursor: pointer;
-  /* hidden until the card is hovered or focused (it keeps its room, so nothing shifts); stays while its menu is open */
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 140ms ease, background-color 140ms ease, color 140ms ease, border-color 140ms ease, transform 120ms ease;
+  transition: background-color 140ms ease, color 140ms ease, transform 120ms ease;
 }
+.trigger::after { content: ''; position: absolute; inset: -10px; border-radius: inherit; } /* a 44px target */
+/* it warms up when the card does */
 :global([data-mover-host]):hover .trigger,
-:global([data-mover-host]):focus-within .trigger,
-.trigger[data-open] { opacity: 1; pointer-events: auto; }
-.trigger::after { content: ''; position: absolute; inset: -8px; border-radius: inherit; } /* a 44px target */
+:global([data-mover-host]):focus-within .trigger { color: var(--color-fg-muted); }
 .trigger:hover { background: var(--color-bg-subtle); color: var(--color-fg-default); }
-.trigger[data-open] { background: var(--color-accent-default); border-color: var(--color-accent-default); color: var(--color-fg-on-accent); }
-.trigger:focus-visible { outline: none; box-shadow: 0 0 0 2px var(--color-bg-surface), 0 0 0 4px var(--color-border-focus); }
-.trigger:active:not(:disabled) { transform: scale(0.94); }
-.trigger:disabled { opacity: 0 !important; pointer-events: none; }
+.trigger[data-open] { background: var(--color-accent-default); color: var(--color-fg-on-accent); }
+.trigger:focus-visible { outline: none; box-shadow: 0 0 0 2px var(--color-border-focus); }
+.trigger:active:not(:disabled) { transform: scale(0.92); }
+.trigger:disabled { opacity: 0.4; cursor: default; }
 
-/* its hint, above it on hover */
+/* its hint, below it on hover */
 .tip {
   position: absolute;
-  bottom: calc(100% + 10px);
+  top: calc(100% + 8px);
   right: -4px;
+  z-index: 2;
   padding: 5px 9px;
   border-radius: var(--radius-md);
   background: var(--color-bg-inverse);
@@ -48,10 +45,10 @@
   white-space: nowrap;
   opacity: 0;
   pointer-events: none;
-  transform: translateY(4px);
+  transform: translateY(-4px);
   transition: opacity 120ms ease, transform 160ms cubic-bezier(0.2, 0.9, 0.3, 1);
 }
-.tip::after { content: ''; position: absolute; top: 100%; right: 15px; width: 8px; height: 8px; margin-top: -4px; background: inherit; transform: rotate(45deg); border-radius: 1px; }
+.tip::after { content: ''; position: absolute; bottom: 100%; right: 11px; width: 8px; height: 8px; margin-bottom: -4px; background: inherit; transform: rotate(45deg); border-radius: 1px; }
 .trigger:hover .tip { opacity: 1; transform: none; transition-delay: 300ms; }
 
 /* ---- the menu: a short list ---- */
@@ -119,7 +116,6 @@
 .check { flex: none; color: var(--color-fg-default); }
 
 @media (hover: none) {
-  .trigger { opacity: 1; pointer-events: auto; }
   .tip { display: none; }
 }
 

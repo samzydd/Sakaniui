@@ -14,8 +14,8 @@
  * trailing) · description (non-compact) · tags (non-compact) · footer
  * (meta items + avatars), separated by a hairline divider.
  *
- * Moving between stages: give the card `stages`, `stage` and `onMoveTo` and its footer gets a small "Move to" button
- * (⇄), shown when the card is hovered or focused. It opens a short list of the stages, each with its colour; the card's
+ * Moving between stages: give the card `stages`, `stage` and `onMoveTo` and its header gets a small "Move to" button
+ * (⇄) at the top right, always there and quiet (so nothing shifts, and it works the same on touch). It opens a short list of the stages, each with its colour; the card's
  * own stage has a check and the next one is highlighted to start with, so one click moves it on and any other stage is
  * one click away. ↑ ↓ or a number pick, Enter moves. The card becomes focusable and Alt + → / Alt + ← move it one stage
  * without the menu. This is the "State=Move" look in the Figma "Board Card" set (with the "Stage Menu").
@@ -81,7 +81,7 @@ export const BoardCard: React.FC<BoardCardProps> = ({
   const showBody = type !== 'compact';
   const at = stages && stage != null ? stages.findIndex((x) => x.id === stage) : -1;
   const movable = !!(onMoveTo && stages && stages.length > 1 && at >= 0);
-  const hasFooter = meta || assignees || movable;
+  const hasFooter = meta || assignees;
   const onKeyDown = movable
     ? (e: React.KeyboardEvent<HTMLDivElement>) => {
         // Alt + arrows on the card itself (not on a button or field inside it): one stage on or back
@@ -107,6 +107,7 @@ export const BoardCard: React.FC<BoardCardProps> = ({
         {leading && <span className={styles.card__leading}>{leading}</span>}
         <span className={styles.card__title}>{title}</span>
         {trailing && <span className={styles.card__trailing}>{trailing}</span>}
+        {movable && <StageMenu stages={stages!} current={stage!} onMove={onMoveTo!} disabled={moveDisabled} />}
       </div>
 
       {showBody && description && <p className={styles.card__desc}>{description}</p>}
@@ -117,14 +118,7 @@ export const BoardCard: React.FC<BoardCardProps> = ({
           <div className={styles.card__divider} />
           <div className={styles.card__footer}>
             {meta && <div className={styles.card__meta}>{meta}</div>}
-            {movable ? (
-              <div className={styles.card__end}>
-                {assignees && <div className={styles.card__assignees}>{assignees}</div>}
-                <StageMenu stages={stages!} current={stage!} onMove={onMoveTo!} disabled={moveDisabled} />
-              </div>
-            ) : (
-              assignees && <div className={styles.card__assignees}>{assignees}</div>
-            )}
+            {assignees && <div className={styles.card__assignees}>{assignees}</div>}
           </div>
         </>
       )}
