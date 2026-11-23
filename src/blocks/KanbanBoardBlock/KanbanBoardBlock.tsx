@@ -12,8 +12,8 @@
  *   dragging     · a card lifts and tilts while a card-shaped slot marks where it lands
  *
  * Move to another stage (default state): hover or focus a card and a small "Move to" button (⇄) shows in its footer.
- * It opens a menu of every stage, laid out as a pipeline with each stage's colour and count; the next stage is chosen to
- * start with. Pick one and the card slides across into that column at its own height, settles, then glides up to the
+ * It opens a short list of the stages, each with its colour; the card's own stage has a check and the next stage is
+ * highlighted to start with. Pick one and the card slides across into that column at its own height, settles, then glides up to the
  * top while the cards around it make room: done as layout animation on its own soft path, so nothing jumps. The new
  * column's colour rings the card as it lands and both counts tick; moves are announced to screen readers. Alt + → /
  * Alt + ← on a focused card move it one stage without the menu. On touch the button stays on every card. Nothing
@@ -483,7 +483,7 @@ export const KanbanBoardBlock: React.FC<KanbanBoardBlockProps> = ({
   }, [step]);
   React.useEffect(() => () => glide.current?.cancel(), []);
 
-  const stages: BoardCardStage[] = columns.map((c) => ({ id: c.title, label: c.title, color: c.dot, count: c.tasks.length }));
+  const stages: BoardCardStage[] = columns.map((c) => ({ id: c.title, label: c.title, color: c.dot }));
   const lifted = drag.active ? drag.active.from : null;
   const aim = drag.active ? drag.target : null;
   const liftedTask = lifted ? columns[lifted.col]?.tasks[lifted.index] : undefined;

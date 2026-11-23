@@ -17,7 +17,7 @@ Mirrors the four states in the Figma block:
 - **dragging** — a card lifts while a placeholder marks the drop target
 
 Moving a card without dragging: hover or focus a card and a "Move to" button (⇄) shows in its footer. It opens a
-menu of every stage; pick one and the card slides across into that column, then glides up to the top. Alt + → / Alt + ←
+short list of the stages; pick one and the card slides across into that column, then glides up to the top. Alt + → / Alt + ←
 move a focused card one stage.
 
 The column is defined locally (below) rather than as a library component —

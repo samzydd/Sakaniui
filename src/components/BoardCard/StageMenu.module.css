@@ -1,4 +1,4 @@
-/* StageMenu: the footer button (⇄) and the "Move to" menu it opens. */
+/* StageMenu: the footer button (⇄) and the short "Move to" list it opens. */
 
 /* ---- the button ---- */
 .trigger {
@@ -54,12 +54,12 @@
 .tip::after { content: ''; position: absolute; top: 100%; right: 15px; width: 8px; height: 8px; margin-top: -4px; background: inherit; transform: rotate(45deg); border-radius: 1px; }
 .trigger:hover .tip { opacity: 1; transform: none; transition-delay: 300ms; }
 
-/* ---- the menu ---- */
+/* ---- the menu: a short list ---- */
 .menu {
   position: fixed;
   z-index: 1000;
   box-sizing: border-box;
-  padding: 6px;
+  padding: 4px;
   border: 1px solid var(--surface-border-strong, var(--color-border-default));
   border-radius: var(--radius-lg);
   background: var(--surface-bg-overlay, var(--color-bg-surface));
@@ -71,37 +71,24 @@
   transform-origin: top right;
 }
 .menu--above { transform-origin: bottom right; }
-.menu--in { animation: stageMenuIn 170ms cubic-bezier(0.2, 0.9, 0.3, 1) both; }
-.menu--out { animation: stageMenuOut 110ms ease-in both; pointer-events: none; }
+.menu--in { animation: stageMenuIn 160ms cubic-bezier(0.2, 0.9, 0.3, 1) both; }
+.menu--out { animation: stageMenuOut 100ms ease-in both; pointer-events: none; }
 .menu--above.menu--in { animation-name: stageMenuInAbove; }
 @keyframes stageMenuIn { from { opacity: 0; transform: translateY(-4px) scale(0.97); } }
 @keyframes stageMenuInAbove { from { opacity: 0; transform: translateY(4px) scale(0.97); } }
 @keyframes stageMenuOut { to { opacity: 0; transform: scale(0.98); } }
 
-.head { margin: 0; padding: 6px 10px 4px; font-size: 12px; line-height: 16px; font-weight: 500; color: var(--color-fg-subtle); }
-
-/* the stages, as a pipeline: a rail joins their dots */
 .list { position: relative; display: flex; flex-direction: column; gap: 2px; }
-.list::before {
-  content: '';
-  position: absolute;
-  left: 17px;
-  top: 18px;
-  bottom: 18px;
-  width: 2px;
-  border-radius: 1px;
-  background: var(--color-border-default);
-}
 /* one highlight glides between the rows (hover and keyboard share it) */
 .highlight {
   position: absolute;
   left: 0;
   right: 0;
   top: 0;
-  height: 36px;
+  height: 32px;
   border-radius: var(--radius-md);
   background: var(--color-bg-subtle);
-  transition: transform 160ms cubic-bezier(0.2, 0.9, 0.3, 1), opacity 120ms ease;
+  transition: transform 150ms cubic-bezier(0.2, 0.9, 0.3, 1), opacity 120ms ease;
   pointer-events: none;
 }
 
@@ -110,7 +97,7 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  height: 36px;
+  height: 32px;
   padding: 0 10px;
   border: 0;
   border-radius: var(--radius-md);
@@ -125,73 +112,18 @@
 }
 .row:focus { outline: none; }
 .row:focus-visible { box-shadow: inset 0 0 0 2px var(--color-border-focus); }
-.row[data-kind='current'] { color: var(--color-fg-muted); cursor: default; }
+.row[data-current] { color: var(--color-fg-muted); cursor: default; }
 
-/* the dot: behind the card filled, the card's own stage ringed, ahead hollow */
-.node {
-  position: relative;
-  z-index: 1;
-  flex: none;
-  box-sizing: border-box;
-  width: 16px;
-  height: 16px;
-  display: grid;
-  place-items: center;
-}
-.node::before {
-  content: '';
-  box-sizing: border-box;
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background: var(--color-bg-surface);
-  border: 1.5px solid var(--stage);
-  transition: transform 160ms cubic-bezier(0.2, 0.9, 0.3, 1), background-color 160ms ease;
-}
-.row[data-kind='passed'] .node::before { background: var(--stage); border-color: var(--stage); }
-.row[data-kind='current'] .node::before { width: 12px; height: 12px; border-width: 3px; }
-.row[data-active] .node::before { transform: scale(1.2); background: color-mix(in srgb, var(--stage) 22%, var(--color-bg-surface)); }
-.row[data-kind='passed'][data-active] .node::before { background: var(--stage); }
-
+.dot { flex: none; width: 8px; height: 8px; border-radius: 50%; background: var(--stage); }
 .label { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.meta { flex: none; font-size: 12px; line-height: 16px; color: var(--color-fg-subtle); font-variant-numeric: tabular-nums; }
-.enter { flex: none; color: var(--color-fg-muted); opacity: 0; transform: translateX(-3px); transition: opacity 120ms ease, transform 160ms ease; }
-.row[data-active] .enter { opacity: 1; transform: none; }
+.check { flex: none; color: var(--color-fg-default); }
 
-/* the keys, for people with a keyboard */
-.hint {
-  display: flex;
-  gap: 12px;
-  margin-top: 4px;
-  padding: 8px 10px 4px;
-  border-top: 1px solid var(--color-border-subtle);
-  font-size: 11px;
-  line-height: 16px;
-  color: var(--color-fg-subtle);
-}
-.hint span { display: inline-flex; align-items: center; gap: 4px; }
-.hint kbd {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 18px;
-  height: 18px;
-  padding: 0 4px;
-  box-sizing: border-box;
-  border: 1px solid var(--color-border-default);
-  border-radius: var(--radius-xs);
-  background: var(--color-bg-surface);
-  color: var(--color-fg-muted);
-  font: inherit;
-  font-size: 11px;
-}
 @media (hover: none) {
-  .hint { display: none; }
   .trigger { opacity: 1; pointer-events: auto; }
   .tip { display: none; }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .menu--in, .menu--out { animation-duration: 1ms; }
-  .trigger, .highlight, .node::before, .enter, .tip { transition: none; }
+  .trigger, .highlight, .tip { transition: none; }
 }

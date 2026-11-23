@@ -67,16 +67,16 @@ export const Bug: Story = {
   },
 };
 /** With `stages`, `stage` and `onMoveTo` the card's footer gets a "Move to" button (⇄), shown on hover or focus. It opens a
- * menu of every stage, laid out as a pipeline with each stage's colour and count; the next one is chosen to start with.
+ * short list of the stages, each with its colour; the card's own has a check and the next one is highlighted to start with.
  * Alt + → / Alt + ← move the focused card one stage. (Figma: Board Card State=Move, with the Stage Menu.) */
 export const MoveToStage: Story = {
   args: {
     ...Task.args,
     stages: [
-      { id: 'todo', label: 'To-do', color: 'var(--color-chart-1)', count: 6 },
-      { id: 'progress', label: 'In progress', color: 'var(--color-chart-2)', count: 5 },
-      { id: 'review', label: 'In review', color: 'var(--color-chart-4)', count: 5 },
-      { id: 'done', label: 'Done', color: 'var(--color-success-solid)', count: 5 },
+      { id: 'todo', label: 'To-do', color: 'var(--color-chart-1)' },
+      { id: 'progress', label: 'In progress', color: 'var(--color-chart-2)' },
+      { id: 'review', label: 'In review', color: 'var(--color-chart-4)' },
+      { id: 'done', label: 'Done', color: 'var(--color-success-solid)' },
     ],
     stage: 'progress',
     onMoveTo: () => {},

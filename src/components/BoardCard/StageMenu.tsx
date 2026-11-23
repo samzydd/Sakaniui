@@ -1,11 +1,10 @@
 /**
  * StageMenu
  *
- * The "Move to" control in a board card's footer. A small round button (⇄); click it and a menu opens with every stage
- * laid out as a pipeline: the stages behind the card filled in, the one it is in ringed and marked "Current", the ones
- * ahead hollow, each with its colour and how many cards it holds. The next stage is chosen to start with, so a click and
- * Enter move the card on; ↑ ↓ (or a number key) pick another. Matches the Figma "Stage Menu Trigger" set and the
- * "Stage Menu" component.
+ * The "Move to" control in a board card's footer. A small round button (⇄); click it and a short list of the stages
+ * opens, each with its colour. The card's own stage has a check, and the next stage is highlighted to start with, so a
+ * click (or Enter) moves the card on, and any other stage is one click away. ↑ ↓ (or a number key) pick, Esc closes.
+ * Matches the Figma "Stage Menu Trigger" set and the "Stage Menu" component.
  *
  * Internal to BoardCard: you pass `stages`, `stage` and `onMoveTo` to the card and it draws this in its footer. The menu
  * portals to <body> (so a scrolling board cannot clip it) and keeps the theme of the place it opened from.
@@ -14,9 +13,7 @@
 import React from 'react';
 import { createPortal } from 'react-dom';
 import { IconSwitchHorizontal } from '../../icons/outline/switch-horizontal';
-import { IconCornerDownLeft } from '../../icons/outline/corner-down-left';
-import { IconArrowUp } from '../../icons/outline/arrow-up';
-import { IconArrowDown } from '../../icons/outline/arrow-down';
+import { IconCheck } from '../../icons/outline/check';
 import { usePortalThemeClass } from '../../lib/usePortalThemeClass';
 import styles from './StageMenu.module.css';
 
@@ -26,8 +23,6 @@ export interface BoardCardStage {
   label: string;
   /** The stage's colour: its dot in the menu. Any CSS colour. */
   color?: string;
-  /** How many cards the stage holds, shown beside it. */
-  count?: number;
 }
 
 export interface StageMenuProps {
@@ -38,7 +33,7 @@ export interface StageMenuProps {
   disabled?: boolean;
 }
 
-const WIDTH = 248;
+const WIDTH = 200;
 const GAP = 8;
 
 export const StageMenu: React.FC<StageMenuProps> = ({ stages, current, onMove, disabled }) => {
@@ -145,45 +140,28 @@ export const StageMenu: React.FC<StageMenuProps> = ({ stages, current, onMove, d
           onAnimationEnd={() => { if (!open) { setMounted(false); setPos(null); } }}
           onMouseDown={(e) => e.stopPropagation()}
         >
-          <p className={styles.head}>Move to</p>
-          <div className={styles.list} style={{ ['--rows' as string]: stages.length }}>
-            <span className={styles.highlight} aria-hidden style={{ transform: `translateY(${Math.max(0, active) * 38}px)`, opacity: active >= 0 && active !== at ? 1 : 0 }} />
-            {stages.map((s, i) => {
-              const kind = i < at ? 'passed' : i === at ? 'current' : 'ahead';
-              return (
-                <button
-                  key={s.id}
-                  ref={(el) => { rows.current[i] = el; }}
-                  type="button"
-                  role="menuitemradio"
-                  aria-checked={i === at}
-                  aria-disabled={i === at || undefined}
-                  tabIndex={-1}
-                  className={styles.row}
-                  data-kind={kind}
-                  data-active={i === active && i !== at ? '' : undefined}
-                  style={{ ['--stage' as string]: s.color ?? 'var(--color-fg-muted)' }}
-                  onMouseEnter={() => { if (i !== at) setActive(i); }}
-                  onClick={() => choose(i)}
-                >
-                  <i className={styles.node} aria-hidden />
-                  <span className={styles.label}>{s.label}</span>
-                  {i === at ? (
-                    <span className={styles.meta}>Current</span>
-                  ) : (
-                    <>
-                      {s.count != null && <span className={styles.meta}>{s.count}</span>}
-                      <IconCornerDownLeft size={14} className={styles.enter} aria-hidden />
-                    </>
-                  )}
-                </button>
-              );
-            })}
-          </div>
-          <div className={styles.hint} aria-hidden>
-            <span><kbd><IconArrowUp size={11} /></kbd><kbd><IconArrowDown size={11} /></kbd> choose</span>
-            <span><kbd><IconCornerDownLeft size={11} /></kbd> move</span>
-            <span><kbd>esc</kbd> close</span>
+          <div className={styles.list}>
+            <span className={styles.highlight} aria-hidden style={{ transform: `translateY(${Math.max(0, active) * 34}px)`, opacity: active >= 0 && active !== at ? 1 : 0 }} />
+            {stages.map((s, i) => (
+              <button
+                key={s.id}
+                ref={(el) => { rows.current[i] = el; }}
+                type="button"
+                role="menuitemradio"
+                aria-checked={i === at}
+                aria-disabled={i === at || undefined}
+                tabIndex={-1}
+                className={styles.row}
+                data-current={i === at ? '' : undefined}
+                style={{ ['--stage' as string]: s.color ?? 'var(--color-fg-muted)' }}
+                onMouseEnter={() => { if (i !== at) setActive(i); }}
+                onClick={() => choose(i)}
+              >
+                <i className={styles.dot} aria-hidden />
+                <span className={styles.label}>{s.label}</span>
+                {i === at && <IconCheck size={16} className={styles.check} aria-hidden />}
+              </button>
+            ))}
           </div>
         </div>,
         document.body,

@@ -311,7 +311,7 @@ lists its other names under `aliases` in `manifest.json`, and `search_components
   Prefer a real image when you have one; initials are the fallback, not the default.
 - **BoardCard / BoardColumn** — kanban pieces. `BoardColumn state="loading"` styles the column; *you* pass
   Skeleton-filled `BoardCard`s as children. `state="dragging"` only styles; implement drag yourself.
-  To let people move a card to another stage without dragging, give it `stages` (`{ id, label, color?, count? }[]`),
+  To let people move a card to another stage without dragging, give it `stages` (`{ id, label, color? }[]`),
   `stage` and `onMoveTo`: a "Move to" button appears in the footer on hover or focus and opens a stage menu; Alt + arrows
   move the focused card one stage. `KanbanBoardBlock` does the slide-across-then-rise animation for you and reports moves
   through `onTaskMove`.

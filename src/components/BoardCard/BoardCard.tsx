@@ -15,10 +15,10 @@
  * (meta items + avatars), separated by a hairline divider.
  *
  * Moving between stages: give the card `stages`, `stage` and `onMoveTo` and its footer gets a small "Move to" button
- * (⇄), shown when the card is hovered or focused. It opens a menu of every stage, laid out as a pipeline (behind the
- * card filled, its own stage ringed, ahead hollow), with each stage's colour and count; the next stage is chosen to
- * start with, ↑ ↓ or a number pick another, Enter moves. The card becomes focusable and Alt + → / Alt + ← move it one
- * stage without the menu. This is the "State=Move" look in the Figma "Board Card" set (with the "Stage Menu").
+ * (⇄), shown when the card is hovered or focused. It opens a short list of the stages, each with its colour; the card's
+ * own stage has a check and the next one is highlighted to start with, so one click moves it on and any other stage is
+ * one click away. ↑ ↓ or a number pick, Enter moves. The card becomes focusable and Alt + → / Alt + ← move it one stage
+ * without the menu. This is the "State=Move" look in the Figma "Board Card" set (with the "Stage Menu").
  */
 
 import React from 'react';
