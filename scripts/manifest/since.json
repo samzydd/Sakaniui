@@ -304,6 +304,7 @@
   "src/components/Badge/Badge.tsx": "0.1.0",
   "src/components/BarChart/BarChart.tsx": "0.1.0",
   "src/components/BoardCard/BoardCard.tsx": "0.1.0",
+  "src/components/BoardCard/StageMenu.tsx": "0.22.0",
   "src/components/BoardColumn/BoardColumn.tsx": "0.1.0",
   "src/components/Breadcrumb/Breadcrumb.tsx": "0.1.0",
   "src/components/Button/Button.tsx": "0.1.0",
