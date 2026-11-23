@@ -11,6 +11,12 @@
  *   empty-column · a column with no cards shows a dashed drop zone
  *   dragging     · a card lifts and tilts while a card-shaped slot marks where it lands
  *
+ * Move to the next stage (default state): hover or focus a card and a round button appears on its edge (a chevron;
+ * hover it and it names the stage). Click it, or press Alt + → on the focused card, and the card slides to the top of
+ * the next column: the column it left closes up, a slot opens, the card flies across and lands with a short highlight,
+ * and both counts tick. Alt + ← (and the button on the left edge) moves it back. On touch the "next" button stays on
+ * every card. Moves are announced to screen readers. Nothing animates under prefers-reduced-motion.
+ *
  * Drag and drop (default state) is pointer-based, see useKanbanDrag.ts: the
  * card follows the pointer and swings with its movement, a slot opens where it
  * will land, the other cards slide out of the way, and on release it glides
@@ -197,16 +203,20 @@ interface ColumnProps {
   fillPlaceholders?: boolean;
   /** A dragged card is over this column. */
   isTarget?: boolean;
+  /** A card just arrived or left: the count ticks. */
+  pop?: boolean;
   bodyRef?: React.Ref<HTMLDivElement>;
   children?: React.ReactNode;
 }
 
-const Column: React.FC<ColumnProps> = ({ title, dot, count, variant = 'default', fillPlaceholders, isTarget, bodyRef, children }) => (
+const Column: React.FC<ColumnProps> = ({ title, dot, count, variant = 'default', fillPlaceholders, isTarget, pop, bodyRef, children }) => (
   <div className={[styles.column, fillPlaceholders ? styles['column--fill'] : '', isTarget ? styles['column--target'] : ''].filter(Boolean).join(' ')}>
     <div className={styles.column__header}>
       <span className={styles.column__dot} style={{ background: dot }} aria-hidden="true" />
       <span className={styles.column__title}>{title}</span>
-      <Badge variant="neutral" emphasis="subtle">{String(count)}</Badge>
+      <span key={String(count)} className={pop ? styles.countPop : undefined}>
+        <Badge variant="neutral" emphasis="subtle">{String(count)}</Badge>
+      </span>
       <span className={styles.spacer} />
       <button type="button" className={styles.column__action} aria-label={`Add task to ${title}`}>
         <Plus size={16} />
@@ -245,11 +255,22 @@ const Column: React.FC<ColumnProps> = ({ title, dot, count, variant = 'default',
 /* ------------------------------------------------------------------ *
  * Card renderer
  * ------------------------------------------------------------------ */
+interface MoverProps {
+  onMoveNext?: () => void;
+  nextLabel?: string;
+  nextColor?: string;
+  onMoveBack?: () => void;
+  backLabel?: string;
+  backColor?: string;
+  moveDisabled?: boolean;
+}
+
 const renderTask = (
   task: Task,
   key: React.Key,
   state?: 'default' | 'dragging',
   wrapperProps?: React.HTMLAttributes<HTMLDivElement> & Partial<Record<`data-${string}`, string>>,
+  mover?: MoverProps,
 ) => (
   <div key={key} className={wrapperProps ? styles.draggable : undefined} {...(wrapperProps ?? {})}>
   <BoardCard
@@ -271,6 +292,7 @@ const renderTask = (
       </>
     }
     assignees={<AvatarGroup size="sm" max={3} avatars={task.assignees} />}
+    {...(mover ?? {})}
   />
   </div>
 );
@@ -304,26 +326,156 @@ export interface KanbanBoardBlockProps {
    * bottom instead of leaving blank canvas. No-op at the board's natural
    * height. */
   fillPlaceholders?: boolean;
+  /** A card moved to another stage, by drag or by the move buttons. Save it here. */
+  onTaskMove?: (move: { id: string; title: string; from: string; to: string }) => void;
+}
+
+const reducedMotion = () => typeof window !== 'undefined' && !!window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+const FLIGHT_EASE_OUT = 'cubic-bezier(0.22, 0.9, 0.3, 1)';
+
+interface Flight {
+  task: Task;
+  from: KanbanPos;
+  to: KanbanPos;
+  /** Where the card starts, relative to the block. */
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  dir: 1 | -1;
 }
 
 export const KanbanBoardBlock: React.FC<KanbanBoardBlockProps> = ({
   state = 'default',
   className,
   fillPlaceholders,
+  onTaskMove,
 }) => {
   // ---- drag and drop -----------------------------------------------------
   const [columns, setColumns] = React.useState(INITIAL_COLUMNS);
-  const drag = useKanbanDrag({
-    enabled: state === 'default',
-    onMove: (from: KanbanPos, to: KanbanPos) =>
-      setColumns((prev) => {
-        const next = prev.map((c) => ({ ...c, tasks: [...c.tasks] }));
-        const [moved] = next[from.col].tasks.splice(from.index, 1);
-        if (moved) next[to.col].tasks.splice(to.index, 0, moved);
-        return next;
-      }),
-  });
-  const draggedTask = drag.active ? columns[drag.active.from.col]?.tasks[drag.active.from.index] : undefined;
+  const columnsRef = React.useRef(columns);
+  columnsRef.current = columns;
+  const [arrived, setArrived] = React.useState<{ id: string; cols: number[] } | null>(null);
+  const [announce, setAnnounce] = React.useState('');
+  const refocus = React.useRef<string | null>(null);
+  const onTaskMoveRef = React.useRef(onTaskMove);
+  onTaskMoveRef.current = onTaskMove;
+
+  /** Commit a move: the card leaves one list and enters another; the landing is marked and announced. */
+  const commitMove = (from: KanbanPos, to: KanbanPos) => {
+    const cols = columnsRef.current;
+    const task = cols[from.col]?.tasks[from.index];
+    if (!task) return;
+    setColumns((prev) => {
+      const next = prev.map((c) => ({ ...c, tasks: [...c.tasks] }));
+      const [moved] = next[from.col].tasks.splice(from.index, 1);
+      if (moved) next[to.col].tasks.splice(to.index, 0, moved);
+      return next;
+    });
+    if (from.col !== to.col) {
+      setArrived({ id: task.id, cols: [from.col, to.col] });
+      setAnnounce(`${task.title} moved to ${cols[to.col].title}, position ${to.index + 1} of ${cols[to.col].tasks.length + 1}.`);
+      onTaskMoveRef.current?.({ id: task.id, title: task.title, from: cols[from.col].title, to: cols[to.col].title });
+    }
+  };
+
+  const drag = useKanbanDrag({ enabled: state === 'default', onMove: commitMove });
+
+  // The highlight on a card that just landed, and the counts that ticked, fade after a moment.
+  React.useEffect(() => {
+    if (!arrived) return undefined;
+    const t = window.setTimeout(() => setArrived(null), 1100);
+    return () => window.clearTimeout(t);
+  }, [arrived]);
+  // A card that had focus keeps it through the move, so Alt + → can be pressed again.
+  React.useEffect(() => {
+    if (!arrived || refocus.current !== arrived.id) return;
+    refocus.current = null;
+    drag.blockRef.current?.querySelector<HTMLElement>(`[data-kanban-card="${arrived.id}"] [tabindex]`)?.focus();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [arrived]);
+
+  // ---- move to the next stage ---------------------------------------------
+  const [flight, setFlight] = React.useState<Flight | null>(null);
+  const flightEl = React.useRef<HTMLDivElement | null>(null);
+
+  const startMove = (from: KanbanPos, dir: 1 | -1) => {
+    if (flight || drag.active || state !== 'default') return;
+    const cols = columnsRef.current;
+    const toCol = from.col + dir;
+    const task = cols[from.col]?.tasks[from.index];
+    const block = drag.blockRef.current;
+    const board = drag.boardRef.current;
+    if (!task || !block || !board || toCol < 0 || toCol >= cols.length) return;
+    const to: KanbanPos = { col: toCol, index: 0 };
+    const cardEl = block.querySelector<HTMLElement>(`[data-kanban-card="${task.id}"]`);
+    if (!cardEl) return;
+    if (cardEl.contains(document.activeElement)) refocus.current = task.id;
+    if (reducedMotion()) { commitMove(from, to); return; }
+
+    const begin = () => {
+      const r = cardEl.getBoundingClientRect();
+      const b = block.getBoundingClientRect();
+      drag.capture();
+      setFlight({ task, from, to, x: r.left - b.left, y: r.top - b.top, width: r.width, height: r.height, dir });
+    };
+    // The next column may sit past the edge of a narrow board: bring it into view first, then fly.
+    const target = drag.boardRef.current?.querySelectorAll<HTMLElement>(`.${styles.column}`)[toCol];
+    const br = board.getBoundingClientRect();
+    const tr = target?.getBoundingClientRect();
+    if (tr && (tr.left < br.left || tr.right > br.right)) {
+      board.scrollBy({ left: tr.left < br.left ? tr.left - br.left - 16 : tr.right - br.right + 16, behavior: 'smooth' });
+      window.setTimeout(begin, 280);
+    } else begin();
+  };
+
+  // The card flies from where it was to the slot that opened at the top of the next column, then the move commits.
+  React.useLayoutEffect(() => {
+    const f = flight;
+    if (!f) return undefined;
+    const overlay = flightEl.current;
+    const block = drag.blockRef.current;
+    const slot = block?.querySelector<HTMLElement>('[data-kanban-slot]');
+    const column = slot?.parentElement;
+    if (!overlay || !block || !column) { commitMove(f.from, f.to); setFlight(null); return undefined; }
+    const b = block.getBoundingClientRect();
+    const c = column.getBoundingClientRect();
+    const dx = c.left - b.left - f.x;
+    const dy = c.top - b.top - f.y;
+    const dist = Math.hypot(dx, dy);
+    const duration = Math.round(Math.min(620, 380 + dist / 4));
+    const at = (k: number, extra = '') => `translate3d(${f.x + dx * k}px, ${f.y + dy * k - (k > 0 && k < 1 ? 18 : 0)}px, 0) ${extra}`;
+    const inner = overlay.firstElementChild?.firstElementChild as HTMLElement | null;
+    const tilt = 2.5 * f.dir;
+    const anim = overlay.animate(
+      [
+        { transform: at(0, 'scale(1) rotate(0deg)'), easing: FLIGHT_EASE_OUT },
+        { transform: at(0.5, `scale(1.045) rotate(${tilt}deg)`), offset: 0.42, easing: FLIGHT_EASE_OUT },
+        { transform: at(1, 'scale(1) rotate(0deg)') },
+      ],
+      { duration, fill: 'forwards' },
+    );
+    inner?.animate(
+      [{ boxShadow: 'var(--shadow-xs)' }, { boxShadow: 'var(--shadow-xl)', offset: 0.42 }, { boxShadow: 'var(--shadow-xs)' }],
+      { duration, fill: 'forwards' },
+    );
+    let live = true;
+    anim.finished.then(() => {
+      if (!live) return;
+      drag.capture();
+      commitMove(f.from, f.to);
+      setFlight(null);
+    }).catch(() => {});
+    return () => { live = false; anim.cancel(); };
+    // commitMove reads refs; the effect is keyed to the flight alone
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [flight]);
+
+  const lifted = drag.active ? drag.active.from : flight ? flight.from : null;
+  const aim = drag.active ? drag.target : flight ? flight.to : null;
+  const liftedTask = lifted ? columns[lifted.col]?.tasks[lifted.index] : undefined;
+  const liftedHeight = drag.active?.height ?? flight?.height;
+  const busy = !!(drag.active || flight);
 
   const source = state === 'default' ? columns : INITIAL_COLUMNS;
 
@@ -349,13 +501,18 @@ export const KanbanBoardBlock: React.FC<KanbanBoardBlockProps> = ({
     <div ref={drag.boardRef} className={[styles.columns, fillPlaceholders ? styles['columns--fill'] : ''].filter(Boolean).join(' ')}>
       {source.map((col, colIndex) => {
         const isEmptyCol = state === 'empty-column' && colIndex === 2;
+        const incoming = !!aim && aim.col === colIndex;
+        const leaving = lifted && lifted.col === colIndex ? 1 : 0;
+        // a column that has been emptied (its last card moved on) shows the drop zone, unless a card is on its way in
+        const emptied = state === 'default' && col.tasks.length - leaving === 0 && !incoming;
         const variant =
-          state === 'loading' ? 'loading' : isEmptyCol ? 'empty' : 'default';
+          state === 'loading' ? 'loading' : isEmptyCol || emptied ? 'empty' : 'default';
 
         return (
           <Column
             key={col.title}
-            isTarget={!!drag.active && drag.target?.col === colIndex && drag.target.col !== drag.active.from.col}
+            isTarget={!!lifted && aim?.col === colIndex && aim.col !== lifted.col}
+            pop={!!arrived && arrived.cols.includes(colIndex)}
             bodyRef={drag.columnRef(colIndex)}
             title={col.title}
             dot={col.dot}
@@ -364,11 +521,10 @@ export const KanbanBoardBlock: React.FC<KanbanBoardBlockProps> = ({
             fillPlaceholders={fillPlaceholders}
           >
             {(() => {
-              // While dragging: the card leaves its column and a slot opens at the target.
-              const a = drag.active;
+              // While dragging or moving: the card leaves its column and a slot opens at the target.
               const items = col.tasks
                 .map((task, i) => ({ task, i }))
-                .filter(({ i }) => !(a && a.from.col === colIndex && a.from.index === i));
+                .filter(({ i }) => !(lifted && lifted.col === colIndex && lifted.index === i));
               const nodes: React.ReactNode[] = items.map(({ task, i }) => {
                 // The static dragging state: column 2's last card lifts out over its slot.
                 const isDragged = state === 'dragging' && colIndex === 1 && i === col.tasks.length - 1;
@@ -380,15 +536,28 @@ export const KanbanBoardBlock: React.FC<KanbanBoardBlockProps> = ({
                     </div>
                   );
                 }
-                return renderTask(task, task.id, 'default', drag.cardProps({ col: colIndex, index: i }, task.id));
+                const next = state === 'default' ? columns[colIndex + 1] : undefined;
+                const prev = state === 'default' ? columns[colIndex - 1] : undefined;
+                const wrapper = {
+                  ...drag.cardProps({ col: colIndex, index: i }, task.id),
+                  ...(arrived?.id === task.id ? { 'data-arrived': '', style: { ['--arrive' as string]: col.dot } as React.CSSProperties } : {}),
+                };
+                const mover: MoverProps | undefined = state === 'default'
+                  ? {
+                      moveDisabled: busy,
+                      ...(next ? { onMoveNext: () => startMove({ col: colIndex, index: i }, 1), nextLabel: next.title, nextColor: next.dot } : {}),
+                      ...(prev ? { onMoveBack: () => startMove({ col: colIndex, index: i }, -1), backLabel: prev.title, backColor: prev.dot } : {}),
+                    }
+                  : undefined;
+                return renderTask(task, task.id, 'default', wrapper, mover);
               });
-              if (a && drag.target?.col === colIndex) {
-                nodes.splice(drag.target.index, 0, (
-                  draggedTask && (
+              if (aim && aim.col === colIndex) {
+                nodes.splice(aim.index, 0, (
+                  liftedTask && (
                     <DropSlot
                       key="slot"
-                      task={draggedTask}
-                      height={a.height}
+                      task={liftedTask}
+                      height={liftedHeight}
                       className={styles['slot--live']}
                       data-kanban-slot=""
                       data-flip-id={`slot-${colIndex}`}
@@ -403,12 +572,24 @@ export const KanbanBoardBlock: React.FC<KanbanBoardBlockProps> = ({
       })}
       </div>
 
-    {/* The card in flight: follows the pointer above the board. */}
-    {drag.active && draggedTask && (
+    {/* The card being dragged: follows the pointer above the board. */}
+    {drag.active && liftedTask && (
       <div ref={drag.overlayRef} className={styles.overlay} style={{ width: drag.active.width }} aria-hidden="true">
-        {renderTask(draggedTask, 'overlay')}
+        {renderTask(liftedTask, 'overlay')}
       </div>
     )}
+    {/* The card sliding to the next stage: flown by the layout effect above. */}
+    {flight && (
+      <div
+        ref={flightEl}
+        className={[styles.overlay, styles.flying].join(' ')}
+        style={{ width: flight.width, transform: `translate3d(${flight.x}px, ${flight.y}px, 0)` }}
+        aria-hidden="true"
+      >
+        {renderTask(flight.task, 'flight')}
+      </div>
+    )}
+    <div className={styles.srOnly} role="status" aria-live="polite">{announce}</div>
     </div>
   );
 };

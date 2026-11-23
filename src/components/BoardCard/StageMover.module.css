@@ -1,0 +1,93 @@
+/* StageMover: a 28px circle straddling the card's edge; opens into a pill that names the stage. */
+.mover {
+  position: absolute;
+  top: 50%;
+  z-index: 3;
+  display: inline-flex;
+  align-items: center;
+  height: 28px;
+  min-width: 28px;
+  box-sizing: border-box;
+  padding: 0 5px;
+  border: var(--border-width-100, 1px) solid var(--color-border-default);
+  border-radius: var(--radius-full, 9999px);
+  background: var(--color-bg-surface);
+  color: var(--color-fg-default);
+  box-shadow: var(--shadow-md);
+  cursor: pointer;
+  /* hidden until the card is hovered or focused; slides in from the card's edge */
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(var(--from, 0), -50%) scale(0.85);
+  transition:
+    opacity 140ms ease,
+    transform 220ms cubic-bezier(0.2, 0.9, 0.3, 1),
+    background-color 140ms ease,
+    color 140ms ease,
+    border-color 140ms ease,
+    padding 220ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.mover--next { right: -14px; --from: 6px; }
+.mover--back { left: -14px; --from: -6px; }
+
+/* a bigger target than it looks: 44px for a thumb */
+.mover::after { content: ''; position: absolute; inset: -8px; border-radius: inherit; }
+
+/* The label opens with a grid track going 0fr -> 1fr: the width animates without knowing the text's width. */
+.text {
+  display: grid;
+  grid-template-columns: 0fr;
+  transition: grid-template-columns 220ms cubic-bezier(0.2, 0.8, 0.2, 1), margin 220ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.text > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  font-family: var(--font-sans);
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 500;
+  opacity: 0;
+  transition: opacity 160ms ease;
+}
+.dot { flex: none; width: 8px; height: 8px; border-radius: 50%; }
+
+/* revealed by the card (BoardCard.module.css sets data-reveal on hover / focus-within) */
+:global([data-mover-host]):hover > .mover,
+:global([data-mover-host]):focus-within > .mover,
+.mover:focus-visible {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translate(0, -50%) scale(1);
+}
+
+.mover:hover,
+.mover:focus-visible {
+  outline: none;
+  background: var(--color-accent-default);
+  border-color: var(--color-accent-default);
+  color: var(--color-fg-on-accent);
+}
+.mover--next:hover, .mover--next:focus-visible { padding-left: 10px; padding-right: 7px; }
+.mover--back:hover, .mover--back:focus-visible { padding-left: 7px; padding-right: 10px; }
+.mover:hover .text, .mover:focus-visible .text { grid-template-columns: 1fr; }
+.mover--next:hover .text, .mover--next:focus-visible .text { margin-right: 6px; }
+.mover--back:hover .text, .mover--back:focus-visible .text { margin-left: 6px; }
+.mover:hover .text > span, .mover:focus-visible .text > span { opacity: 1; }
+.mover:focus-visible { box-shadow: 0 0 0 2px var(--color-bg-surface), 0 0 0 4px var(--color-border-focus), var(--shadow-md); }
+.mover:active:not(:disabled) { transform: translate(0, -50%) scale(0.96); }
+
+/* A card is on its way (or being dragged): the buttons step aside. */
+.mover:disabled { opacity: 0 !important; pointer-events: none; }
+
+/* Touch has no hover: the "next" button stays on every card, so the way to move a card on is always in sight. */
+@media (hover: none) {
+  .mover--next { opacity: 1; pointer-events: auto; transform: translate(0, -50%) scale(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mover, .text, .text > span { transition: none; }
+}

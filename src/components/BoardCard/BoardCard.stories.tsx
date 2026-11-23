@@ -66,6 +66,21 @@ export const Bug: Story = {
     assignees: <AvatarGroup size="sm" max={2} avatars={[{ initials: 'AB' }, { initials: 'MR' }]} />,
   },
 };
+/** With `onMoveNext` / `onMoveBack` the card gets a round button on each edge. Hover or focus the card to see them; hover a
+ * button and it opens into a pill that names the stage. Alt + → / Alt + ← do the same from the keyboard. (Figma: State=Move.) */
+export const MoveToStage: Story = {
+  args: {
+    ...Task.args,
+    onMoveNext: () => {},
+    nextLabel: 'In progress',
+    nextColor: 'var(--color-chart-2)',
+    onMoveBack: () => {},
+    backLabel: 'To-do',
+    backColor: 'var(--color-chart-1)',
+  },
+  decorators: [(S) => (<div style={{ padding: '24px 40px' }}><S /></div>)],
+};
+
 export const Done: Story = {
   args: { ...Task.args, state: 'done', leading: <Checkbox defaultChecked /> },
 };

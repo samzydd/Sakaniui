@@ -1,5 +1,7 @@
 /* BoardCard.module.css — 296px, pad 14, gap 10, radius 12 (between Table 8 and Card 16) */
 .card {
+  /* the stage-mover buttons sit on the card's edges */
+  position: relative;
   transition: background-color var(--transition-base), border-color var(--transition-base), box-shadow var(--transition-base), color var(--transition-base), transform var(--transition-base);
   display: flex;
   flex-direction: column;

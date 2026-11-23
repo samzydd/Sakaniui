@@ -18,6 +18,9 @@
  *     drags start after a short press-and-hold (so swipes still scroll).
  *   - Near the board's left/right edge the columns row scrolls.
  *   - With prefers-reduced-motion the card doesn't swing and drops in place.
+ *
+ * `capture()` is also returned: call it just before a layout change you want the cards to slide through (the block's
+ * "move to the next stage" uses it, so the cards slide the same way for a click as for a drag).
  */
 import React from 'react';
 
@@ -300,5 +303,5 @@ export function useKanbanDrag({ enabled, onMove }: Options) {
     if (el) columnEls.current.set(col, el); else columnEls.current.delete(col);
   };
 
-  return { active, target, blockRef, boardRef, overlayRef, cardProps, columnRef };
+  return { active, target, blockRef, boardRef, overlayRef, cardProps, columnRef, capture };
 }

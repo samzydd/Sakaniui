@@ -189,6 +189,26 @@
   border-color: var(--color-border-default);
 }
 
+/* The card sliding to the next stage. It is flown with the Web Animations API (see KanbanBoardBlock.tsx): the shadow
+   there is animated too, so it rises as the card lifts off and settles as it lands. */
+.flying { z-index: 60; }
+.flying > * > * { border-color: var(--color-border-default); }
+
+/* A card that has just landed: a ring in its new column's colour that fades out, and a brief lift. */
+.draggable[data-arrived] > * { animation: arrive 1000ms cubic-bezier(0.2, 0.7, 0.3, 1) both; }
+@keyframes arrive {
+  0%   { box-shadow: 0 0 0 3px color-mix(in srgb, var(--arrive, var(--color-accent-default)) 55%, transparent), var(--shadow-sm); }
+  60%  { box-shadow: 0 0 0 3px color-mix(in srgb, var(--arrive, var(--color-accent-default)) 22%, transparent), var(--shadow-xs); }
+  100% { box-shadow: 0 0 0 3px transparent, var(--shadow-xs); }
+}
+
+/* The count in a column header ticks when a card arrives or leaves. */
+.countPop { display: inline-flex; animation: countPop 380ms cubic-bezier(0.3, 1.6, 0.5, 1) both; }
+@keyframes countPop { 0% { transform: scale(1); } 40% { transform: scale(1.35); } 100% { transform: scale(1); } }
+
+/* Text for screen readers only: the live region that announces a move. */
+.srOnly { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+
 /* The static `dragging` state: the card lifted and tilted over its slot. */
 .draggedWrap { position: relative; }
 .draggedCard {
@@ -205,6 +225,7 @@
 @media (prefers-reduced-motion: reduce) {
   .slot--live { animation: none; }
   .column { transition: none; }
+  .draggable[data-arrived] > *, .countPop { animation: none; }
 }
 
 /* ---- responsive (container-based) ---- */

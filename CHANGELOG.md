@@ -2,6 +2,14 @@
 
 All notable changes to `@sakaniui/react` are documented here.
 
+## Unreleased
+
+### Added
+
+- **Move a Kanban card to the next stage with a click, not just a drag.** Hover or focus a card in `KanbanBoardBlock` and a round button appears on its right edge. Click it (or press Alt + → on the focused card) and the card slides to the top of the next column: the column it left closes up, a slot opens, the card lifts, flies across and lands with a short highlight in the new column's colour, and both counts tick. Hover the button and it opens into a pill that names the stage ("In progress"). A button on the left edge (Alt + ←) moves it back; the last column has no "next". Focus stays on the card so you can keep moving it, each move is announced to screen readers, and on touch the "next" button stays on every card since there is no hover. Under `prefers-reduced-motion` the card moves without the slide. A column emptied by a move shows its drop zone.
+- **`BoardCard` takes `onMoveNext` / `nextLabel` / `nextColor`, `onMoveBack` / `backLabel` / `backColor` and `moveDisabled`.** They draw the same edge buttons on any card (Figma: Board Card, State=Move; the button is the Stage Mover set). The card becomes focusable and Alt + arrows call them. The card only reports the click: you move it.
+- **`KanbanBoardBlock` has `onTaskMove({ id, title, from, to })`**, called for every move by drag or by button, so you can save it.
+
 ## 0.21.0
 
 ### Changed

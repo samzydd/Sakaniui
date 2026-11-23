@@ -13,9 +13,14 @@
  * Regions (top→bottom): cover (cover type) · header (leading + title +
  * trailing) · description (non-compact) · tags (non-compact) · footer
  * (meta items + avatars), separated by a hairline divider.
+ *
+ * Moving on: give the card `onMoveNext` (and `onMoveBack`) and a round button appears on its edge when it is hovered
+ * or focused; hover that and it opens into a pill naming the stage ("In progress"). The card becomes focusable and
+ * Alt + → / Alt + ← do the same from the keyboard. This is the "State=Move" look in the Figma "Board Card" set.
  */
 
 import React from 'react';
+import { StageMover } from './StageMover';
 import styles from './BoardCard.module.css';
 
 export type BoardCardType = 'compact' | 'default' | 'cover';
@@ -40,6 +45,18 @@ export interface BoardCardProps {
   /** AvatarGroup / Avatar, right-aligned in the footer. */
   assignees?: React.ReactNode;
   onClick?: () => void;
+  /** Move the card to the next stage. Adds a button on the card's right edge, and Alt + → on the focused card. */
+  onMoveNext?: () => void;
+  /** The next stage's name, for the button ("In progress"). */
+  nextLabel?: string;
+  /** The next stage's colour, a dot in the button. Any CSS colour. */
+  nextColor?: string;
+  /** Move the card back a stage. Adds a button on the left edge, and Alt + ← on the focused card. */
+  onMoveBack?: () => void;
+  backLabel?: string;
+  backColor?: string;
+  /** Hides both buttons and ignores the shortcuts: a move is under way, or a card is being dragged. */
+  moveDisabled?: boolean;
   className?: string;
 }
 
@@ -55,13 +72,33 @@ export const BoardCard: React.FC<BoardCardProps> = ({
   meta,
   assignees,
   onClick,
+  onMoveNext,
+  nextLabel = 'the next stage',
+  nextColor,
+  onMoveBack,
+  backLabel = 'the previous stage',
+  backColor,
+  moveDisabled,
   className,
 }) => {
   const showBody = type !== 'compact';
   const hasFooter = meta || assignees;
+  const movable = !!(onMoveNext || onMoveBack);
+  const onKeyDown = movable
+    ? (e: React.KeyboardEvent<HTMLDivElement>) => {
+        // Alt + arrows on the card itself (not on a button or field inside it)
+        if (!e.altKey || moveDisabled || e.target !== e.currentTarget) return;
+        if (e.key === 'ArrowRight' && onMoveNext) { e.preventDefault(); onMoveNext(); }
+        else if (e.key === 'ArrowLeft' && onMoveBack) { e.preventDefault(); onMoveBack(); }
+      }
+    : undefined;
   return (
     <div
       onClick={onClick}
+      onKeyDown={onKeyDown}
+      tabIndex={movable ? 0 : undefined}
+      data-mover-host={movable ? '' : undefined}
+      aria-keyshortcuts={movable ? [onMoveBack && 'Alt+ArrowLeft', onMoveNext && 'Alt+ArrowRight'].filter(Boolean).join(' ') : undefined}
       aria-selected={state === 'selected' || undefined}
       className={[styles.card, styles[`card--${type}`], styles[`card--${state}`], className ?? '']
         .filter(Boolean).join(' ')}
@@ -86,6 +123,9 @@ export const BoardCard: React.FC<BoardCardProps> = ({
           </div>
         </>
       )}
+
+      {onMoveBack && <StageMover direction="back" label={backLabel} color={backColor} onClick={onMoveBack} disabled={moveDisabled} />}
+      {onMoveNext && <StageMover direction="next" label={nextLabel} color={nextColor} onClick={onMoveNext} disabled={moveDisabled} />}
     </div>
   );
 };
