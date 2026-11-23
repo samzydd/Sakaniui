@@ -26,17 +26,26 @@ import React from 'react';
 
 export interface KanbanPos { col: number; index: number }
 
+export interface KanbanRect { x: number; y: number; w: number; h: number }
+
 export interface KanbanDragActive {
   id: string;
   from: KanbanPos;
   width: number;
   height: number;
+  /** Where the grabbed card was when the drag began (viewport). */
+  origin: KanbanRect;
+  /** The other cards carried along (a multi-selection), in order, and where each one was when the drag began. */
+  group: string[];
+  groupRects: Record<string, KanbanRect>;
 }
 
 interface Options {
   enabled: boolean;
-  /** Commit a move. `to.index` counts the target column's cards without the moved one. */
-  onMove: (from: KanbanPos, to: KanbanPos) => void;
+  /** Commit a move. `to.index` counts the target column's cards without the moved ones; `group` is the other cards carried along. */
+  onMove: (from: KanbanPos, to: KanbanPos, group: string[]) => void;
+  /** The other cards to carry along when this one is dragged (its fellow selected cards), or none. */
+  groupOf?: (id: string) => string[];
 }
 
 const MOUSE_THRESHOLD = 4;     // px before a press becomes a drag
@@ -51,7 +60,7 @@ const NO_DRAG = 'button, input, textarea, select, a, label, [role="checkbox"], [
 const reducedMotion = () =>
   typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
 
-export function useKanbanDrag({ enabled, onMove }: Options) {
+export function useKanbanDrag({ enabled, onMove, groupOf }: Options) {
   const [active, setActive] = React.useState<KanbanDragActive | null>(null);
   const [target, setTarget] = React.useState<KanbanPos | null>(null);
 
@@ -73,6 +82,8 @@ export function useKanbanDrag({ enabled, onMove }: Options) {
   });
   const onMoveRef = React.useRef(onMove);
   onMoveRef.current = onMove;
+  const groupOfRef = React.useRef(groupOf);
+  groupOfRef.current = groupOf;
 
   // FLIP: visual positions of [data-flip-id] elements before a layout change.
   const flipFrom = React.useRef<Map<string, DOMRect> | null>(null);
@@ -209,7 +220,19 @@ export function useKanbanDrag({ enabled, onMove }: Options) {
     st.x = r.left; st.y = r.top;
     st.lastPx = st.px; st.lastT = performance.now(); st.vx = 0;
     st.rot = 0; st.rotV = 0; st.scale = 1;
-    const a: KanbanDragActive = { id: p.id, from: p.from, width: r.width, height: r.height };
+    // A multi-selection travels together: note where each of the other cards is before they leave their columns.
+    const group = groupOfRef.current?.(p.id) ?? [];
+    const groupRects: Record<string, KanbanRect> = {};
+    for (const id of group) {
+      const el = boardRef.current?.querySelector<HTMLElement>(`[data-kanban-card="${id}"]`);
+      const g = el?.getBoundingClientRect();
+      if (g) groupRects[id] = { x: g.left, y: g.top, w: g.width, h: g.height };
+    }
+    const a: KanbanDragActive = {
+      id: p.id, from: p.from, width: r.width, height: r.height,
+      origin: { x: r.left, y: r.top, w: r.width, h: r.height },
+      group: group.filter((id) => groupRects[id]), groupRects,
+    };
     st.active = a;
     st.target = p.from;
     capture();
@@ -243,7 +266,7 @@ export function useKanbanDrag({ enabled, onMove }: Options) {
       y: r ? r.top : st.y,
       done: () => {
         capture();
-        if (to.col !== a.from.col || to.index !== a.from.index) onMoveRef.current(a.from, to);
+        if (a.group.length || to.col !== a.from.col || to.index !== a.from.index) onMoveRef.current(a.from, to, a.group);
         finish();
       },
     };

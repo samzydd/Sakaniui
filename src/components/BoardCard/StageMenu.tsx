@@ -14,6 +14,7 @@ import React from 'react';
 import { createPortal } from 'react-dom';
 import { IconSwitchHorizontal } from '../../icons/outline/switch-horizontal';
 import { IconCheck } from '../../icons/outline/check';
+import { IconChevronUp } from '../../icons/outline/chevron-up';
 import { usePortalThemeClass } from '../../lib/usePortalThemeClass';
 import styles from './StageMenu.module.css';
 
@@ -27,18 +28,22 @@ export interface BoardCardStage {
 
 export interface StageMenuProps {
   stages: BoardCardStage[];
-  /** The id of the stage the card is in. */
-  current: string;
+  /** The id of the stage the card (or every selected card) is in; left out when they are in different stages. */
+  current?: string;
   onMove: (id: string) => void;
   disabled?: boolean;
+  /** 'icon': the round ⇄ on a card (default). 'bar': a "Move to" button, for a selection bar; its list opens above it. */
+  variant?: 'icon' | 'bar';
+  /** What is being moved, for the button's label ("Move 3 cards to another stage"). */
+  subject?: string;
 }
 
 const WIDTH = 200;
 const GAP = 8;
 
-export const StageMenu: React.FC<StageMenuProps> = ({ stages, current, onMove, disabled }) => {
-  const at = Math.max(0, stages.findIndex((s) => s.id === current));
-  const firstChoice = at + 1 < stages.length ? at + 1 : at > 0 ? at - 1 : -1;
+export const StageMenu: React.FC<StageMenuProps> = ({ stages, current, onMove, disabled, variant = 'icon', subject }) => {
+  const at = current == null ? -1 : stages.findIndex((s) => s.id === current);
+  const firstChoice = at < 0 ? -1 : at + 1 < stages.length ? at + 1 : at > 0 ? at - 1 : -1;
 
   const [open, setOpen] = React.useState(false);
   const [mounted, setMounted] = React.useState(false);
@@ -59,8 +64,8 @@ export const StageMenu: React.FC<StageMenuProps> = ({ stages, current, onMove, d
     if (!t) return;
     const r = t.getBoundingClientRect();
     const h = p?.offsetHeight ?? 240;
-    const above = r.bottom + GAP + h > window.innerHeight - 8 && r.top - GAP - h > 8;
-    const left = Math.min(Math.max(8, r.right - WIDTH), window.innerWidth - WIDTH - 8);
+    const above = variant === 'bar' ? r.top - GAP - h > 8 : r.bottom + GAP + h > window.innerHeight - 8 && r.top - GAP - h > 8;
+    const left = Math.min(Math.max(8, variant === 'bar' ? r.left + r.width / 2 - WIDTH / 2 : r.right - WIDTH), window.innerWidth - WIDTH - 8);
     setPos({ top: above ? r.top - GAP - h : r.bottom + GAP, left, above });
   }, []);
   React.useLayoutEffect(() => { if (mounted) place(); }, [mounted, place]);
@@ -83,7 +88,11 @@ export const StageMenu: React.FC<StageMenuProps> = ({ stages, current, onMove, d
     };
   }, [open, place]);
   // Focus follows the chosen row, so a screen reader reads it and Enter acts on it.
-  React.useEffect(() => { if (open && pos) rows.current[active]?.focus({ preventScroll: true }); }, [open, pos, active]);
+  React.useEffect(() => {
+    if (!open || !pos) return;
+    if (active >= 0) rows.current[active]?.focus({ preventScroll: true });
+    else panel.current?.focus({ preventScroll: true });
+  }, [open, pos, active]);
   // A move starts elsewhere (or the card is dragged): close.
   React.useEffect(() => { if (disabled && open) hide(false); }, [disabled]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -115,26 +124,33 @@ export const StageMenu: React.FC<StageMenuProps> = ({ stages, current, onMove, d
       <button
         ref={trigger}
         type="button"
-        className={styles.trigger}
-        aria-label="Move to another stage"
+        className={variant === 'bar' ? styles.barTrigger : styles.trigger}
+        aria-label={variant === 'bar' ? undefined : subject ? `Move ${subject} to another stage` : 'Move to another stage'}
         aria-haspopup="menu"
         aria-expanded={open}
         data-open={open ? '' : undefined}
-        data-stage-trigger
+        data-stage-trigger={variant}
         disabled={disabled}
         onClick={(e) => { e.stopPropagation(); if (open) hide(false); else show(); }}
-        onKeyDown={(e) => { if (e.key === 'ArrowDown' && !open) { e.preventDefault(); show(); } }}
+        onKeyDown={(e) => { if ((e.key === 'ArrowDown' || e.key === 'ArrowUp') && !open) { e.preventDefault(); show(); } }}
       >
-        <IconSwitchHorizontal size={16} aria-hidden />
-        {!open && <span className={styles.tip} aria-hidden>Move to…</span>}
+        {variant === 'bar' ? (
+          <>Move to <IconChevronUp size={14} aria-hidden /></>
+        ) : (
+          <>
+            <IconSwitchHorizontal size={16} aria-hidden />
+            {!open && <span className={styles.tip} aria-hidden>Move to…</span>}
+          </>
+        )}
       </button>
 
       {mounted && typeof document !== 'undefined' && createPortal(
         <div
           ref={panel}
           role="menu"
-          aria-label="Move to"
-          className={[theme, styles.menu, open ? styles['menu--in'] : styles['menu--out'], pos?.above ? styles['menu--above'] : ''].filter(Boolean).join(' ')}
+          tabIndex={-1}
+          aria-label={subject ? `Move ${subject} to` : 'Move to'}
+          className={[theme, styles.menu, open ? styles['menu--in'] : styles['menu--out'], pos?.above ? styles['menu--above'] : '', variant === 'bar' ? styles['menu--bar'] : ''].filter(Boolean).join(' ')}
           style={{ top: pos?.top ?? -9999, left: pos?.left ?? -9999, width: WIDTH }}
           onKeyDown={onKeyDown}
           onAnimationEnd={() => { if (!open) { setMounted(false); setPos(null); } }}
