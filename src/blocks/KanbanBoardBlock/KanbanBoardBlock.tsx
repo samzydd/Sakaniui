@@ -334,14 +334,13 @@ export interface KanbanBoardBlockProps {
 
 const reducedMotion = () => typeof window !== 'undefined' && !!window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
 
-// The move to the next stage, in two overlapping steps (ms): the card slides across, and while it is still arriving it
-// starts to rise to the top of the column.
-const ACROSS = 440;      // the slide across (the card's layout animation)
-const RISE_AFTER = 200;  // when the rise starts, counted from the click
-const RISE = 460;        // the rise to the top
-// across: leaves quickly and settles softly; up: starts gently (the slide is still settling), then glides home
-const SLIDE_EASE = 'cubic-bezier(0.32, 0.72, 0, 1)';
-const RISE_EASE = 'cubic-bezier(0.5, 0, 0.12, 1)';
+// The move to the next stage, in two steps (ms): the card slides across into the next column at its own height and settles,
+// then rises to the top. The card is animated on its own path (the Web Animations API) with a soft start and a soft end, so
+// it never lurches; the cards around it make room with the same easing.
+const ACROSS = 460;      // the slide across
+const RISE = 440;        // the rise to the top
+const MAKE_ROOM = 380;   // the other cards stepping aside
+const GLIDE = 'cubic-bezier(0.4, 0, 0.2, 1)';
 
 export const KanbanBoardBlock: React.FC<KanbanBoardBlockProps> = ({
   state = 'default',
@@ -394,7 +393,10 @@ export const KanbanBoardBlock: React.FC<KanbanBoardBlockProps> = ({
   }, [arrived]);
 
   // ---- move to the next stage ---------------------------------------------
-  const [moving, setMoving] = React.useState<{ id: string; col: number; phase: 1 | 2 } | null>(null);
+  const [moving, setMoving] = React.useState<{ id: string; col: number } | null>(null);
+  const [step, setStep] = React.useState<{ n: number; id: string; from: DOMRect; ms: number } | null>(null);
+  const stepN = React.useRef(0);
+  const glide = React.useRef<Animation | null>(null);
   const timers = React.useRef<number[]>([]);
   React.useEffect(() => () => timers.current.forEach((t) => window.clearTimeout(t)), []);
   const later = (fn: () => void, ms: number) => { timers.current.push(window.setTimeout(fn, ms)); };
@@ -429,24 +431,28 @@ export const KanbanBoardBlock: React.FC<KanbanBoardBlockProps> = ({
     const run = () => {
       const rect = cardEl.getBoundingClientRect();
       const into = indexAtHeight(bodies[toCol], rect.top + 20); // by its top edge: it slides in level, not from below
-      // 1. across: the card joins the next column at the height it is at; everything else makes room (layout animation)
+      // 1. across: the card joins the next column at the height it is at; everything else makes room
       drag.capture();
       commitMove(from, { col: toCol, index: into }, 0);
-      setMoving({ id: task.id, col: toCol, phase: 1 });
-      // 2. up: while it is still arriving it rises to the top, the cards above it stepping down
+      setMoving({ id: task.id, col: toCol });
+      setStep({ n: ++stepN.current, id: task.id, from: rect, ms: ACROSS });
+      // 2. up: once it has settled in, it rises to the top of the column, the cards above it stepping down
       if (into > 0) {
         later(() => {
+          const el = block.querySelector<HTMLElement>(`[data-kanban-card="${task.id}"]`);
+          if (!el) return;
+          const here = el.getBoundingClientRect();
           drag.capture();
-          setMoving((m) => (m ? { ...m, phase: 2 } : m));
           setColumns((prev) => {
             const next = prev.map((c) => ({ ...c, tasks: [...c.tasks] }));
             const at = next[toCol].tasks.findIndex((t) => t.id === task.id);
             if (at > 0) next[toCol].tasks.unshift(...next[toCol].tasks.splice(at, 1));
             return next;
           });
-        }, RISE_AFTER);
+          setStep({ n: ++stepN.current, id: task.id, from: here, ms: RISE });
+        }, ACROSS - 30);
       }
-      later(() => setMoving(null), (into > 0 ? RISE_AFTER + RISE : ACROSS) + 60);
+      later(() => setMoving(null), (into > 0 ? ACROSS - 30 + RISE : ACROSS) + 80);
     };
     // The next column may sit past the edge of a narrow board: bring it into view first, then move.
     const target = bodies[toCol]?.parentElement;
@@ -457,6 +463,28 @@ export const KanbanBoardBlock: React.FC<KanbanBoardBlockProps> = ({
       later(run, 280);
     } else run();
   };
+
+  // Flies the moving card from where it was to where it now sits, on its own soft-start, soft-end path. (The other cards
+  // are animated by the drag hook's layout effect; this card is flagged data-flip-skip so the two do not fight.)
+  React.useLayoutEffect(() => {
+    if (!step) return undefined;
+    const el = drag.blockRef.current?.querySelector<HTMLElement>(`[data-kanban-card="${step.id}"]`);
+    if (!el) return undefined;
+    glide.current?.cancel();
+    el.style.transform = '';
+    const now = el.getBoundingClientRect();
+    const k = el.offsetWidth ? now.width / el.offsetWidth || 1 : 1; // a scaled preview scales the rects, not the translate
+    const dx = (step.from.left - now.left) / k;
+    const dy = (step.from.top - now.top) / k;
+    if (!dx && !dy) return undefined;
+    glide.current = el.animate(
+      [{ transform: `translate(${dx}px, ${dy}px)` }, { transform: 'translate(0px, 0px)' }],
+      { duration: step.ms, easing: GLIDE, fill: 'backwards' },
+    );
+    return undefined;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [step]);
+  React.useEffect(() => () => glide.current?.cancel(), []);
 
   const lifted = drag.active ? drag.active.from : null;
   const aim = drag.active ? drag.target : null;
@@ -529,8 +557,8 @@ export const KanbanBoardBlock: React.FC<KanbanBoardBlockProps> = ({
                   ...drag.cardProps({ col: colIndex, index: i }, task.id),
                   ...(arrived?.id === task.id ? { 'data-arrived': '', style: { ['--arrive' as string]: col.dot } as React.CSSProperties } : {}),
                   // while a card moves on, it glides slowly and softly, and its neighbours make room at the same pace
-                  ...(moving ? { 'data-flip-duration': moving.id === task.id ? String(moving.phase === 1 ? ACROSS : RISE) : '360', 'data-flip-ease': moving.phase === 1 ? SLIDE_EASE : RISE_EASE } : {}),
-                  ...(moving?.id === task.id ? { 'data-moving': '' } : {}),
+                  ...(moving ? { 'data-flip-duration': String(MAKE_ROOM), 'data-flip-ease': GLIDE } : {}),
+                  ...(moving?.id === task.id ? { 'data-moving': '', 'data-flip-skip': '' } : {}),
                 };
                 const mover: MoverProps | undefined = state === 'default'
                   ? {
