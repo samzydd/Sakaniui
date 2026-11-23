@@ -16,9 +16,9 @@ Mirrors the four states in the Figma block:
 - **empty-column** — a column with no cards shows a dashed drop zone
 - **dragging** — a card lifts while a placeholder marks the drop target
 
-Moving on without dragging: hover or focus a card and a small control appears in its footer; click it (or press
-Alt + →) and the card slides across into the next column, then glides up to the top. Alt + ← (and the back half of the
-control) moves it back.
+Moving a card without dragging: hover or focus a card and a "Move to" button (⇄) shows in its footer. It opens a
+menu of every stage; pick one and the card slides across into that column, then glides up to the top. Alt + → / Alt + ←
+move a focused card one stage.
 
 The column is defined locally (below) rather than as a library component —
 it exists to serve this block, so it lives with the block.` } }, layout: 'fullscreen' },

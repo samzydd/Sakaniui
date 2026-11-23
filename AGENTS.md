@@ -311,9 +311,10 @@ lists its other names under `aliases` in `manifest.json`, and `search_components
   Prefer a real image when you have one; initials are the fallback, not the default.
 - **BoardCard / BoardColumn** — kanban pieces. `BoardColumn state="loading"` styles the column; *you* pass
   Skeleton-filled `BoardCard`s as children. `state="dragging"` only styles; implement drag yourself.
-  To let people move a card on without dragging, give it `onMoveNext` + `nextLabel` (and `onMoveBack` + `backLabel`): a
-  a small control appears in the card's footer on hover or focus, and Alt + arrows work on the focused card. `KanbanBoardBlock` does the
-  slide-to-the-next-column animation for you and reports moves through `onTaskMove`.
+  To let people move a card to another stage without dragging, give it `stages` (`{ id, label, color?, count? }[]`),
+  `stage` and `onMoveTo`: a "Move to" button appears in the footer on hover or focus and opens a stage menu; Alt + arrows
+  move the focused card one stage. `KanbanBoardBlock` does the slide-across-then-rise animation for you and reports moves
+  through `onTaskMove`.
 - **ProfileCard / TeamCard** — ProfileCard: compact (row) or detailed (centred, with bio/social). TeamCard:
   portrait-led with a location bar. Both want a real photo.
 

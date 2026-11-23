@@ -14,14 +14,17 @@
  * trailing) · description (non-compact) · tags (non-compact) · footer
  * (meta items + avatars), separated by a hairline divider.
  *
- * Moving on: give the card `onMoveNext` (and `onMoveBack`) and the card's footer gets a small round control, shown when
- * the card is hovered or focused; hover it and a label names the stage ("In progress"). It is part of the card, in
- * the footer beside the avatars. The card becomes focusable and Alt + → / Alt + ← do the same from the keyboard. This
- * is the "State=Move" look in the Figma "Board Card" set (the Stage Mover set).
+ * Moving between stages: give the card `stages`, `stage` and `onMoveTo` and its footer gets a small "Move to" button
+ * (⇄), shown when the card is hovered or focused. It opens a menu of every stage, laid out as a pipeline (behind the
+ * card filled, its own stage ringed, ahead hollow), with each stage's colour and count; the next stage is chosen to
+ * start with, ↑ ↓ or a number pick another, Enter moves. The card becomes focusable and Alt + → / Alt + ← move it one
+ * stage without the menu. This is the "State=Move" look in the Figma "Board Card" set (with the "Stage Menu").
  */
 
 import React from 'react';
-import { StageMover } from './StageMover';
+import { StageMenu, type BoardCardStage } from './StageMenu';
+
+export type { BoardCardStage };
 import styles from './BoardCard.module.css';
 
 export type BoardCardType = 'compact' | 'default' | 'cover';
@@ -46,17 +49,13 @@ export interface BoardCardProps {
   /** AvatarGroup / Avatar, right-aligned in the footer. */
   assignees?: React.ReactNode;
   onClick?: () => void;
-  /** Move the card to the next stage. Adds a control to the card's footer, and Alt + → on the focused card. */
-  onMoveNext?: () => void;
-  /** The next stage's name, for the button ("In progress"). */
-  nextLabel?: string;
-  /** The next stage's colour, a dot in the button. Any CSS colour. */
-  nextColor?: string;
-  /** Move the card back a stage. Adds a back half to the footer control, and Alt + ← on the focused card. */
-  onMoveBack?: () => void;
-  backLabel?: string;
-  backColor?: string;
-  /** Hides the control and ignores the shortcuts: a move is under way, or a card is being dragged. */
+  /** Every stage the card can be in, in order. With `stage` and `onMoveTo`, adds the "Move to" button to the footer. */
+  stages?: BoardCardStage[];
+  /** The id of the stage the card is in. */
+  stage?: string;
+  /** A stage was chosen (from the menu, or Alt + → / Alt + ← on the focused card). The card only reports it: you move it. */
+  onMoveTo?: (stageId: string) => void;
+  /** Hides the button and ignores the shortcuts: a move is under way, or a card is being dragged. */
   moveDisabled?: boolean;
   className?: string;
 }
@@ -73,24 +72,22 @@ export const BoardCard: React.FC<BoardCardProps> = ({
   meta,
   assignees,
   onClick,
-  onMoveNext,
-  nextLabel = 'the next stage',
-  nextColor,
-  onMoveBack,
-  backLabel = 'the previous stage',
-  backColor,
+  stages,
+  stage,
+  onMoveTo,
   moveDisabled,
   className,
 }) => {
   const showBody = type !== 'compact';
-  const movable = !!(onMoveNext || onMoveBack);
+  const at = stages && stage != null ? stages.findIndex((x) => x.id === stage) : -1;
+  const movable = !!(onMoveTo && stages && stages.length > 1 && at >= 0);
   const hasFooter = meta || assignees || movable;
   const onKeyDown = movable
     ? (e: React.KeyboardEvent<HTMLDivElement>) => {
-        // Alt + arrows on the card itself (not on a button or field inside it)
+        // Alt + arrows on the card itself (not on a button or field inside it): one stage on or back
         if (!e.altKey || moveDisabled || e.target !== e.currentTarget) return;
-        if (e.key === 'ArrowRight' && onMoveNext) { e.preventDefault(); onMoveNext(); }
-        else if (e.key === 'ArrowLeft' && onMoveBack) { e.preventDefault(); onMoveBack(); }
+        const to = e.key === 'ArrowRight' ? stages![at + 1] : e.key === 'ArrowLeft' ? stages![at - 1] : undefined;
+        if (to) { e.preventDefault(); onMoveTo!(to.id); }
       }
     : undefined;
   return (
@@ -99,7 +96,7 @@ export const BoardCard: React.FC<BoardCardProps> = ({
       onKeyDown={onKeyDown}
       tabIndex={movable ? 0 : undefined}
       data-mover-host={movable ? '' : undefined}
-      aria-keyshortcuts={movable ? [onMoveBack && 'Alt+ArrowLeft', onMoveNext && 'Alt+ArrowRight'].filter(Boolean).join(' ') : undefined}
+      aria-keyshortcuts={movable ? 'Alt+ArrowLeft Alt+ArrowRight' : undefined}
       aria-selected={state === 'selected' || undefined}
       className={[styles.card, styles[`card--${type}`], styles[`card--${state}`], className ?? '']
         .filter(Boolean).join(' ')}
@@ -123,15 +120,7 @@ export const BoardCard: React.FC<BoardCardProps> = ({
             {movable ? (
               <div className={styles.card__end}>
                 {assignees && <div className={styles.card__assignees}>{assignees}</div>}
-                <StageMover
-                  onNext={onMoveNext}
-                  nextLabel={nextLabel}
-                  nextColor={nextColor}
-                  onBack={onMoveBack}
-                  backLabel={backLabel}
-                  backColor={backColor}
-                  disabled={moveDisabled}
-                />
+                <StageMenu stages={stages!} current={stage!} onMove={onMoveTo!} disabled={moveDisabled} />
               </div>
             ) : (
               assignees && <div className={styles.card__assignees}>{assignees}</div>

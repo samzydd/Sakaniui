@@ -11,13 +11,13 @@
  *   empty-column · a column with no cards shows a dashed drop zone
  *   dragging     · a card lifts and tilts while a card-shaped slot marks where it lands
  *
- * Move to the next stage (default state): hover or focus a card and a small round control in its footer shows up
- * (a chevron; hover it and a label names the stage). Click it, or press Alt + → on the focused card, and the card
- * slides across into the next column at its own height, then glides up to the top while the cards around it make
- * room: one continuous move, done as layout animation (the cards really are in the new column from the first
- * moment, so nothing flies over the board and nothing jumps). Alt + ← (and the back half of the control) moves it
- * back. The new column's colour rings the card as it lands and both counts tick; moves are announced to screen
- * readers. On touch the control stays on every card. Nothing animates under prefers-reduced-motion.
+ * Move to another stage (default state): hover or focus a card and a small "Move to" button (⇄) shows in its footer.
+ * It opens a menu of every stage, laid out as a pipeline with each stage's colour and count; the next stage is chosen to
+ * start with. Pick one and the card slides across into that column at its own height, settles, then glides up to the
+ * top while the cards around it make room: done as layout animation on its own soft path, so nothing jumps. The new
+ * column's colour rings the card as it lands and both counts tick; moves are announced to screen readers. Alt + → /
+ * Alt + ← on a focused card move it one stage without the menu. On touch the button stays on every card. Nothing
+ * animates under prefers-reduced-motion.
  *
  * Drag and drop (default state) is pointer-based, see useKanbanDrag.ts: the
  * card follows the pointer and swings with its movement, a slot opens where it
@@ -42,7 +42,7 @@ import { Badge } from '../../components/Badge';
 import { Checkbox } from '../../components/Checkbox';
 import { Skeleton } from '../../components/Skeleton';
 import { AvatarGroup } from '../../components/AvatarGroup';
-import { BoardCard } from '../../components/BoardCard';
+import { BoardCard, type BoardCardStage } from '../../components/BoardCard';
 import { CardMetaItem } from '../../components/CardMetaItem';
 import { FilterChip } from '../../components/FilterChip';
 import styles from './KanbanBoardBlock.module.css';
@@ -258,12 +258,9 @@ const Column: React.FC<ColumnProps> = ({ title, dot, count, variant = 'default',
  * Card renderer
  * ------------------------------------------------------------------ */
 interface MoverProps {
-  onMoveNext?: () => void;
-  nextLabel?: string;
-  nextColor?: string;
-  onMoveBack?: () => void;
-  backLabel?: string;
-  backColor?: string;
+  stages?: BoardCardStage[];
+  stage?: string;
+  onMoveTo?: (stageId: string) => void;
   moveDisabled?: boolean;
 }
 
@@ -337,7 +334,7 @@ const reducedMotion = () => typeof window !== 'undefined' && !!window.matchMedia
 // The move to the next stage, in two steps (ms): the card slides across into the next column at its own height and settles,
 // then rises to the top. The card is animated on its own path (the Web Animations API) with a soft start and a soft end, so
 // it never lurches; the cards around it make room with the same easing.
-const ACROSS = 460;      // the slide across
+const ACROSS = 460;      // the slide across one column (further moves take a little longer)
 const RISE = 440;        // the rise to the top
 const MAKE_ROOM = 380;   // the other cards stepping aside
 const GLIDE = 'cubic-bezier(0.4, 0, 0.2, 1)';
@@ -414,14 +411,13 @@ export const KanbanBoardBlock: React.FC<KanbanBoardBlockProps> = ({
     return cards.length;
   };
 
-  const startMove = (from: KanbanPos, dir: 1 | -1) => {
+  const startMove = (from: KanbanPos, toCol: number) => {
     if (moving || drag.active || state !== 'default') return;
     const cols = columnsRef.current;
-    const toCol = from.col + dir;
     const task = cols[from.col]?.tasks[from.index];
     const block = drag.blockRef.current;
     const board = drag.boardRef.current;
-    if (!task || !block || !board || toCol < 0 || toCol >= cols.length) return;
+    if (!task || !block || !board || toCol < 0 || toCol >= cols.length || toCol === from.col) return;
     const cardEl = block.querySelector<HTMLElement>(`[data-kanban-card="${task.id}"]`);
     if (!cardEl) return;
     if (cardEl.contains(document.activeElement)) refocus.current = task.id;
@@ -431,11 +427,12 @@ export const KanbanBoardBlock: React.FC<KanbanBoardBlockProps> = ({
     const run = () => {
       const rect = cardEl.getBoundingClientRect();
       const into = indexAtHeight(bodies[toCol], rect.top + 20); // by its top edge: it slides in level, not from below
+      const across = Math.round(Math.min(760, ACROSS + Math.max(0, Math.abs(bodies[toCol].getBoundingClientRect().left - rect.left) - 340) * 0.35));
       // 1. across: the card joins the next column at the height it is at; everything else makes room
       drag.capture();
       commitMove(from, { col: toCol, index: into }, 0);
       setMoving({ id: task.id, col: toCol });
-      setStep({ n: ++stepN.current, id: task.id, from: rect, ms: ACROSS });
+      setStep({ n: ++stepN.current, id: task.id, from: rect, ms: across });
       // 2. up: once it has settled in, it rises to the top of the column, the cards above it stepping down
       if (into > 0) {
         later(() => {
@@ -450,9 +447,9 @@ export const KanbanBoardBlock: React.FC<KanbanBoardBlockProps> = ({
             return next;
           });
           setStep({ n: ++stepN.current, id: task.id, from: here, ms: RISE });
-        }, ACROSS - 30);
+        }, across - 30);
       }
-      later(() => setMoving(null), (into > 0 ? ACROSS - 30 + RISE : ACROSS) + 80);
+      later(() => setMoving(null), (into > 0 ? across - 30 + RISE : across) + 80);
     };
     // The next column may sit past the edge of a narrow board: bring it into view first, then move.
     const target = bodies[toCol]?.parentElement;
@@ -486,6 +483,7 @@ export const KanbanBoardBlock: React.FC<KanbanBoardBlockProps> = ({
   }, [step]);
   React.useEffect(() => () => glide.current?.cancel(), []);
 
+  const stages: BoardCardStage[] = columns.map((c) => ({ id: c.title, label: c.title, color: c.dot, count: c.tasks.length }));
   const lifted = drag.active ? drag.active.from : null;
   const aim = drag.active ? drag.target : null;
   const liftedTask = lifted ? columns[lifted.col]?.tasks[lifted.index] : undefined;
@@ -551,8 +549,6 @@ export const KanbanBoardBlock: React.FC<KanbanBoardBlockProps> = ({
                     </div>
                   );
                 }
-                const next = state === 'default' ? columns[colIndex + 1] : undefined;
-                const prev = state === 'default' ? columns[colIndex - 1] : undefined;
                 const wrapper = {
                   ...drag.cardProps({ col: colIndex, index: i }, task.id),
                   ...(arrived?.id === task.id ? { 'data-arrived': '', style: { ['--arrive' as string]: col.dot } as React.CSSProperties } : {}),
@@ -561,11 +557,7 @@ export const KanbanBoardBlock: React.FC<KanbanBoardBlockProps> = ({
                   ...(moving?.id === task.id ? { 'data-moving': '', 'data-flip-skip': '' } : {}),
                 };
                 const mover: MoverProps | undefined = state === 'default'
-                  ? {
-                      moveDisabled: busy,
-                      ...(next ? { onMoveNext: () => startMove({ col: colIndex, index: i }, 1), nextLabel: next.title, nextColor: next.dot } : {}),
-                      ...(prev ? { onMoveBack: () => startMove({ col: colIndex, index: i }, -1), backLabel: prev.title, backColor: prev.dot } : {}),
-                    }
+                  ? { stages, stage: col.title, moveDisabled: busy, onMoveTo: (id) => startMove({ col: colIndex, index: i }, columns.findIndex((c) => c.title === id)) }
                   : undefined;
                 return renderTask(task, task.id, 'default', wrapper, mover);
               });

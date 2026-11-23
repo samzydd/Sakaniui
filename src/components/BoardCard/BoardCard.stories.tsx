@@ -66,19 +66,22 @@ export const Bug: Story = {
     assignees: <AvatarGroup size="sm" max={2} avatars={[{ initials: 'AB' }, { initials: 'MR' }]} />,
   },
 };
-/** With `onMoveNext` / `onMoveBack` the card's footer gets a small control (the Stage Mover). Hover or focus the card to see
- * it; hover a button and a label names the stage. Alt + → / Alt + ← do the same from the keyboard. (Figma: State=Move.) */
+/** With `stages`, `stage` and `onMoveTo` the card's footer gets a "Move to" button (⇄), shown on hover or focus. It opens a
+ * menu of every stage, laid out as a pipeline with each stage's colour and count; the next one is chosen to start with.
+ * Alt + → / Alt + ← move the focused card one stage. (Figma: Board Card State=Move, with the Stage Menu.) */
 export const MoveToStage: Story = {
   args: {
     ...Task.args,
-    onMoveNext: () => {},
-    nextLabel: 'In progress',
-    nextColor: 'var(--color-chart-2)',
-    onMoveBack: () => {},
-    backLabel: 'To-do',
-    backColor: 'var(--color-chart-1)',
+    stages: [
+      { id: 'todo', label: 'To-do', color: 'var(--color-chart-1)', count: 6 },
+      { id: 'progress', label: 'In progress', color: 'var(--color-chart-2)', count: 5 },
+      { id: 'review', label: 'In review', color: 'var(--color-chart-4)', count: 5 },
+      { id: 'done', label: 'Done', color: 'var(--color-success-solid)', count: 5 },
+    ],
+    stage: 'progress',
+    onMoveTo: () => {},
   },
-  decorators: [(S) => (<div style={{ padding: '24px 40px' }}><S /></div>)],
+  decorators: [(S) => (<div style={{ padding: '24px 24px 280px' }}><S /></div>)],
 };
 
 export const Done: Story = {
