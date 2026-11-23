@@ -1,0 +1,197 @@
+/* StageMenu: the footer button (⇄) and the "Move to" menu it opens. */
+
+/* ---- the button ---- */
+.trigger {
+  position: relative;
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  box-sizing: border-box;
+  border: var(--border-width-100, 1px) solid var(--color-border-default);
+  border-radius: var(--radius-full, 9999px);
+  background: var(--color-bg-surface);
+  color: var(--color-fg-muted);
+  box-shadow: var(--shadow-xs);
+  cursor: pointer;
+  /* hidden until the card is hovered or focused (it keeps its room, so nothing shifts); stays while its menu is open */
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 140ms ease, background-color 140ms ease, color 140ms ease, border-color 140ms ease, transform 120ms ease;
+}
+:global([data-mover-host]):hover .trigger,
+:global([data-mover-host]):focus-within .trigger,
+.trigger[data-open] { opacity: 1; pointer-events: auto; }
+.trigger::after { content: ''; position: absolute; inset: -8px; border-radius: inherit; } /* a 44px target */
+.trigger:hover { background: var(--color-bg-subtle); color: var(--color-fg-default); }
+.trigger[data-open] { background: var(--color-accent-default); border-color: var(--color-accent-default); color: var(--color-fg-on-accent); }
+.trigger:focus-visible { outline: none; box-shadow: 0 0 0 2px var(--color-bg-surface), 0 0 0 4px var(--color-border-focus); }
+.trigger:active:not(:disabled) { transform: scale(0.94); }
+.trigger:disabled { opacity: 0 !important; pointer-events: none; }
+
+/* its hint, above it on hover */
+.tip {
+  position: absolute;
+  bottom: calc(100% + 10px);
+  right: -4px;
+  padding: 5px 9px;
+  border-radius: var(--radius-md);
+  background: var(--color-bg-inverse);
+  color: var(--color-fg-on-inverse);
+  font-family: var(--font-sans);
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 500;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(4px);
+  transition: opacity 120ms ease, transform 160ms cubic-bezier(0.2, 0.9, 0.3, 1);
+}
+.tip::after { content: ''; position: absolute; top: 100%; right: 15px; width: 8px; height: 8px; margin-top: -4px; background: inherit; transform: rotate(45deg); border-radius: 1px; }
+.trigger:hover .tip { opacity: 1; transform: none; transition-delay: 300ms; }
+
+/* ---- the menu ---- */
+.menu {
+  position: fixed;
+  z-index: 1000;
+  box-sizing: border-box;
+  padding: 6px;
+  border: 1px solid var(--surface-border-strong, var(--color-border-default));
+  border-radius: var(--radius-lg);
+  background: var(--surface-bg-overlay, var(--color-bg-surface));
+  box-shadow: var(--surface-highlight, 0 0 0 0 transparent), 0 12px 32px -6px rgba(16, 15, 12, 0.16), 0 2px 6px rgba(16, 15, 12, 0.08);
+  -webkit-backdrop-filter: var(--surface-blur-overlay);
+  backdrop-filter: var(--surface-blur-overlay);
+  color: var(--color-fg-default);
+  font-family: var(--font-sans);
+  transform-origin: top right;
+}
+.menu--above { transform-origin: bottom right; }
+.menu--in { animation: stageMenuIn 170ms cubic-bezier(0.2, 0.9, 0.3, 1) both; }
+.menu--out { animation: stageMenuOut 110ms ease-in both; pointer-events: none; }
+.menu--above.menu--in { animation-name: stageMenuInAbove; }
+@keyframes stageMenuIn { from { opacity: 0; transform: translateY(-4px) scale(0.97); } }
+@keyframes stageMenuInAbove { from { opacity: 0; transform: translateY(4px) scale(0.97); } }
+@keyframes stageMenuOut { to { opacity: 0; transform: scale(0.98); } }
+
+.head { margin: 0; padding: 6px 10px 4px; font-size: 12px; line-height: 16px; font-weight: 500; color: var(--color-fg-subtle); }
+
+/* the stages, as a pipeline: a rail joins their dots */
+.list { position: relative; display: flex; flex-direction: column; gap: 2px; }
+.list::before {
+  content: '';
+  position: absolute;
+  left: 17px;
+  top: 18px;
+  bottom: 18px;
+  width: 2px;
+  border-radius: 1px;
+  background: var(--color-border-default);
+}
+/* one highlight glides between the rows (hover and keyboard share it) */
+.highlight {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 36px;
+  border-radius: var(--radius-md);
+  background: var(--color-bg-subtle);
+  transition: transform 160ms cubic-bezier(0.2, 0.9, 0.3, 1), opacity 120ms ease;
+  pointer-events: none;
+}
+
+.row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 36px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--color-fg-default);
+  font: inherit;
+  font-size: 13px;
+  line-height: 18px;
+  font-weight: 500;
+  text-align: left;
+  cursor: pointer;
+}
+.row:focus { outline: none; }
+.row:focus-visible { box-shadow: inset 0 0 0 2px var(--color-border-focus); }
+.row[data-kind='current'] { color: var(--color-fg-muted); cursor: default; }
+
+/* the dot: behind the card filled, the card's own stage ringed, ahead hollow */
+.node {
+  position: relative;
+  z-index: 1;
+  flex: none;
+  box-sizing: border-box;
+  width: 16px;
+  height: 16px;
+  display: grid;
+  place-items: center;
+}
+.node::before {
+  content: '';
+  box-sizing: border-box;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--color-bg-surface);
+  border: 1.5px solid var(--stage);
+  transition: transform 160ms cubic-bezier(0.2, 0.9, 0.3, 1), background-color 160ms ease;
+}
+.row[data-kind='passed'] .node::before { background: var(--stage); border-color: var(--stage); }
+.row[data-kind='current'] .node::before { width: 12px; height: 12px; border-width: 3px; }
+.row[data-active] .node::before { transform: scale(1.2); background: color-mix(in srgb, var(--stage) 22%, var(--color-bg-surface)); }
+.row[data-kind='passed'][data-active] .node::before { background: var(--stage); }
+
+.label { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.meta { flex: none; font-size: 12px; line-height: 16px; color: var(--color-fg-subtle); font-variant-numeric: tabular-nums; }
+.enter { flex: none; color: var(--color-fg-muted); opacity: 0; transform: translateX(-3px); transition: opacity 120ms ease, transform 160ms ease; }
+.row[data-active] .enter { opacity: 1; transform: none; }
+
+/* the keys, for people with a keyboard */
+.hint {
+  display: flex;
+  gap: 12px;
+  margin-top: 4px;
+  padding: 8px 10px 4px;
+  border-top: 1px solid var(--color-border-subtle);
+  font-size: 11px;
+  line-height: 16px;
+  color: var(--color-fg-subtle);
+}
+.hint span { display: inline-flex; align-items: center; gap: 4px; }
+.hint kbd {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  box-sizing: border-box;
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-xs);
+  background: var(--color-bg-surface);
+  color: var(--color-fg-muted);
+  font: inherit;
+  font-size: 11px;
+}
+@media (hover: none) {
+  .hint { display: none; }
+  .trigger { opacity: 1; pointer-events: auto; }
+  .tip { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .menu--in, .menu--out { animation-duration: 1ms; }
+  .trigger, .highlight, .node::before, .enter, .tip { transition: none; }
+}

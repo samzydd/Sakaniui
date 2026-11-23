@@ -66,6 +66,24 @@ export const Bug: Story = {
     assignees: <AvatarGroup size="sm" max={2} avatars={[{ initials: 'AB' }, { initials: 'MR' }]} />,
   },
 };
+/** With `stages`, `stage` and `onMoveTo` the card's footer gets a "Move to" button (⇄), shown on hover or focus. It opens a
+ * menu of every stage, laid out as a pipeline with each stage's colour and count; the next one is chosen to start with.
+ * Alt + → / Alt + ← move the focused card one stage. (Figma: Board Card State=Move, with the Stage Menu.) */
+export const MoveToStage: Story = {
+  args: {
+    ...Task.args,
+    stages: [
+      { id: 'todo', label: 'To-do', color: 'var(--color-chart-1)', count: 6 },
+      { id: 'progress', label: 'In progress', color: 'var(--color-chart-2)', count: 5 },
+      { id: 'review', label: 'In review', color: 'var(--color-chart-4)', count: 5 },
+      { id: 'done', label: 'Done', color: 'var(--color-success-solid)', count: 5 },
+    ],
+    stage: 'progress',
+    onMoveTo: () => {},
+  },
+  decorators: [(S) => (<div style={{ padding: '24px 24px 280px' }}><S /></div>)],
+};
+
 export const Done: Story = {
   args: { ...Task.args, state: 'done', leading: <Checkbox defaultChecked /> },
 };

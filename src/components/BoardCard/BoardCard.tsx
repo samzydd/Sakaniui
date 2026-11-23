@@ -13,9 +13,18 @@
  * Regions (top→bottom): cover (cover type) · header (leading + title +
  * trailing) · description (non-compact) · tags (non-compact) · footer
  * (meta items + avatars), separated by a hairline divider.
+ *
+ * Moving between stages: give the card `stages`, `stage` and `onMoveTo` and its footer gets a small "Move to" button
+ * (⇄), shown when the card is hovered or focused. It opens a menu of every stage, laid out as a pipeline (behind the
+ * card filled, its own stage ringed, ahead hollow), with each stage's colour and count; the next stage is chosen to
+ * start with, ↑ ↓ or a number pick another, Enter moves. The card becomes focusable and Alt + → / Alt + ← move it one
+ * stage without the menu. This is the "State=Move" look in the Figma "Board Card" set (with the "Stage Menu").
  */
 
 import React from 'react';
+import { StageMenu, type BoardCardStage } from './StageMenu';
+
+export type { BoardCardStage };
 import styles from './BoardCard.module.css';
 
 export type BoardCardType = 'compact' | 'default' | 'cover';
@@ -40,6 +49,14 @@ export interface BoardCardProps {
   /** AvatarGroup / Avatar, right-aligned in the footer. */
   assignees?: React.ReactNode;
   onClick?: () => void;
+  /** Every stage the card can be in, in order. With `stage` and `onMoveTo`, adds the "Move to" button to the footer. */
+  stages?: BoardCardStage[];
+  /** The id of the stage the card is in. */
+  stage?: string;
+  /** A stage was chosen (from the menu, or Alt + → / Alt + ← on the focused card). The card only reports it: you move it. */
+  onMoveTo?: (stageId: string) => void;
+  /** Hides the button and ignores the shortcuts: a move is under way, or a card is being dragged. */
+  moveDisabled?: boolean;
   className?: string;
 }
 
@@ -55,13 +72,31 @@ export const BoardCard: React.FC<BoardCardProps> = ({
   meta,
   assignees,
   onClick,
+  stages,
+  stage,
+  onMoveTo,
+  moveDisabled,
   className,
 }) => {
   const showBody = type !== 'compact';
-  const hasFooter = meta || assignees;
+  const at = stages && stage != null ? stages.findIndex((x) => x.id === stage) : -1;
+  const movable = !!(onMoveTo && stages && stages.length > 1 && at >= 0);
+  const hasFooter = meta || assignees || movable;
+  const onKeyDown = movable
+    ? (e: React.KeyboardEvent<HTMLDivElement>) => {
+        // Alt + arrows on the card itself (not on a button or field inside it): one stage on or back
+        if (!e.altKey || moveDisabled || e.target !== e.currentTarget) return;
+        const to = e.key === 'ArrowRight' ? stages![at + 1] : e.key === 'ArrowLeft' ? stages![at - 1] : undefined;
+        if (to) { e.preventDefault(); onMoveTo!(to.id); }
+      }
+    : undefined;
   return (
     <div
       onClick={onClick}
+      onKeyDown={onKeyDown}
+      tabIndex={movable ? 0 : undefined}
+      data-mover-host={movable ? '' : undefined}
+      aria-keyshortcuts={movable ? 'Alt+ArrowLeft Alt+ArrowRight' : undefined}
       aria-selected={state === 'selected' || undefined}
       className={[styles.card, styles[`card--${type}`], styles[`card--${state}`], className ?? '']
         .filter(Boolean).join(' ')}
@@ -82,7 +117,14 @@ export const BoardCard: React.FC<BoardCardProps> = ({
           <div className={styles.card__divider} />
           <div className={styles.card__footer}>
             {meta && <div className={styles.card__meta}>{meta}</div>}
-            {assignees && <div className={styles.card__assignees}>{assignees}</div>}
+            {movable ? (
+              <div className={styles.card__end}>
+                {assignees && <div className={styles.card__assignees}>{assignees}</div>}
+                <StageMenu stages={stages!} current={stage!} onMove={onMoveTo!} disabled={moveDisabled} />
+              </div>
+            ) : (
+              assignees && <div className={styles.card__assignees}>{assignees}</div>
+            )}
           </div>
         </>
       )}

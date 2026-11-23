@@ -18,6 +18,9 @@
  *     drags start after a short press-and-hold (so swipes still scroll).
  *   - Near the board's left/right edge the columns row scrolls.
  *   - With prefers-reduced-motion the card doesn't swing and drops in place.
+ *
+ * `capture()` is also returned: call it just before a layout change you want the cards to slide through (the block's
+ * "move to the next stage" uses it, so the cards slide the same way for a click as for a drag).
  */
 import React from 'react';
 
@@ -87,19 +90,25 @@ export function useKanbanDrag({ enabled, onMove }: Options) {
     if (!from || !root) return;
     flipFrom.current = null;
     if (reducedMotion()) return;
-    const els = [...root.querySelectorAll<HTMLElement>('[data-flip-id]')];
+    // A card with data-flip-skip is animated by its owner (the move to the next stage flies it on its own path).
+    const els = [...root.querySelectorAll<HTMLElement>('[data-flip-id]')].filter((el) => el.dataset.flipSkip === undefined);
     // Measure the new layout untransformed, then play each element from where it was.
     els.forEach((el) => { el.style.transition = 'none'; el.style.transform = ''; });
     const moves = els.map((el) => {
       const prev = from.get(el.dataset.flipId!);
       const now = el.getBoundingClientRect();
-      return { el, dx: prev ? prev.left - now.left : 0, dy: prev ? prev.top - now.top : 0 };
+      // inside a scaled preview the rects are scaled and a translate is not: divide by the element's own scale
+      const k = el.offsetWidth ? now.width / el.offsetWidth || 1 : 1;
+      return { el, dx: prev ? (prev.left - now.left) / k : 0, dy: prev ? (prev.top - now.top) / k : 0 };
     });
     moves.forEach(({ el, dx, dy }) => { if (dx || dy) el.style.transform = `translate(${dx}px, ${dy}px)`; });
     void root.offsetHeight;
     moves.forEach(({ el, dx, dy }) => {
       if (!dx && !dy) return;
-      el.style.transition = 'transform 240ms cubic-bezier(0.25, 1, 0.5, 1)';
+      // a card can ask for its own timing (data-flip-duration, data-flip-ease)
+      const ms = el.dataset.flipDuration || '240';
+      const ease = el.dataset.flipEase || 'cubic-bezier(0.25, 1, 0.5, 1)';
+      el.style.transition = `transform ${ms}ms ${ease}`;
       el.style.transform = '';
     });
   });
@@ -300,5 +309,5 @@ export function useKanbanDrag({ enabled, onMove }: Options) {
     if (el) columnEls.current.set(col, el); else columnEls.current.delete(col);
   };
 
-  return { active, target, blockRef, boardRef, overlayRef, cardProps, columnRef };
+  return { active, target, blockRef, boardRef, overlayRef, cardProps, columnRef, capture };
 }
