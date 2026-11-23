@@ -14,9 +14,10 @@
  * trailing) · description (non-compact) · tags (non-compact) · footer
  * (meta items + avatars), separated by a hairline divider.
  *
- * Moving on: give the card `onMoveNext` (and `onMoveBack`) and a round button appears on its edge when it is hovered
- * or focused; hover that and it opens into a pill naming the stage ("In progress"). The card becomes focusable and
- * Alt + → / Alt + ← do the same from the keyboard. This is the "State=Move" look in the Figma "Board Card" set.
+ * Moving on: give the card `onMoveNext` (and `onMoveBack`) and the card's footer gets a small round control, shown when
+ * the card is hovered or focused; hover it and a label names the stage ("In progress"). It is part of the card, in
+ * the footer beside the avatars. The card becomes focusable and Alt + → / Alt + ← do the same from the keyboard. This
+ * is the "State=Move" look in the Figma "Board Card" set (the Stage Mover set).
  */
 
 import React from 'react';
@@ -45,17 +46,17 @@ export interface BoardCardProps {
   /** AvatarGroup / Avatar, right-aligned in the footer. */
   assignees?: React.ReactNode;
   onClick?: () => void;
-  /** Move the card to the next stage. Adds a button on the card's right edge, and Alt + → on the focused card. */
+  /** Move the card to the next stage. Adds a control to the card's footer, and Alt + → on the focused card. */
   onMoveNext?: () => void;
   /** The next stage's name, for the button ("In progress"). */
   nextLabel?: string;
   /** The next stage's colour, a dot in the button. Any CSS colour. */
   nextColor?: string;
-  /** Move the card back a stage. Adds a button on the left edge, and Alt + ← on the focused card. */
+  /** Move the card back a stage. Adds a back half to the footer control, and Alt + ← on the focused card. */
   onMoveBack?: () => void;
   backLabel?: string;
   backColor?: string;
-  /** Hides both buttons and ignores the shortcuts: a move is under way, or a card is being dragged. */
+  /** Hides the control and ignores the shortcuts: a move is under way, or a card is being dragged. */
   moveDisabled?: boolean;
   className?: string;
 }
@@ -82,8 +83,8 @@ export const BoardCard: React.FC<BoardCardProps> = ({
   className,
 }) => {
   const showBody = type !== 'compact';
-  const hasFooter = meta || assignees;
   const movable = !!(onMoveNext || onMoveBack);
+  const hasFooter = meta || assignees || movable;
   const onKeyDown = movable
     ? (e: React.KeyboardEvent<HTMLDivElement>) => {
         // Alt + arrows on the card itself (not on a button or field inside it)
@@ -119,13 +120,25 @@ export const BoardCard: React.FC<BoardCardProps> = ({
           <div className={styles.card__divider} />
           <div className={styles.card__footer}>
             {meta && <div className={styles.card__meta}>{meta}</div>}
-            {assignees && <div className={styles.card__assignees}>{assignees}</div>}
+            {movable ? (
+              <div className={styles.card__end}>
+                {assignees && <div className={styles.card__assignees}>{assignees}</div>}
+                <StageMover
+                  onNext={onMoveNext}
+                  nextLabel={nextLabel}
+                  nextColor={nextColor}
+                  onBack={onMoveBack}
+                  backLabel={backLabel}
+                  backColor={backColor}
+                  disabled={moveDisabled}
+                />
+              </div>
+            ) : (
+              assignees && <div className={styles.card__assignees}>{assignees}</div>
+            )}
           </div>
         </>
       )}
-
-      {onMoveBack && <StageMover direction="back" label={backLabel} color={backColor} onClick={onMoveBack} disabled={moveDisabled} />}
-      {onMoveNext && <StageMover direction="next" label={nextLabel} color={nextColor} onClick={onMoveNext} disabled={moveDisabled} />}
     </div>
   );
 };

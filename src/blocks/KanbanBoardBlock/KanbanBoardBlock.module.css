@@ -189,10 +189,10 @@
   border-color: var(--color-border-default);
 }
 
-/* The card sliding to the next stage. It is flown with the Web Animations API (see KanbanBoardBlock.tsx): the shadow
-   there is animated too, so it rises as the card lifts off and settles as it lands. */
-.flying { z-index: 60; }
-.flying > * > * { border-color: var(--color-border-default); }
+/* The card sliding to the next stage is a real card in the layout: while it moves it sits above its neighbours and lifts
+   (its shadow rises, then settles back when the move ends). */
+.draggable[data-moving] { position: relative; z-index: 20; }
+.draggable[data-moving] > * { box-shadow: var(--shadow-lg); border-color: var(--color-border-default); }
 
 /* A card that has just landed: a ring in its new column's colour that fades out, and a brief lift. */
 .draggable[data-arrived] > * { animation: arrive 1000ms cubic-bezier(0.2, 0.7, 0.3, 1) both; }

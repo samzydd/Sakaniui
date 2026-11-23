@@ -1,93 +1,98 @@
-/* StageMover: a 28px circle straddling the card's edge; opens into a pill that names the stage. */
-.mover {
-  position: absolute;
-  top: 50%;
-  z-index: 3;
+/* StageMover: a 28px round (or two-part) control in the card's footer. Quiet until the card is hovered or focused. */
+.group {
+  position: relative;
+  z-index: 4;
+  flex: none;
   display: inline-flex;
-  align-items: center;
+  align-items: stretch;
   height: 28px;
-  min-width: 28px;
   box-sizing: border-box;
-  padding: 0 5px;
   border: var(--border-width-100, 1px) solid var(--color-border-default);
   border-radius: var(--radius-full, 9999px);
   background: var(--color-bg-surface);
-  color: var(--color-fg-default);
-  box-shadow: var(--shadow-md);
-  cursor: pointer;
-  /* hidden until the card is hovered or focused; slides in from the card's edge */
+  box-shadow: var(--shadow-xs);
+  /* hidden until the card is hovered or focused; it keeps its room, so nothing shifts when it appears */
   opacity: 0;
   pointer-events: none;
-  transform: translate(var(--from, 0), -50%) scale(0.85);
-  transition:
-    opacity 140ms ease,
-    transform 220ms cubic-bezier(0.2, 0.9, 0.3, 1),
-    background-color 140ms ease,
-    color 140ms ease,
-    border-color 140ms ease,
-    padding 220ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  transition: opacity 140ms ease;
 }
-.mover--next { right: -14px; --from: 6px; }
-.mover--back { left: -14px; --from: -6px; }
+:global([data-mover-host]):hover .group,
+:global([data-mover-host]):focus-within .group { opacity: 1; pointer-events: auto; }
+
+.btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--color-fg-muted);
+  cursor: pointer;
+  border-radius: var(--radius-full, 9999px);
+  transition: background-color 140ms ease, color 140ms ease, transform 120ms ease;
+}
+/* two halves: a hairline between them, and each half rounded on its outer side only */
+.group--pair .btn--back { border-radius: 14px 0 0 14px; }
+.group--pair .btn--next { border-radius: 0 14px 14px 0; }
+.group--pair .btn--next::before { content: ''; position: absolute; left: 0; top: -1px; bottom: -1px; width: 1px; background: var(--color-border-default); }
 
 /* a bigger target than it looks: 44px for a thumb */
-.mover::after { content: ''; position: absolute; inset: -8px; border-radius: inherit; }
+.btn::after { content: ''; position: absolute; inset: -8px -2px; }
 
-/* The label opens with a grid track going 0fr -> 1fr: the width animates without knowing the text's width. */
-.text {
-  display: grid;
-  grid-template-columns: 0fr;
-  transition: grid-template-columns 220ms cubic-bezier(0.2, 0.8, 0.2, 1), margin 220ms cubic-bezier(0.2, 0.8, 0.2, 1);
+.btn:hover,
+.btn:focus-visible {
+  outline: none;
+  background: var(--color-accent-default);
+  color: var(--color-fg-on-accent);
 }
-.text > span {
+.group--pair .btn--next:hover::before,
+.group--pair .btn--next:focus-visible::before,
+.group--pair .btn--back:hover + .btn--next::before { background: transparent; }
+.btn:focus-visible { box-shadow: 0 0 0 2px var(--color-bg-surface), 0 0 0 4px var(--color-border-focus); z-index: 1; }
+.btn:active:not(:disabled) { transform: scale(0.94); }
+
+/* the label: a small dark bubble above the button, with the stage's colour */
+.tip {
+  position: absolute;
+  bottom: calc(100% + 10px);
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  min-width: 0;
-  overflow: hidden;
-  white-space: nowrap;
+  padding: 6px 10px;
+  border-radius: var(--radius-md);
+  background: var(--color-bg-inverse);
+  color: var(--color-fg-on-inverse);
   font-family: var(--font-sans);
   font-size: 12px;
   line-height: 16px;
   font-weight: 500;
+  white-space: nowrap;
   opacity: 0;
-  transition: opacity 160ms ease;
+  pointer-events: none;
+  transform: translateY(4px);
+  transition: opacity 120ms ease, transform 160ms cubic-bezier(0.2, 0.9, 0.3, 1);
 }
-.dot { flex: none; width: 8px; height: 8px; border-radius: 50%; }
+.tip i { flex: none; width: 8px; height: 8px; border-radius: 50%; }
+.tip::after { content: ''; position: absolute; top: 100%; width: 8px; height: 8px; margin-top: -4px; background: inherit; transform: rotate(45deg); border-radius: 1px; }
+.btn--next .tip { right: -4px; }
+.btn--next .tip::after { right: 15px; }
+.btn--back .tip { left: -4px; }
+.btn--back .tip::after { left: 15px; }
+.btn:hover .tip,
+.btn:focus-visible .tip { opacity: 1; transform: none; transition-delay: 160ms; }
 
-/* revealed by the card (BoardCard.module.css sets data-reveal on hover / focus-within) */
-:global([data-mover-host]):hover > .mover,
-:global([data-mover-host]):focus-within > .mover,
-.mover:focus-visible {
-  opacity: 1;
-  pointer-events: auto;
-  transform: translate(0, -50%) scale(1);
-}
+/* A move is under way, or a card is being dragged: the control steps aside. */
+.btn:disabled { cursor: default; }
+.group:has(.btn:disabled) { opacity: 0 !important; pointer-events: none; }
 
-.mover:hover,
-.mover:focus-visible {
-  outline: none;
-  background: var(--color-accent-default);
-  border-color: var(--color-accent-default);
-  color: var(--color-fg-on-accent);
-}
-.mover--next:hover, .mover--next:focus-visible { padding-left: 10px; padding-right: 7px; }
-.mover--back:hover, .mover--back:focus-visible { padding-left: 7px; padding-right: 10px; }
-.mover:hover .text, .mover:focus-visible .text { grid-template-columns: 1fr; }
-.mover--next:hover .text, .mover--next:focus-visible .text { margin-right: 6px; }
-.mover--back:hover .text, .mover--back:focus-visible .text { margin-left: 6px; }
-.mover:hover .text > span, .mover:focus-visible .text > span { opacity: 1; }
-.mover:focus-visible { box-shadow: 0 0 0 2px var(--color-bg-surface), 0 0 0 4px var(--color-border-focus), var(--shadow-md); }
-.mover:active:not(:disabled) { transform: translate(0, -50%) scale(0.96); }
-
-/* A card is on its way (or being dragged): the buttons step aside. */
-.mover:disabled { opacity: 0 !important; pointer-events: none; }
-
-/* Touch has no hover: the "next" button stays on every card, so the way to move a card on is always in sight. */
+/* Touch has no hover: the control stays on every card, so the way to move a card on is always in sight. */
 @media (hover: none) {
-  .mover--next { opacity: 1; pointer-events: auto; transform: translate(0, -50%) scale(1); }
+  .group { opacity: 1; pointer-events: auto; }
+  .tip { display: none; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .mover, .text, .text > span { transition: none; }
+  .group, .btn, .tip { transition: none; }
 }

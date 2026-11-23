@@ -66,8 +66,8 @@ export const Bug: Story = {
     assignees: <AvatarGroup size="sm" max={2} avatars={[{ initials: 'AB' }, { initials: 'MR' }]} />,
   },
 };
-/** With `onMoveNext` / `onMoveBack` the card gets a round button on each edge. Hover or focus the card to see them; hover a
- * button and it opens into a pill that names the stage. Alt + → / Alt + ← do the same from the keyboard. (Figma: State=Move.) */
+/** With `onMoveNext` / `onMoveBack` the card's footer gets a small control (the Stage Mover). Hover or focus the card to see
+ * it; hover a button and a label names the stage. Alt + → / Alt + ← do the same from the keyboard. (Figma: State=Move.) */
 export const MoveToStage: Story = {
   args: {
     ...Task.args,

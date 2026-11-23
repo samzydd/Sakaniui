@@ -11,11 +11,13 @@
  *   empty-column · a column with no cards shows a dashed drop zone
  *   dragging     · a card lifts and tilts while a card-shaped slot marks where it lands
  *
- * Move to the next stage (default state): hover or focus a card and a round button appears on its edge (a chevron;
- * hover it and it names the stage). Click it, or press Alt + → on the focused card, and the card slides to the top of
- * the next column: the column it left closes up, a slot opens, the card flies across and lands with a short highlight,
- * and both counts tick. Alt + ← (and the button on the left edge) moves it back. On touch the "next" button stays on
- * every card. Moves are announced to screen readers. Nothing animates under prefers-reduced-motion.
+ * Move to the next stage (default state): hover or focus a card and a small round control in its footer shows up
+ * (a chevron; hover it and a label names the stage). Click it, or press Alt + → on the focused card, and the card
+ * slides across into the next column at its own height, then glides up to the top while the cards around it make
+ * room: one continuous move, done as layout animation (the cards really are in the new column from the first
+ * moment, so nothing flies over the board and nothing jumps). Alt + ← (and the back half of the control) moves it
+ * back. The new column's colour rings the card as it lands and both counts tick; moves are announced to screen
+ * readers. On touch the control stays on every card. Nothing animates under prefers-reduced-motion.
  *
  * Drag and drop (default state) is pointer-based, see useKanbanDrag.ts: the
  * card follows the pointer and swings with its movement, a slot opens where it
@@ -331,19 +333,15 @@ export interface KanbanBoardBlockProps {
 }
 
 const reducedMotion = () => typeof window !== 'undefined' && !!window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
-const FLIGHT_EASE_OUT = 'cubic-bezier(0.22, 0.9, 0.3, 1)';
 
-interface Flight {
-  task: Task;
-  from: KanbanPos;
-  to: KanbanPos;
-  /** Where the card starts, relative to the block. */
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-  dir: 1 | -1;
-}
+// The move to the next stage, in two overlapping steps (ms): the card slides across, and while it is still arriving it
+// starts to rise to the top of the column.
+const ACROSS = 440;      // the slide across (the card's layout animation)
+const RISE_AFTER = 200;  // when the rise starts, counted from the click
+const RISE = 460;        // the rise to the top
+// across: leaves quickly and settles softly; up: starts gently (the slide is still settling), then glides home
+const SLIDE_EASE = 'cubic-bezier(0.32, 0.72, 0, 1)';
+const RISE_EASE = 'cubic-bezier(0.5, 0, 0.12, 1)';
 
 export const KanbanBoardBlock: React.FC<KanbanBoardBlockProps> = ({
   state = 'default',
@@ -361,8 +359,8 @@ export const KanbanBoardBlock: React.FC<KanbanBoardBlockProps> = ({
   const onTaskMoveRef = React.useRef(onTaskMove);
   onTaskMoveRef.current = onTaskMove;
 
-  /** Commit a move: the card leaves one list and enters another; the landing is marked and announced. */
-  const commitMove = (from: KanbanPos, to: KanbanPos) => {
+  /** Commit a move: the card leaves one list and enters another; the landing is marked and announced (`endsAt`: where it will finally sit, when it moves on after landing). */
+  const commitMove = (from: KanbanPos, to: KanbanPos, endsAt = to.index) => {
     const cols = columnsRef.current;
     const task = cols[from.col]?.tasks[from.index];
     if (!task) return;
@@ -374,7 +372,7 @@ export const KanbanBoardBlock: React.FC<KanbanBoardBlockProps> = ({
     });
     if (from.col !== to.col) {
       setArrived({ id: task.id, cols: [from.col, to.col] });
-      setAnnounce(`${task.title} moved to ${cols[to.col].title}, position ${to.index + 1} of ${cols[to.col].tasks.length + 1}.`);
+      setAnnounce(`${task.title} moved to ${cols[to.col].title}, position ${endsAt + 1} of ${cols[to.col].tasks.length + 1}.`);
       onTaskMoveRef.current?.({ id: task.id, title: task.title, from: cols[from.col].title, to: cols[to.col].title });
     }
   };
@@ -391,91 +389,80 @@ export const KanbanBoardBlock: React.FC<KanbanBoardBlockProps> = ({
   React.useEffect(() => {
     if (!arrived || refocus.current !== arrived.id) return;
     refocus.current = null;
-    drag.blockRef.current?.querySelector<HTMLElement>(`[data-kanban-card="${arrived.id}"] [tabindex]`)?.focus();
+    drag.blockRef.current?.querySelector<HTMLElement>(`[data-kanban-card="${arrived.id}"] [tabindex]`)?.focus({ preventScroll: true });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [arrived]);
 
   // ---- move to the next stage ---------------------------------------------
-  const [flight, setFlight] = React.useState<Flight | null>(null);
-  const flightEl = React.useRef<HTMLDivElement | null>(null);
+  const [moving, setMoving] = React.useState<{ id: string; col: number; phase: 1 | 2 } | null>(null);
+  const timers = React.useRef<number[]>([]);
+  React.useEffect(() => () => timers.current.forEach((t) => window.clearTimeout(t)), []);
+  const later = (fn: () => void, ms: number) => { timers.current.push(window.setTimeout(fn, ms)); };
+
+  /** Where in a column a card at this height belongs, so it can slide in sideways rather than from above. */
+  const indexAtHeight = (body: HTMLElement, centreY: number) => {
+    const cards = [...body.querySelectorAll<HTMLElement>(':scope > [data-kanban-card]')];
+    const gap = parseFloat(getComputedStyle(body).rowGap) || 0;
+    let y = body.getBoundingClientRect().top;
+    for (let i = 0; i < cards.length; i++) {
+      const h = cards[i].offsetHeight;
+      if (centreY < y + h / 2) return i;
+      y += h + gap;
+    }
+    return cards.length;
+  };
 
   const startMove = (from: KanbanPos, dir: 1 | -1) => {
-    if (flight || drag.active || state !== 'default') return;
+    if (moving || drag.active || state !== 'default') return;
     const cols = columnsRef.current;
     const toCol = from.col + dir;
     const task = cols[from.col]?.tasks[from.index];
     const block = drag.blockRef.current;
     const board = drag.boardRef.current;
     if (!task || !block || !board || toCol < 0 || toCol >= cols.length) return;
-    const to: KanbanPos = { col: toCol, index: 0 };
     const cardEl = block.querySelector<HTMLElement>(`[data-kanban-card="${task.id}"]`);
     if (!cardEl) return;
     if (cardEl.contains(document.activeElement)) refocus.current = task.id;
-    if (reducedMotion()) { commitMove(from, to); return; }
+    if (reducedMotion()) { commitMove(from, { col: toCol, index: 0 }); return; }
 
-    const begin = () => {
-      const r = cardEl.getBoundingClientRect();
-      const b = block.getBoundingClientRect();
+    const bodies = board.querySelectorAll<HTMLElement>(`.${styles.column__body}`);
+    const run = () => {
+      const rect = cardEl.getBoundingClientRect();
+      const into = indexAtHeight(bodies[toCol], rect.top + 20); // by its top edge: it slides in level, not from below
+      // 1. across: the card joins the next column at the height it is at; everything else makes room (layout animation)
       drag.capture();
-      setFlight({ task, from, to, x: r.left - b.left, y: r.top - b.top, width: r.width, height: r.height, dir });
+      commitMove(from, { col: toCol, index: into }, 0);
+      setMoving({ id: task.id, col: toCol, phase: 1 });
+      // 2. up: while it is still arriving it rises to the top, the cards above it stepping down
+      if (into > 0) {
+        later(() => {
+          drag.capture();
+          setMoving((m) => (m ? { ...m, phase: 2 } : m));
+          setColumns((prev) => {
+            const next = prev.map((c) => ({ ...c, tasks: [...c.tasks] }));
+            const at = next[toCol].tasks.findIndex((t) => t.id === task.id);
+            if (at > 0) next[toCol].tasks.unshift(...next[toCol].tasks.splice(at, 1));
+            return next;
+          });
+        }, RISE_AFTER);
+      }
+      later(() => setMoving(null), (into > 0 ? RISE_AFTER + RISE : ACROSS) + 60);
     };
-    // The next column may sit past the edge of a narrow board: bring it into view first, then fly.
-    const target = drag.boardRef.current?.querySelectorAll<HTMLElement>(`.${styles.column}`)[toCol];
+    // The next column may sit past the edge of a narrow board: bring it into view first, then move.
+    const target = bodies[toCol]?.parentElement;
     const br = board.getBoundingClientRect();
     const tr = target?.getBoundingClientRect();
     if (tr && (tr.left < br.left || tr.right > br.right)) {
       board.scrollBy({ left: tr.left < br.left ? tr.left - br.left - 16 : tr.right - br.right + 16, behavior: 'smooth' });
-      window.setTimeout(begin, 280);
-    } else begin();
+      later(run, 280);
+    } else run();
   };
 
-  // The card flies from where it was to the slot that opened at the top of the next column, then the move commits.
-  React.useLayoutEffect(() => {
-    const f = flight;
-    if (!f) return undefined;
-    const overlay = flightEl.current;
-    const block = drag.blockRef.current;
-    const slot = block?.querySelector<HTMLElement>('[data-kanban-slot]');
-    const column = slot?.parentElement;
-    if (!overlay || !block || !column) { commitMove(f.from, f.to); setFlight(null); return undefined; }
-    const b = block.getBoundingClientRect();
-    const c = column.getBoundingClientRect();
-    const dx = c.left - b.left - f.x;
-    const dy = c.top - b.top - f.y;
-    const dist = Math.hypot(dx, dy);
-    const duration = Math.round(Math.min(620, 380 + dist / 4));
-    const at = (k: number, extra = '') => `translate3d(${f.x + dx * k}px, ${f.y + dy * k - (k > 0 && k < 1 ? 18 : 0)}px, 0) ${extra}`;
-    const inner = overlay.firstElementChild?.firstElementChild as HTMLElement | null;
-    const tilt = 2.5 * f.dir;
-    const anim = overlay.animate(
-      [
-        { transform: at(0, 'scale(1) rotate(0deg)'), easing: FLIGHT_EASE_OUT },
-        { transform: at(0.5, `scale(1.045) rotate(${tilt}deg)`), offset: 0.42, easing: FLIGHT_EASE_OUT },
-        { transform: at(1, 'scale(1) rotate(0deg)') },
-      ],
-      { duration, fill: 'forwards' },
-    );
-    inner?.animate(
-      [{ boxShadow: 'var(--shadow-xs)' }, { boxShadow: 'var(--shadow-xl)', offset: 0.42 }, { boxShadow: 'var(--shadow-xs)' }],
-      { duration, fill: 'forwards' },
-    );
-    let live = true;
-    anim.finished.then(() => {
-      if (!live) return;
-      drag.capture();
-      commitMove(f.from, f.to);
-      setFlight(null);
-    }).catch(() => {});
-    return () => { live = false; anim.cancel(); };
-    // commitMove reads refs; the effect is keyed to the flight alone
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [flight]);
-
-  const lifted = drag.active ? drag.active.from : flight ? flight.from : null;
-  const aim = drag.active ? drag.target : flight ? flight.to : null;
+  const lifted = drag.active ? drag.active.from : null;
+  const aim = drag.active ? drag.target : null;
   const liftedTask = lifted ? columns[lifted.col]?.tasks[lifted.index] : undefined;
-  const liftedHeight = drag.active?.height ?? flight?.height;
-  const busy = !!(drag.active || flight);
+  const liftedHeight = drag.active?.height;
+  const busy = !!(drag.active || moving);
 
   const source = state === 'default' ? columns : INITIAL_COLUMNS;
 
@@ -511,7 +498,7 @@ export const KanbanBoardBlock: React.FC<KanbanBoardBlockProps> = ({
         return (
           <Column
             key={col.title}
-            isTarget={!!lifted && aim?.col === colIndex && aim.col !== lifted.col}
+            isTarget={(!!lifted && aim?.col === colIndex && aim.col !== lifted.col) || moving?.col === colIndex}
             pop={!!arrived && arrived.cols.includes(colIndex)}
             bodyRef={drag.columnRef(colIndex)}
             title={col.title}
@@ -541,6 +528,9 @@ export const KanbanBoardBlock: React.FC<KanbanBoardBlockProps> = ({
                 const wrapper = {
                   ...drag.cardProps({ col: colIndex, index: i }, task.id),
                   ...(arrived?.id === task.id ? { 'data-arrived': '', style: { ['--arrive' as string]: col.dot } as React.CSSProperties } : {}),
+                  // while a card moves on, it glides slowly and softly, and its neighbours make room at the same pace
+                  ...(moving ? { 'data-flip-duration': moving.id === task.id ? String(moving.phase === 1 ? ACROSS : RISE) : '360', 'data-flip-ease': moving.phase === 1 ? SLIDE_EASE : RISE_EASE } : {}),
+                  ...(moving?.id === task.id ? { 'data-moving': '' } : {}),
                 };
                 const mover: MoverProps | undefined = state === 'default'
                   ? {
@@ -576,17 +566,6 @@ export const KanbanBoardBlock: React.FC<KanbanBoardBlockProps> = ({
     {drag.active && liftedTask && (
       <div ref={drag.overlayRef} className={styles.overlay} style={{ width: drag.active.width }} aria-hidden="true">
         {renderTask(liftedTask, 'overlay')}
-      </div>
-    )}
-    {/* The card sliding to the next stage: flown by the layout effect above. */}
-    {flight && (
-      <div
-        ref={flightEl}
-        className={[styles.overlay, styles.flying].join(' ')}
-        style={{ width: flight.width, transform: `translate3d(${flight.x}px, ${flight.y}px, 0)` }}
-        aria-hidden="true"
-      >
-        {renderTask(flight.task, 'flight')}
       </div>
     )}
     <div className={styles.srOnly} role="status" aria-live="polite">{announce}</div>

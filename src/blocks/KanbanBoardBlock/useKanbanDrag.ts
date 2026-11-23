@@ -102,7 +102,10 @@ export function useKanbanDrag({ enabled, onMove }: Options) {
     void root.offsetHeight;
     moves.forEach(({ el, dx, dy }) => {
       if (!dx && !dy) return;
-      el.style.transition = 'transform 240ms cubic-bezier(0.25, 1, 0.5, 1)';
+      // a card can ask for its own timing (data-flip-duration, data-flip-ease): the move-to-next-stage slide is slower
+      const ms = el.dataset.flipDuration || '240';
+      const ease = el.dataset.flipEase || 'cubic-bezier(0.25, 1, 0.5, 1)';
+      el.style.transition = `transform ${ms}ms ${ease}`;
       el.style.transform = '';
     });
   });
