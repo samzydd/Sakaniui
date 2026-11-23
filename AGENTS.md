@@ -314,7 +314,8 @@ lists its other names under `aliases` in `manifest.json`, and `search_components
   To let people move a card to another stage without dragging, give it `stages` (`{ id, label, color? }[]`),
   `stage` and `onMoveTo`: a "Move to" button sits at the card's top right and opens a stage menu; Alt + arrows
   move the focused card one stage. `KanbanBoardBlock` does the slide-across-then-rise animation for you and reports moves
-  through `onTaskMove`.
+  through `onTaskMove`. It also selects several cards (checkboxes, Cmd/Ctrl-click) and moves them together, from a
+  selection bar or by dragging the selection as a deck.
 - **ProfileCard / TeamCard** — ProfileCard: compact (row) or detailed (centred, with bio/social). TeamCard:
   portrait-led with a location bar. Both want a real photo.
 

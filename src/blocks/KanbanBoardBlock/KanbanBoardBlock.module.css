@@ -195,7 +195,7 @@
 .draggable[data-moving] > * { box-shadow: var(--shadow-lg); border-color: var(--color-border-default); }
 
 /* A card that has just landed: a ring in its new column's colour that fades out, and a brief lift. */
-.draggable[data-arrived] > * { animation: arrive 1000ms cubic-bezier(0.2, 0.7, 0.3, 1) both; }
+.draggable[data-arrived] > * { animation: arrive 1000ms cubic-bezier(0.2, 0.7, 0.3, 1) var(--arrive-delay, 0ms) forwards; }
 @keyframes arrive {
   0%   { box-shadow: 0 0 0 3px color-mix(in srgb, var(--arrive, var(--color-accent-default)) 55%, transparent), var(--shadow-sm); }
   60%  { box-shadow: 0 0 0 3px color-mix(in srgb, var(--arrive, var(--color-accent-default)) 22%, transparent), var(--shadow-xs); }
@@ -208,6 +208,122 @@
 
 /* Text for screen readers only: the live region that announces a move. */
 .srOnly { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+
+/* ---- several cards at once ---- */
+
+/* A drag of several: the grabbed card on top, the others gathered under it as a fanned deck, and a count. */
+.stackCard {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  pointer-events: none;
+  transform-origin: 50% 0;
+}
+.stackCard > * > * { box-shadow: var(--shadow-md); border-color: var(--color-border-default); }
+.stackTop { position: relative; z-index: 2; }
+.stackTop > * > * { box-shadow: var(--shadow-xl); border-color: var(--color-border-default); }
+.stackCount {
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  z-index: 3;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 26px;
+  height: 26px;
+  padding: 0 8px;
+  box-sizing: border-box;
+  border-radius: var(--radius-full, 9999px);
+  background: var(--color-accent-default);
+  color: var(--color-fg-on-accent);
+  font-family: var(--font-sans);
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  box-shadow: 0 0 0 2px var(--color-bg-surface), var(--shadow-md);
+  animation: stackCountIn 380ms cubic-bezier(0.34, 1.56, 0.64, 1) 260ms both;
+}
+@keyframes stackCountIn { from { opacity: 0; transform: scale(0.4); } }
+
+/* where a deck will land: as tall as its cards will be, with how many */
+.slot__count {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-fg-muted);
+}
+
+/* The selection bar: floats at the bottom of the board while cards are picked. Its dock takes no room. */
+.barDock {
+  position: sticky;
+  bottom: 20px;
+  z-index: 40;
+  height: 0;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  pointer-events: none;
+}
+.bar {
+  pointer-events: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 6px 6px 8px;
+  border-radius: 14px;
+  background: var(--color-bg-inverse);
+  color: var(--color-fg-on-inverse);
+  font-family: var(--font-sans);
+  box-shadow: 0 18px 40px -10px rgba(16, 15, 12, 0.45), 0 2px 6px rgba(16, 15, 12, 0.18);
+  transform: translateY(calc(-100% - 4px));
+  animation: barIn 340ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.bar--out { animation: barOut 180ms cubic-bezier(0.4, 0, 1, 1) both; }
+@keyframes barIn { from { opacity: 0; transform: translateY(calc(-100% + 14px)) scale(0.96); } }
+@keyframes barOut { to { opacity: 0; transform: translateY(calc(-100% + 10px)) scale(0.97); } }
+.bar__count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 24px;
+  height: 24px;
+  padding: 0 7px;
+  box-sizing: border-box;
+  border-radius: var(--radius-full, 9999px);
+  background: var(--color-bg-surface);
+  color: var(--color-fg-default);
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  animation: countPop 320ms cubic-bezier(0.3, 1.6, 0.5, 1) both;
+}
+.bar__label { font-size: 13px; line-height: 18px; font-weight: 500; padding-right: 2px; }
+.bar__divider { width: 1px; height: 18px; background: currentColor; opacity: 0.2; }
+.bar__clear {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  color: inherit;
+  opacity: 0.75;
+  cursor: pointer;
+  transition: background-color 140ms ease, opacity 140ms ease;
+}
+.bar__clear:hover { opacity: 1; background: color-mix(in srgb, currentColor 14%, transparent); }
+.bar__clear:focus-visible { outline: none; box-shadow: 0 0 0 2px var(--color-border-focus); }
 
 /* The static `dragging` state: the card lifted and tilted over its slot. */
 .draggedWrap { position: relative; }
@@ -225,7 +341,7 @@
 @media (prefers-reduced-motion: reduce) {
   .slot--live { animation: none; }
   .column { transition: none; }
-  .draggable[data-arrived] > *, .countPop { animation: none; }
+  .draggable[data-arrived] > *, .countPop, .stackCount, .bar, .bar--out, .bar__count { animation: none; }
 }
 
 /* ---- responsive (container-based) ---- */

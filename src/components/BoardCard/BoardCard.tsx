@@ -57,6 +57,8 @@ export interface BoardCardProps {
   onMoveTo?: (stageId: string) => void;
   /** Hides the button and ignores the shortcuts: a move is under way, or a card is being dragged. */
   moveDisabled?: boolean;
+  /** What the button moves, when it is more than this card ("3 cards"): read out, and named in the menu. */
+  moveSubject?: string;
   className?: string;
 }
 
@@ -76,6 +78,7 @@ export const BoardCard: React.FC<BoardCardProps> = ({
   stage,
   onMoveTo,
   moveDisabled,
+  moveSubject,
   className,
 }) => {
   const showBody = type !== 'compact';
@@ -107,7 +110,7 @@ export const BoardCard: React.FC<BoardCardProps> = ({
         {leading && <span className={styles.card__leading}>{leading}</span>}
         <span className={styles.card__title}>{title}</span>
         {trailing && <span className={styles.card__trailing}>{trailing}</span>}
-        {movable && <StageMenu stages={stages!} current={stage!} onMove={onMoveTo!} disabled={moveDisabled} />}
+        {movable && <StageMenu stages={stages!} current={stage!} onMove={onMoveTo!} disabled={moveDisabled} subject={moveSubject} />}
       </div>
 
       {showBody && description && <p className={styles.card__desc}>{description}</p>}

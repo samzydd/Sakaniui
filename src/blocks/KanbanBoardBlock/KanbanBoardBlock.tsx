@@ -19,6 +19,12 @@
  * Alt + ← on a focused card move it one stage without the menu. Nothing
  * animates under prefers-reduced-motion.
  *
+ * Several at once (default state): the checkbox on each card selects it (Cmd / Ctrl / Shift-click too; once some are
+ * picked a plain click adds or removes one) and a bar rises at the bottom: "3 selected", Move to, ×. Move to (or the ⇄ on
+ * a selected card) sends them in a wave, each arcing across to the top of the new column a beat after the one before.
+ * Dragging a selected card carries the rest: they gather under it as a fanned deck with a count, and where it is dropped
+ * the deck deals out into the column card by card. Esc clears the selection.
+ *
  * Drag and drop (default state) is pointer-based, see useKanbanDrag.ts: the
  * card follows the pointer and swings with its movement, a slot opens where it
  * will land, the other cards slide out of the way, and on release it glides
@@ -36,6 +42,7 @@ import { IconSelector as ChevronsUpDown } from '../../icons/outline/selector';
 import { IconCalendar as Calendar } from '../../icons/outline/calendar';
 import { IconMessage as MessageSquare } from '../../icons/outline/message';
 import { IconFlag as Flag } from '../../icons/outline/flag';
+import { IconX } from '../../icons/outline/x';
 import { Input } from '../../components/Input';
 import { Button } from '../../components/Button';
 import { Badge } from '../../components/Badge';
@@ -46,7 +53,8 @@ import { BoardCard, type BoardCardStage } from '../../components/BoardCard';
 import { CardMetaItem } from '../../components/CardMetaItem';
 import { FilterChip } from '../../components/FilterChip';
 import styles from './KanbanBoardBlock.module.css';
-import { useKanbanDrag, type KanbanPos } from './useKanbanDrag';
+import { useKanbanDrag, type KanbanPos, type KanbanRect } from './useKanbanDrag';
+import { StageMenu } from '../../components/BoardCard/StageMenu';
 import amaraPhoto from '../../assets/avatars/activity-amara-kalu.jpg';
 import chidiPhoto from '../../assets/avatars/activity-chidi-duru.jpg';
 import jadePhoto from '../../assets/avatars/activity-jade-silva.jpg';
@@ -262,6 +270,12 @@ interface MoverProps {
   stage?: string;
   onMoveTo?: (stageId: string) => void;
   moveDisabled?: boolean;
+  moveSubject?: string;
+}
+
+interface SelectProps {
+  checked: boolean;
+  onToggle: () => void;
 }
 
 const renderTask = (
@@ -270,12 +284,21 @@ const renderTask = (
   state?: 'default' | 'dragging',
   wrapperProps?: React.HTMLAttributes<HTMLDivElement> & Partial<Record<`data-${string}`, string>>,
   mover?: MoverProps,
+  select?: SelectProps,
 ) => (
   <div key={key} className={wrapperProps ? styles.draggable : undefined} {...(wrapperProps ?? {})}>
   <BoardCard
     type={task.compact ? 'compact' : 'default'}
-    state={state === 'dragging' ? 'dragging' : 'default'}
-    leading={<Checkbox />}
+    state={state === 'dragging' ? 'dragging' : select?.checked ? 'selected' : 'default'}
+    leading={
+      <Checkbox
+        checked={select?.checked ?? false}
+        onChange={() => select?.onToggle()}
+        onClick={(e) => e.stopPropagation()}
+        aria-label={`Select ${task.title}`}
+        readOnly={!select}
+      />
+    }
     title={task.title}
     trailing={<Flag size={14} color="var(--color-warning-fg)" />}
     description={task.description}
@@ -301,10 +324,12 @@ const renderTask = (
  * outlined with a 12/4 dash (an SVG rect, since CSS borders can't set the
  * dash length).
  * ------------------------------------------------------------------ */
-const DropSlot = React.forwardRef<HTMLDivElement, { task: Task; height?: number } & React.HTMLAttributes<HTMLDivElement> & Record<`data-${string}`, string>>(
-  ({ task, height, className, style, ...rest }, ref) => (
+const DropSlot = React.forwardRef<HTMLDivElement, { task: Task; height?: number; count?: number } & React.HTMLAttributes<HTMLDivElement> & Record<`data-${string}`, string>>(
+  ({ task, height, count, className, style, ...rest }, ref) => (
     <div ref={ref} className={[styles.slot, className ?? ''].filter(Boolean).join(' ')} style={{ height, ...style }} aria-hidden="true" {...rest}>
-      <div className={styles.slot__ghost}>{renderTask(task, 'ghost')}</div>
+      {count && count > 1
+        ? <span className={styles.slot__count}>{count} cards</span>
+        : <div className={styles.slot__ghost}>{renderTask(task, 'ghost')}</div>}
       <svg className={styles.slot__dash} aria-hidden="true">
         <rect x="0.75" y="0.75" rx="11.25" ry="11.25" />
       </svg>
@@ -339,6 +364,24 @@ const RISE = 440;        // the rise to the top
 const MAKE_ROOM = 380;   // the other cards stepping aside
 const GLIDE = 'cubic-bezier(0.4, 0, 0.2, 1)';
 
+// Several cards at once. Moved from the menu they go in a wave: each lifts, arcs across to the new column and settles at
+// the top, a beat after the one before. Dragged, the others gather under the grabbed card as a deck, and where the deck is
+// dropped it deals out into the column, card by card.
+const WAVE = 680;          // each card's flight
+const WAVE_STAGGER = 80;   // the beat between one card and the next
+const WAVE_EASE = 'cubic-bezier(0.45, 0, 0.15, 1)';
+const GATHER = 520;
+const GATHER_STAGGER = 50;
+const DEAL = 560;
+const DEAL_STAGGER = 70;
+const SETTLE = 'cubic-bezier(0.22, 1, 0.36, 1)';
+/** Where the n-th card under the top one sits in the deck: a little lower each, fanned left and right. */
+const deckPose = (i: number) => {
+  const d = Math.min(i + 1, 3);
+  const side = i % 2 ? -1 : 1;
+  return { x: side * (6 + 4 * d), y: 8 * d, r: side * (2.5 + 1.5 * d), s: 1 - 0.03 * d };
+};
+
 export const KanbanBoardBlock: React.FC<KanbanBoardBlockProps> = ({
   state = 'default',
   className,
@@ -349,7 +392,14 @@ export const KanbanBoardBlock: React.FC<KanbanBoardBlockProps> = ({
   const [columns, setColumns] = React.useState(INITIAL_COLUMNS);
   const columnsRef = React.useRef(columns);
   columnsRef.current = columns;
-  const [arrived, setArrived] = React.useState<{ id: string; cols: number[] } | null>(null);
+  // ---- selection: the checkboxes pick cards to move together -------------
+  const [selected, setSelected] = React.useState<string[]>([]);
+  const selectedRef = React.useRef(selected);
+  selectedRef.current = selected;
+  const toggle = (id: string) => setSelected((sel) => (sel.includes(id) ? sel.filter((x) => x !== id) : [...sel, id]));
+  /** These ids in the order they sit on the board, column by column, top to bottom. */
+  const boardOrder = (ids: string[]) => columnsRef.current.flatMap((c) => c.tasks.filter((t) => ids.includes(t.id)).map((t) => t.id));
+  const [arrived, setArrived] = React.useState<{ ids: string[]; cols: number[]; delay?: Record<string, number>; ms?: number } | null>(null);
   const [announce, setAnnounce] = React.useState('');
   const refocus = React.useRef<string | null>(null);
   const onTaskMoveRef = React.useRef(onTaskMove);
@@ -367,25 +417,58 @@ export const KanbanBoardBlock: React.FC<KanbanBoardBlockProps> = ({
       return next;
     });
     if (from.col !== to.col) {
-      setArrived({ id: task.id, cols: [from.col, to.col] });
+      setArrived({ ids: [task.id], cols: [from.col, to.col] });
       setAnnounce(`${task.title} moved to ${cols[to.col].title}, position ${endsAt + 1} of ${cols[to.col].tasks.length + 1}.`);
       onTaskMoveRef.current?.({ id: task.id, title: task.title, from: cols[from.col].title, to: cols[to.col].title });
     }
   };
 
-  const drag = useKanbanDrag({ enabled: state === 'default', onMove: commitMove });
+  const drag = useKanbanDrag({
+    enabled: state === 'default',
+    // a selected card carries the rest of the selection with it
+    groupOf: (id) => {
+      const sel = selectedRef.current;
+      return sel.includes(id) && sel.length > 1 ? boardOrder(sel.filter((x) => x !== id)) : [];
+    },
+    onMove: (from, to, group) => (group.length ? commitDrop(from, to, group) : commitMove(from, to)),
+  });
+
+  /** Several cards dropped together: they all land where the deck was dropped, the grabbed one first. */
+  const [deal, setDeal] = React.useState<{ n: number; ids: string[]; from: KanbanRect } | null>(null);
+  const dealN = React.useRef(0);
+  const commitDrop = (from: KanbanPos, to: KanbanPos, group: string[]) => {
+    const cols = columnsRef.current;
+    const lead = cols[from.col]?.tasks[from.index];
+    if (!lead) return;
+    const ids = [lead.id, ...group];
+    const all = cols.flatMap((c, ci) => c.tasks.map((t) => ({ t, ci })));
+    const moving = ids.map((id) => all.find((x) => x.t.id === id)).filter((x): x is { t: Task; ci: number } => !!x);
+    const slot = drag.boardRef.current?.querySelector<HTMLElement>('[data-kanban-slot]')?.getBoundingClientRect();
+    setColumns((prev) => {
+      const next = prev.map((c) => ({ ...c, tasks: c.tasks.filter((t) => !ids.includes(t.id)) }));
+      next[to.col].tasks.splice(Math.min(to.index, next[to.col].tasks.length), 0, ...moving.map((m) => m.t));
+      return next;
+    });
+    const delay: Record<string, number> = {};
+    ids.forEach((id, i) => { delay[id] = i * DEAL_STAGGER + DEAL * 0.5; });
+    setArrived({ ids, cols: [...new Set([...moving.map((m) => m.ci), to.col])], delay, ms: DEAL + ids.length * DEAL_STAGGER + 700 });
+    if (slot) setDeal({ n: ++dealN.current, ids, from: { x: slot.left, y: slot.top, w: slot.width, h: slot.height } });
+    setSelected([]);
+    setAnnounce(`${ids.length} cards moved to ${cols[to.col].title}.`);
+    moving.forEach(({ t, ci }) => { if (ci !== to.col) onTaskMoveRef.current?.({ id: t.id, title: t.title, from: cols[ci].title, to: cols[to.col].title }); });
+  };
 
   // The highlight on a card that just landed, and the counts that ticked, fade after a moment.
   React.useEffect(() => {
     if (!arrived) return undefined;
-    const t = window.setTimeout(() => setArrived(null), 1100);
+    const t = window.setTimeout(() => setArrived(null), arrived.ms ?? 1100);
     return () => window.clearTimeout(t);
   }, [arrived]);
   // A card that had focus keeps it through the move, so Alt + → can be pressed again.
   React.useEffect(() => {
-    if (!arrived || refocus.current !== arrived.id) return;
+    if (!arrived || refocus.current !== arrived.ids[0]) return;
     refocus.current = null;
-    drag.blockRef.current?.querySelector<HTMLElement>(`[data-kanban-card="${arrived.id}"] [tabindex]`)?.focus({ preventScroll: true });
+    drag.blockRef.current?.querySelector<HTMLElement>(`[data-kanban-card="${arrived.ids[0]}"] [tabindex]`)?.focus({ preventScroll: true });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [arrived]);
 
@@ -483,12 +566,168 @@ export const KanbanBoardBlock: React.FC<KanbanBoardBlockProps> = ({
   }, [step]);
   React.useEffect(() => () => glide.current?.cancel(), []);
 
+  // ---- several cards at once, from the menu: a wave ------------------------
+  const [waving, setWaving] = React.useState<{ ids: string[]; col: number } | null>(null);
+  const [wave, setWave] = React.useState<{ n: number; ids: string[]; from: Record<string, KanbanRect> } | null>(null);
+  const waveN = React.useRef(0);
+
+  const moveMany = (ids: string[], toCol: number) => {
+    if (moving || waving || drag.active || state !== 'default') return;
+    const cols = columnsRef.current;
+    const block = drag.blockRef.current;
+    const board = drag.boardRef.current;
+    const order = boardOrder(ids);
+    if (!block || !board || !order.length || toCol < 0 || toCol >= cols.length) return;
+    const all = cols.flatMap((c, ci) => c.tasks.map((t) => ({ t, ci })));
+    const moving_ = order.map((id) => all.find((x) => x.t.id === id)!).filter(Boolean);
+    const commit = () => setColumns((prev) => {
+      const next = prev.map((c) => ({ ...c, tasks: c.tasks.filter((t) => !order.includes(t.id)) }));
+      next[toCol].tasks.unshift(...moving_.map((m) => m.t));
+      return next;
+    });
+    const wrapUp = (motion: boolean) => {
+      const delay: Record<string, number> = {};
+      order.forEach((id, i) => { delay[id] = motion ? i * WAVE_STAGGER + WAVE * 0.7 : 0; });
+      setArrived({ ids: order, cols: [...new Set([...moving_.map((m) => m.ci), toCol])], delay, ms: (motion ? WAVE + order.length * WAVE_STAGGER : 0) + 1000 });
+      setSelected([]);
+      setAnnounce(`${order.length} ${order.length === 1 ? 'card' : 'cards'} moved to ${cols[toCol].title}.`);
+      moving_.forEach(({ t, ci }) => { if (ci !== toCol) onTaskMoveRef.current?.({ id: t.id, title: t.title, from: cols[ci].title, to: cols[toCol].title }); });
+    };
+    if (reducedMotion()) { commit(); wrapUp(false); return; }
+    const bodies = board.querySelectorAll<HTMLElement>(`.${styles.column__body}`);
+    const run = () => {
+      const from: Record<string, KanbanRect> = {};
+      for (const id of order) {
+        const r = block.querySelector<HTMLElement>(`[data-kanban-card="${id}"]`)?.getBoundingClientRect();
+        if (r) from[id] = { x: r.left, y: r.top, w: r.width, h: r.height };
+      }
+      drag.capture();
+      commit();
+      setWaving({ ids: order, col: toCol });
+      setWave({ n: ++waveN.current, ids: order, from });
+      wrapUp(true);
+      later(() => setWaving(null), WAVE + (order.length - 1) * WAVE_STAGGER + 120);
+    };
+    const target = bodies[toCol]?.parentElement;
+    const br = board.getBoundingClientRect();
+    const tr = target?.getBoundingClientRect();
+    if (tr && (tr.left < br.left || tr.right > br.right)) {
+      board.scrollBy({ left: tr.left < br.left ? tr.left - br.left - 16 : tr.right - br.right + 16, behavior: 'smooth' });
+      later(run, 300);
+    } else run();
+  };
+
+  const scaleOf = (el: HTMLElement, r: DOMRect) => (el.offsetWidth ? r.width / el.offsetWidth || 1 : 1);
+
+  // The wave: each card lifts, arcs across to the top of the new column and settles, a beat after the one before.
+  React.useLayoutEffect(() => {
+    if (!wave) return;
+    const block = drag.blockRef.current;
+    wave.ids.forEach((id, i) => {
+      const el = block?.querySelector<HTMLElement>(`[data-kanban-card="${id}"]`);
+      const f = wave.from[id];
+      if (!el || !f) return;
+      const now = el.getBoundingClientRect();
+      const k = scaleOf(el, now);
+      const dx = (f.x - now.left) / k;
+      const dy = (f.y - now.top) / k;
+      const tilt = dx === 0 ? 0 : dx > 0 ? -2 : 2;
+      el.animate(
+        [
+          { transform: `translate(${dx}px, ${dy}px)` },
+          { transform: `translate(${dx * 0.5}px, ${dy * 0.5 - 26}px) rotate(${tilt}deg) scale(1.035)`, offset: 0.5 },
+          { transform: 'none' },
+        ],
+        { duration: WAVE, delay: i * WAVE_STAGGER, easing: WAVE_EASE, fill: 'backwards' },
+      );
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [wave]);
+
+  // The gather: as a drag of several begins, the other selected cards fly in from where they were and stack under the
+  // grabbed one, a beat apart.
+  const gatherFor = drag.active && drag.active.group.length ? drag.active.id : null;
+  React.useLayoutEffect(() => {
+    const a = drag.active;
+    const ov = drag.overlayRef.current;
+    if (!a || !ov || !a.group.length) return;
+    const reduce = reducedMotion();
+    a.group.forEach((id, i) => {
+      const el = ov.querySelector<HTMLElement>(`[data-stack-id="${id}"]`);
+      const g = a.groupRects[id];
+      if (!el || !g) return;
+      const p = deckPose(i);
+      const pose = `translate(${p.x}px, ${p.y}px) rotate(${p.r}deg) scale(${p.s})`;
+      const hidden = i >= 3;
+      if (reduce) { el.style.transform = pose; el.style.opacity = hidden ? '0' : '1'; return; }
+      el.animate(
+        [
+          { transform: `translate(${g.x - a.origin.x}px, ${g.y - a.origin.y}px)`, opacity: 1 },
+          { transform: pose, opacity: hidden ? 0 : 1 },
+        ],
+        { duration: GATHER, delay: i * GATHER_STAGGER, easing: SETTLE, fill: 'both' },
+      );
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [gatherFor]);
+
+  // The deal: where the deck was dropped it opens up into the column, card by card, each from its place in the deck.
+  React.useLayoutEffect(() => {
+    if (!deal || reducedMotion()) return;
+    const block = drag.blockRef.current;
+    deal.ids.forEach((id, i) => {
+      const el = block?.querySelector<HTMLElement>(`[data-kanban-card="${id}"]`);
+      if (!el) return;
+      const now = el.getBoundingClientRect();
+      const k = scaleOf(el, now);
+      const dx = (deal.from.x - now.left) / k;
+      const dy = (deal.from.y - now.top) / k;
+      const p = i === 0 ? { x: 0, y: 0, r: 0, s: 1 } : deckPose(i - 1);
+      el.animate(
+        [
+          { transform: `translate(${dx + p.x}px, ${dy + p.y}px) rotate(${p.r}deg) scale(${p.s})`, zIndex: String(40 - i) },
+          { transform: 'none', zIndex: String(40 - i) },
+        ],
+        { duration: DEAL, delay: i * DEAL_STAGGER, easing: SETTLE, fill: 'backwards' },
+      );
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [deal]);
+
+  // Esc lets go of the selection (unless a menu has already used it to close).
+  React.useEffect(() => {
+    if (!selected.length) return undefined;
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape' && !e.defaultPrevented) setSelected([]); };
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [selected.length]);
+
+  // The selection bar stays a moment after the selection empties, to leave rather than vanish.
+  const [barShown, setBarShown] = React.useState(false);
+  const barCount = React.useRef(0);
+  if (selected.length) barCount.current = selected.length;
+  React.useEffect(() => {
+    if (selected.length) { setBarShown(true); return undefined; }
+    const t = window.setTimeout(() => setBarShown(false), 200);
+    return () => window.clearTimeout(t);
+  }, [selected.length]);
+
   const stages: BoardCardStage[] = columns.map((c) => ({ id: c.title, label: c.title, color: c.dot }));
   const lifted = drag.active ? drag.active.from : null;
   const aim = drag.active ? drag.target : null;
   const liftedTask = lifted ? columns[lifted.col]?.tasks[lifted.index] : undefined;
-  const liftedHeight = drag.active?.height;
-  const busy = !!(drag.active || moving);
+  const carried = drag.active?.group ?? [];
+  const carriedTasks = carried.map((id) => columns.flatMap((c) => c.tasks).find((t) => t.id === id)).filter((t): t is Task => !!t);
+  // the slot for a deck is as tall as its cards will be once they open up
+  const liftedHeight = drag.active
+    ? drag.active.height + carried.reduce((h, id) => h + (drag.active!.groupRects[id]?.h ?? 0) + 10, 0)
+    : undefined;
+  const busy = !!(drag.active || moving || waving);
+  const flying = new Set([...(moving ? [moving.id] : []), ...(waving?.ids ?? [])]);
+  const commonStage = (() => {
+    const cs = new Set(columns.filter((c) => c.tasks.some((t) => selected.includes(t.id))).map((c) => c.title));
+    return cs.size === 1 ? [...cs][0] : undefined;
+  })();
 
   const source = state === 'default' ? columns : INITIAL_COLUMNS;
 
@@ -515,7 +754,7 @@ export const KanbanBoardBlock: React.FC<KanbanBoardBlockProps> = ({
       {source.map((col, colIndex) => {
         const isEmptyCol = state === 'empty-column' && colIndex === 2;
         const incoming = !!aim && aim.col === colIndex;
-        const leaving = lifted && lifted.col === colIndex ? 1 : 0;
+        const leaving = (lifted && lifted.col === colIndex ? 1 : 0) + col.tasks.filter((t) => carried.includes(t.id)).length;
         // a column that has been emptied (its last card moved on) shows the drop zone, unless a card is on its way in
         const emptied = state === 'default' && col.tasks.length - leaving === 0 && !incoming;
         const variant =
@@ -524,7 +763,7 @@ export const KanbanBoardBlock: React.FC<KanbanBoardBlockProps> = ({
         return (
           <Column
             key={col.title}
-            isTarget={(!!lifted && aim?.col === colIndex && aim.col !== lifted.col) || moving?.col === colIndex}
+            isTarget={(!!lifted && aim?.col === colIndex && (aim.col !== lifted.col || carried.length > 0)) || moving?.col === colIndex || waving?.col === colIndex}
             pop={!!arrived && arrived.cols.includes(colIndex)}
             bodyRef={drag.columnRef(colIndex)}
             title={col.title}
@@ -537,7 +776,7 @@ export const KanbanBoardBlock: React.FC<KanbanBoardBlockProps> = ({
               // While dragging or moving: the card leaves its column and a slot opens at the target.
               const items = col.tasks
                 .map((task, i) => ({ task, i }))
-                .filter(({ i }) => !(lifted && lifted.col === colIndex && lifted.index === i));
+                .filter(({ task, i }) => !(lifted && lifted.col === colIndex && lifted.index === i) && !carried.includes(task.id));
               const nodes: React.ReactNode[] = items.map(({ task, i }) => {
                 // The static dragging state: column 2's last card lifts out over its slot.
                 const isDragged = state === 'dragging' && colIndex === 1 && i === col.tasks.length - 1;
@@ -549,17 +788,38 @@ export const KanbanBoardBlock: React.FC<KanbanBoardBlockProps> = ({
                     </div>
                   );
                 }
+                const isSelected = selected.includes(task.id);
+                const inGroup = isSelected && selected.length > 1;
                 const wrapper = {
                   ...drag.cardProps({ col: colIndex, index: i }, task.id),
-                  ...(arrived?.id === task.id ? { 'data-arrived': '', style: { ['--arrive' as string]: col.dot } as React.CSSProperties } : {}),
-                  // while a card moves on, it glides slowly and softly, and its neighbours make room at the same pace
-                  ...(moving ? { 'data-flip-duration': String(MAKE_ROOM), 'data-flip-ease': GLIDE } : {}),
-                  ...(moving?.id === task.id ? { 'data-moving': '', 'data-flip-skip': '' } : {}),
+                  ...(arrived?.ids.includes(task.id)
+                    ? { 'data-arrived': '', style: { ['--arrive' as string]: col.dot, ['--arrive-delay' as string]: `${arrived.delay?.[task.id] ?? 0}ms` } as React.CSSProperties }
+                    : {}),
+                  // while cards move on, they glide slowly and softly, and their neighbours make room at the same pace
+                  ...(moving || waving ? { 'data-flip-duration': String(MAKE_ROOM), 'data-flip-ease': GLIDE } : {}),
+                  ...(flying.has(task.id) ? { 'data-moving': '', 'data-flip-skip': '' } : {}),
+                  // a click with Cmd / Ctrl / Shift picks a card; once some are picked, a plain click does too
+                  onClick: (e: React.MouseEvent) => {
+                    if (state !== 'default' || (e.target as HTMLElement).closest('button, input, label, a, [role="checkbox"]')) return;
+                    if (e.metaKey || e.ctrlKey || e.shiftKey || selectedRef.current.length) { e.preventDefault(); toggle(task.id); }
+                  },
                 };
                 const mover: MoverProps | undefined = state === 'default'
-                  ? { stages, stage: col.title, moveDisabled: busy, onMoveTo: (id) => startMove({ col: colIndex, index: i }, columns.findIndex((c) => c.title === id)) }
+                  ? {
+                      stages,
+                      stage: col.title,
+                      moveDisabled: busy,
+                      moveSubject: inGroup ? `${selected.length} cards` : undefined,
+                      onMoveTo: (id) => {
+                        const toCol = columns.findIndex((c) => c.title === id);
+                        // the button on a selected card moves the whole selection
+                        if (inGroup) moveMany(selectedRef.current, toCol);
+                        else startMove({ col: colIndex, index: i }, toCol);
+                      },
+                    }
                   : undefined;
-                return renderTask(task, task.id, 'default', wrapper, mover);
+                const select: SelectProps | undefined = state === 'default' ? { checked: isSelected, onToggle: () => toggle(task.id) } : undefined;
+                return renderTask(task, task.id, 'default', wrapper, mover, select);
               });
               if (aim && aim.col === colIndex) {
                 nodes.splice(aim.index, 0, (
@@ -568,6 +828,7 @@ export const KanbanBoardBlock: React.FC<KanbanBoardBlockProps> = ({
                       key="slot"
                       task={liftedTask}
                       height={liftedHeight}
+                      count={carried.length + 1}
                       className={styles['slot--live']}
                       data-kanban-slot=""
                       data-flip-id={`slot-${colIndex}`}
@@ -585,7 +846,34 @@ export const KanbanBoardBlock: React.FC<KanbanBoardBlockProps> = ({
     {/* The card being dragged: follows the pointer above the board. */}
     {drag.active && liftedTask && (
       <div ref={drag.overlayRef} className={styles.overlay} style={{ width: drag.active.width }} aria-hidden="true">
-        {renderTask(liftedTask, 'overlay')}
+        {/* a drag of several: the others gather under the grabbed card as a deck (deepest first, so the nearest is on top) */}
+        {carriedTasks.slice().reverse().map((t) => (
+          <div key={t.id} className={styles.stackCard} data-stack-id={t.id}>{renderTask(t, `stack-${t.id}`)}</div>
+        ))}
+        <div className={carriedTasks.length ? styles.stackTop : undefined}>{renderTask(liftedTask, 'overlay')}</div>
+        {carriedTasks.length > 0 && <span className={styles.stackCount}>{carriedTasks.length + 1}</span>}
+      </div>
+    )}
+
+    {/* The selection bar: what is picked, and where to send it. */}
+    {state === 'default' && barShown && (
+      <div className={styles.barDock}>
+        <div className={[styles.bar, selected.length ? '' : styles['bar--out']].filter(Boolean).join(' ')} role="toolbar" aria-label="Selected cards">
+          <span key={barCount.current} className={styles.bar__count}>{barCount.current}</span>
+          <span className={styles.bar__label}>selected</span>
+          <span className={styles.bar__divider} aria-hidden />
+          <StageMenu
+            variant="bar"
+            stages={stages}
+            current={commonStage}
+            subject={`${barCount.current} ${barCount.current === 1 ? 'card' : 'cards'}`}
+            disabled={busy || !selected.length}
+            onMove={(id) => moveMany(selectedRef.current, columns.findIndex((c) => c.title === id))}
+          />
+          <button type="button" className={styles.bar__clear} aria-label="Clear selection" onClick={() => setSelected([])}>
+            <IconX size={16} aria-hidden />
+          </button>
+        </div>
       </div>
     )}
     <div className={styles.srOnly} role="status" aria-live="polite">{announce}</div>
