@@ -2,6 +2,12 @@
 
 All notable changes to `@sakaniui/react` are documented here.
 
+## Unreleased
+
+### Added
+
+- **`ShareBlock`: a Share panel for a document, note or board.** The access row switches between "Anyone with the link" and "Invited people only"; only the second shows the invite field and the people who have access. The invite field turns e-mail addresses into people as you type: a comma, Enter or paste commits one (an address in your `directory` becomes a name and a photo, any other stays an address with an initial), a bad address is refused in words ("Enter a valid email address, like name@company.com"), Backspace takes the last one back. **Invite** goes to `onInvite` (return a promise to hold "Sending" until it settles; a rejection keeps the people in the field), confirms with a banner, then lists them under "People with access" with a Remove button; the avatars in the header follow. **Copy link** copies the link and says "Copied" for a moment. Every part opens and closes by height. Pass `link` and `owner`; leave access and people to the block (`defaultAccess`, `defaultPeople`) or control them (`access` / `onAccessChange`, `people` / `onPeopleChange`). A fixed 420px card, for where a dialog or popover would go.
+
 ## 0.22.0
 
 ### Added
