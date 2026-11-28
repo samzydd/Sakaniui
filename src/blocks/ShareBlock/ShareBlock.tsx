@@ -101,7 +101,8 @@ const Collapse: React.FC<{ open: boolean; className?: string; children: React.Re
     className={[styles.collapse, className ?? ''].filter(Boolean).join(' ')}
     data-open={open ? '' : undefined}
     aria-hidden={open ? undefined : true}
-    {...(open ? {} : ({ inert: '' } as object))}
+    // `inert` through the DOM, not as a prop: React 18 does not know the attribute and React 19 wants a boolean
+    ref={(el) => { if (el) { if (open) el.removeAttribute('inert'); else el.setAttribute('inert', ''); } }}
   >
     <div className={styles.collapseInner}>{children}</div>
   </div>
@@ -148,7 +149,11 @@ export const ShareBlock: React.FC<ShareBlockProps> = ({
   const fieldRef = React.useRef<HTMLDivElement>(null);
   const timers = React.useRef<number[]>([]);
   const alive = React.useRef(true);
-  React.useEffect(() => () => { alive.current = false; timers.current.forEach(window.clearTimeout); }, []);
+  // StrictMode (and Fast Refresh) runs this cleanup once and then the effect again: the flag has to come back on
+  React.useEffect(() => {
+    alive.current = true;
+    return () => { alive.current = false; timers.current.forEach(window.clearTimeout); timers.current = []; };
+  }, []);
   const later = (fn: () => void, ms: number) => {
     const id = window.setTimeout(() => { if (alive.current) fn(); }, ms);
     timers.current.push(id);
