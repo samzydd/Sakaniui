@@ -323,6 +323,11 @@ lists its other names under `aliases` in `manifest.json`, and `search_components
 Blocks (`CRMDashboardBlock`, `DataTableBlock`, `KanbanBoardBlock`, `LoginBlock`, …) are composed
 screens, not primitives. Use one when it matches the screen you are building; otherwise compose primitives.
 Many Figma-frame blocks have a fixed design width — put them in a container at least that wide or scale them.
+`ShareBlock` is the Share panel (who can open a document: anyone with the link or invited people only, an e-mail
+invite field that makes people chips, the people with access, and a Copy link row). Use it instead of composing a share
+dialog from an `Input`, `Switch` and list. Pass `link` and `owner`, a `directory` of people you know (so a typed address
+becomes a name and a photo), and handle `onInvite` (return a promise to show "Sending"), `onRemove` and
+`onAccessChange`. It is a 420px card: put it in a dialog or popover.
 `LiveMapBlock` is a live payments map (a dotted globe with ranked, sized dots, a ranked city list that becomes a
 city's detail, region filters, a metric switch and a replay of the day). Use it for "where is the money coming from"
 screens; pass your own `cities`, `hourly` and `totals` (the default is sample data), and `state="loading"` or

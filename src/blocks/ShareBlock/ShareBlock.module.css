@@ -1,0 +1,233 @@
+/* ShareBlock: one card, every part of it opening and closing by height. */
+
+.card {
+  --share-ease: cubic-bezier(0.32, 0.72, 0, 1);
+  --share-dur: 320ms;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 420px;
+  box-sizing: border-box;
+  padding: var(--space-16);
+  background: var(--color-bg-surface);
+  border: var(--border-width-050) solid var(--color-border-subtle);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-sm);
+  color: var(--color-fg-default);
+  font-family: var(--font-sans);
+}
+
+/* Sections stack with a 16px rhythm. The space lives on the always-visible rows (margin) and inside each collapsing
+   section (padding-top), never as a flex gap, so a section that closes takes its space with it. */
+.access, .linkRow { margin-top: var(--space-16); }
+.card > .collapse > .collapseInner > .section { padding-top: var(--space-16); }
+
+/* ---- collapse ---- */
+.collapse {
+  display: grid;
+  grid-template-rows: 0fr;
+  opacity: 0;
+  transition: grid-template-rows var(--share-dur) var(--share-ease), opacity calc(var(--share-dur) * 0.7) ease;
+}
+.collapse[data-open] { grid-template-rows: 1fr; opacity: 1; }
+/* a few px of room so focus rings and the field's glow are not clipped by the closing animation's overflow */
+.collapseInner { min-height: 0; overflow: hidden; margin: -4px; padding: 4px; }
+
+/* ---- header ---- */
+.header { display: flex; align-items: center; gap: var(--space-12); }
+.heading { flex: 1 1 auto; min-width: 0; margin-block: -2px; }  /* two 18px lines in a 32px tile row: the text spreads past the tile by 2px each side, the row stays 32 */
+.title { margin: 0; font-size: 14px; line-height: 18px; font-weight: 500; color: var(--color-fg-default); }
+.subtitle { margin: 0; font-size: 13px; line-height: 18px; color: var(--color-fg-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.tile {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-md);
+  background: var(--color-bg-subtle);
+  color: var(--color-fg-muted);
+}
+
+/* ---- the access row ---- */
+.access {
+  display: flex;
+  align-items: center;
+  gap: var(--space-12);
+  padding: var(--space-8) var(--space-12) var(--space-8) var(--space-8);
+  border: var(--border-width-050) solid var(--color-border-subtle);
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  transition: border-color 160ms ease, background-color 160ms ease;
+}
+.access:hover { background: color-mix(in srgb, var(--color-bg-subtle) 45%, transparent); }
+.access:focus-within { border-color: var(--color-border-strong); }
+.accessText, .personText, .bannerText { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; }
+.rowTitle { font-size: 14px; line-height: 18px; font-weight: 500; color: var(--color-fg-default); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rowHint { font-size: 13px; line-height: 18px; color: var(--color-fg-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* ---- sections ---- */
+.section { display: flex; flex-direction: column; gap: var(--space-8); }
+.card > .collapse > .collapseInner > .section[data-invite] { padding-bottom: 6px; transition: padding-bottom 200ms var(--share-ease); }
+.card > .collapse > .collapseInner > .section[data-invite][data-error] { padding-bottom: 0; }
+.label { font-size: 12.5px; line-height: 18px; color: var(--color-fg-muted); }
+
+/* the field and the "sent" banner trade places in the same slot */
+.swap { display: grid; }
+
+/* ---- the invite field ---- */
+.field {
+  display: flex;
+  align-items: center;
+  gap: var(--space-8);
+  box-sizing: border-box;
+  padding: var(--space-4) var(--space-4) var(--space-4) var(--space-12);
+  border: var(--border-width-050) solid var(--color-border-subtle);
+  border-radius: var(--radius-lg);
+  background: transparent;
+  cursor: text;
+  transition: border-color 160ms ease, box-shadow 160ms ease;
+}
+.field[data-focus] {
+  border-color: var(--color-border-strong);
+  box-shadow: 0 0 0 3px var(--color-bg-subtle);
+}
+.field[data-error] {
+  border-color: color-mix(in srgb, var(--color-danger-fg) 42%, transparent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-danger-fg) 7%, transparent);
+}
+.field[data-busy] { cursor: default; }
+.fieldIcon { flex: none; display: inline-flex; color: var(--color-fg-subtle); }
+.tokens { flex: 1 1 auto; min-width: 0; display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-8) var(--space-4); }
+.input {
+  flex: 1 1 96px;
+  min-width: 96px;
+  height: 28px;
+  padding: 0;
+  border: 0;
+  outline: none;
+  background: transparent;
+  color: var(--color-fg-default);
+  font: inherit;
+  font-size: 14px;
+  line-height: 20px;
+}
+.input::placeholder { color: var(--color-fg-subtle); opacity: 1; }
+.input:disabled { opacity: 1; }
+.invite { flex: none; align-self: center; }
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-8);
+  height: 28px;
+  box-sizing: border-box;
+  padding: 0 var(--space-8) 0 var(--space-2);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-subtle);
+  animation: shareChipIn 220ms var(--share-ease) both;
+}
+.chipName { font-size: 13px; line-height: 20px; font-weight: 500; color: var(--color-fg-default); white-space: nowrap; }
+.chipRemove {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 20px; height: 20px; margin-inline: -4px; padding: 0; border: 0; border-radius: var(--radius-full);
+  background: transparent; color: var(--color-fg-subtle); cursor: pointer;
+  transition: color 140ms ease, background-color 140ms ease;
+}
+.chipRemove:hover { color: var(--color-fg-default); background: var(--color-bg-muted); }
+@keyframes shareChipIn { from { opacity: 0; transform: scale(0.92); } }
+
+/* the reason a bad address was refused, in words, under the field */
+.error {
+  display: grid;
+  grid-template-rows: 0fr;
+  margin: 0;
+  font-size: 13px;
+  line-height: 16px;
+  color: var(--color-danger-fg);
+  transition: grid-template-rows 200ms var(--share-ease), padding-top 200ms var(--share-ease), opacity 160ms ease;
+  opacity: 0;
+}
+.error[data-open] { grid-template-rows: 1fr; padding-top: var(--space-8); opacity: 1; }
+.error > span { min-height: 0; overflow: hidden; }
+
+/* the invite button inside the field, and the link row's, are the library's sm Button; the field's radius is smaller
+   than the field's so the button nests in it evenly */
+.invite, .copy { --share-btn-radius: var(--radius-md); border-radius: var(--share-btn-radius); }
+
+/* ---- the "invitations sent" banner ---- */
+.banner {
+  display: flex;
+  align-items: center;
+  gap: var(--space-12);
+  box-sizing: border-box;
+  padding: var(--space-4) var(--space-12) var(--space-4) var(--space-12);
+  border: var(--border-width-050) solid var(--color-border-subtle);
+  border-radius: var(--radius-lg);
+  background: var(--color-bg-subtle);
+}
+.bannerTick {
+  flex: none;
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 20px; height: 20px; border-radius: var(--radius-full);
+  background: var(--color-success-solid); color: #fff;
+  transform-origin: center;
+  animation: shareTick 420ms var(--share-ease) both;
+}
+.bannerTick svg path { stroke-dasharray: 24; stroke-dashoffset: 24; animation: shareDraw 360ms 160ms ease-out forwards; }
+@keyframes shareTick { from { transform: scale(0.4); opacity: 0; } }
+@keyframes shareDraw { to { stroke-dashoffset: 0; } }
+
+/* ---- the link row ---- */
+.linkRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-8);
+  padding: calc(var(--space-4) - 0.5px) var(--space-4) calc(var(--space-4) - 0.5px) var(--space-12);
+  border: var(--border-width-050) solid var(--color-border-subtle);
+  border-radius: var(--radius-lg);
+}
+.linkIcon { flex: none; display: inline-flex; color: var(--color-fg-subtle); }
+.linkText { flex: 1 1 auto; min-width: 0; font-size: 13.5px; line-height: 20px; font-weight: 400; color: var(--color-fg-default); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.copy { flex: none; }
+.copy[data-copied] {
+  color: var(--color-success-fg);
+  border-color: color-mix(in srgb, var(--color-success-fg) 55%, transparent);
+  animation: shareCopied 1000ms ease-out forwards;
+}
+.copy[data-copied]:hover { color: var(--color-success-fg); }
+/* the green outline fades into a quiet tinted pill, so "Copied" reads as a state and not a second button */
+@keyframes shareCopied {
+  0% { box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-success-fg) 22%, transparent); }
+  100% { border-color: transparent; background: var(--color-bg-subtle); box-shadow: 0 0 0 0 transparent; }
+}
+
+/* ---- people with access ---- */
+.people { list-style: none; margin: 0; padding: 0; border: var(--border-width-050) solid var(--color-border-subtle); border-radius: var(--radius-lg); overflow: hidden; }
+.personItem + .personItem { border-top: var(--border-width-050) solid var(--color-border-subtle); }
+.person { display: flex; align-items: center; gap: var(--space-12); padding: var(--space-8) var(--space-12); }
+.person .rowTitle { line-height: 20px; }
+/* people you have just added are lit for a moment, then settle into the list */
+.person[data-new] { animation: sharePersonIn 1800ms ease-out both; }
+@keyframes sharePersonIn { from { background: var(--color-bg-subtle); } to { background: transparent; } }
+.remove {
+  flex: none; padding: var(--space-4) var(--space-8); margin-right: calc(var(--space-8) * -1);
+  border: 0; border-radius: var(--radius-md); background: transparent;
+  color: var(--color-fg-muted); font: inherit; font-size: 14px; line-height: 20px; cursor: pointer;
+  transition: color 140ms ease, background-color 140ms ease;
+}
+.remove:hover { color: var(--color-fg-default); background: var(--color-bg-muted); }
+.remove:focus-visible { outline: none; box-shadow: 0 0 0 2px var(--color-border-focus); }
+
+.srOnly { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+
+@media (prefers-reduced-motion: reduce) {
+  .collapse, .error, .chip, .bannerTick, .bannerTick svg path, .copy[data-copied] { transition-duration: 1ms; animation-duration: 1ms; }
+}
+
+.banner .rowTitle, .banner .rowHint { line-height: 16px; }
+
+/* the badge reads as a quiet note beside the name, not a second label */
+.person .badge { font-weight: 400; color: var(--color-fg-muted); }

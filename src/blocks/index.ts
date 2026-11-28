@@ -100,3 +100,5 @@ export { PaymentMethodBlock } from './Billing/PaymentMethodBlock';
 export type { PaymentMethodBlockProps, PaymentMethodCard, PaymentMethodStatus, PaymentMethodBrand } from './Billing/PaymentMethodBlock';
 export { AddCardFormBlock } from './Billing/AddCardFormBlock';
 export type { AddCardFormBlockProps, AddCardFormValue, AddCardFormStatus } from './Billing/AddCardFormBlock';
+export { ShareBlock } from './ShareBlock';
+export type { ShareBlockProps, ShareAccess, ShareOwner, SharePerson } from './ShareBlock';
