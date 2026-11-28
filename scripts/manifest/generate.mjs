@@ -201,6 +201,7 @@ const SUMMARY_OVERRIDE = {
   BarChart: 'A bar chart (Recharts) styled with Sakani chart tokens; `variant` is "default", "horizontal", "stacked", "active", "multiple" or "negative".',
   DonutChart: 'A donut chart (Recharts) styled with Sakani chart tokens, with an optional centre value and caption.',
   LiquidDashboardBlock: 'A composition example: a full dashboard over a photograph, with the photo as a LiquidBackdrop so every liquid-glass lens refracts it.',
+  ShareBlock: 'A Share panel for a document, note or board: who can open it (anyone with the link, or invited people only), an e-mail invite field that turns addresses into people, the people with access with Remove, and a Copy link row. Pass `link`, a `directory` of people you know, and `onInvite`.',
   SegmentedControl: 'An iOS-style toggle group (segmented control).',
   InstagramIcon: 'Instagram glyph drawn in currentColor, for the `socialLinks` of TeamCard.',
   FacebookIcon: 'Facebook glyph drawn in currentColor, for the `socialLinks` of TeamCard.',
@@ -536,6 +537,7 @@ const ALIASES = {
   LogoCloudBlock: ['logo cloud', 'logo wall', 'customer logos', 'trusted by'],
   DataTableBlock: ['data table section', 'table section', 'records table'],
   KanbanBoardBlock: ['kanban', 'kanban board', 'task board', 'board view'],
+  ShareBlock: ['share', 'share dialog', 'share modal', 'share panel', 'invite people', 'invite', 'sharing', 'permissions', 'access control', 'copy link'],
   ShoppingCartBlock: ['cart', 'shopping cart', 'basket'],
   CheckoutFlowBlock: ['checkout', 'checkout flow', 'checkout page'],
   ForgotPasswordBlock: ['forgot password', 'password reset request', 'lost password'],
@@ -674,6 +676,36 @@ const columns: TableColumn<Row>[] = [
 ];
 
 export const Example = () => <Table columns={columns} rows={rows} />;`,
+  }],
+  ShareBlock: [{
+    title: 'A share panel wired to your API: invite, remove and the access setting',
+    description: 'Keep the access setting and the people in your own state (or load them from the server) and pass them in with `access` and `people`. `onInvite` gets the people to invite: return its promise and the button says Sending until it settles; throw and they stay in the field with an error. Pass `directory` so an address you know becomes a name and a photo. The block updates `people` (through `onPeopleChange`) after a successful invite or a Remove.',
+    code: `import React from 'react';
+import { ShareBlock, type ShareAccess, type SharePerson } from '@sakaniui/react/blocks';
+
+export const Example = ({ link, team }: { link: string; team: SharePerson[] }) => {
+  const [access, setAccess] = React.useState<ShareAccess>('invited');
+  const [people, setPeople] = React.useState<SharePerson[]>([]);
+  return (
+    <ShareBlock
+      subtitle="Enterprise roadmap"
+      link={link}
+      directory={team}
+      access={access}
+      onAccessChange={(next) => {
+        setAccess(next);
+        void fetch('/api/share/access', { method: 'POST', body: JSON.stringify({ access: next }) });
+      }}
+      people={people}
+      onPeopleChange={setPeople}
+      onInvite={async (invitees) => {
+        const res = await fetch('/api/share/invite', { method: 'POST', body: JSON.stringify(invitees) });
+        if (!res.ok) throw new Error('Invite failed');
+      }}
+      onRemove={(person) => void fetch('/api/share/remove', { method: 'POST', body: JSON.stringify(person) })}
+    />
+  );
+};`,
   }],
   Toaster: [{
     title: 'Show a toast from anywhere',
